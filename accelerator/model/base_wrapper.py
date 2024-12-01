@@ -3,4 +3,5 @@ import abc
 
 
 class BaseModelWrapper(abc.ABC):
+    # base wrapper for models
     ...

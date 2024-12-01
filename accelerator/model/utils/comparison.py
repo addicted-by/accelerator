@@ -2,8 +2,11 @@
 
 # logic to compare two models from weights to state dicts, attributes, buffers, etc.
 
+
 def compare_models(model1, model2):
+    # function to compare two models
     ...
+
 
 def model_info(model, verbosity) -> str:
     # return string of main model information
