@@ -1,0 +1,15 @@
+_target_: model.ModelWrapper
+
+
+defaults:
+  - _self_
+  - default: default
+  - preload_ops: default
+  - postload_ops: default
+
+
+preload_ops:
+  order: []
+
+postload_ops:
+  order: ['print_optimizing_params']

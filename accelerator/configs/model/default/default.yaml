@@ -1,0 +1,2 @@
+load_operation:
+  _target_: torch.load
