@@ -1,0 +1,11 @@
+_target_: accelerator.runtime.engine.accelerate.AccelerateEngine
+
+config:
+  mixed_precision: "no"  # Options: "no", "fp16", "bf16"
+  gradient_accumulation_steps: 1  # Number of steps for gradient accumulation
+
+  device_placement: true  # Whether to automatically handle device placement
+  dynamo_backend: "no"
+  dataloader_config: ~
+  deepspeed_plugin: ~
+  fsdp_plugin: ~

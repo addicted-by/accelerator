@@ -1,0 +1,101 @@
+# @package _global_
+
+# CIFAR-10 + ResNet-18 Training Pipeline Configuration
+# This configuration composes all components for training ResNet-18 on CIFAR-10 dataset
+
+defaults:
+  # Core components
+  - /model/resnet18
+  - /datamodule/cifar10
+  - /engine/vanilla_torch
+  
+  # Training components
+  - /training_components/optimizer: adam
+  - /training_components/scheduler: null
+  - /training_components/distillation: null
+  
+  # Loss function for classification
+  - /training_components/loss@losses.cross_entropy: classification/cross_entropy
+  
+  - _self_
+
+# Project configuration
+project_name: cifar10_example
+exp_name: resnet18_baseline
+exp_num: 1
+
+# Training configuration
+seed: 42
+nnodes: 1
+nproc_per_node: 1
+gpu_idxs: ~
+
+# Tags for experiment organization
+tags: ['cifar10', 'resnet18', 'classification', 'baseline']
+
+
+
+load_from_previous: false
+
+losses:
+  cross_entropy:
+    loss_coefficient: 1.0
+
+# Override model configuration for CIFAR-10 (10 classes)
+model:
+  model_core:
+    num_classes: 10
+    weights: null
+
+# Override datamodule configuration for proper CIFAR-10 setup
+datamodule:
+  datasets:
+    train:
+      root: "./data/cifar10"
+      download: true
+      transform:
+        _target_: torchvision.transforms.Compose
+        transforms:
+          - _target_: torchvision.transforms.RandomHorizontalFlip
+            p: 0.5
+          - _target_: torchvision.transforms.ToTensor
+          - _target_: torchvision.transforms.Normalize
+            mean: [0.4914, 0.4822, 0.4465]
+            std: [0.2023, 0.1994, 0.2010]
+    val:
+      _target_: torchvision.datasets.CIFAR10
+      root: "./data/cifar10"
+      train: false
+      download: true
+      transform:
+        _target_: torchvision.transforms.Compose
+        transforms:
+          - _target_: torchvision.transforms.ToTensor
+          - _target_: torchvision.transforms.Normalize
+            mean: [0.4914, 0.4822, 0.4465]
+            std: [0.2023, 0.1994, 0.2010]
+  
+  dataloaders:
+    train:
+      batch_size: 128
+      shuffle: true
+      num_workers: 4
+      pin_memory: true
+      drop_last: false
+    val:
+      batch_size: 128
+      shuffle: false
+      num_workers: 4
+      pin_memory: true
+      drop_last: false
+
+# Override optimizer configuration
+training_components:
+  optimizer:
+    lr: 0.001
+    weight_decay: 1e-4
+
+# Paths configuration
+paths:
+  data_dir: "./data"
+  checkpoint_path: null

@@ -1,0 +1,17 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "image2image"
+prediction_key: null
+target_key: null
+loss_coefficient: 1.0
+name: "rgb_color_diff_loss"
+debug_config: null
+transforms: []
+eps: 0.0001  # Type: float
+loss_mode: "l1"  # Type: str
+reduction: "mean"  # Type: str
+gaussian_blur: false  # Type: bool
+mask: 1.0  # Type: float
+diff_map_out: false  # Type: bool
+RB_diff_flag: true  # Type: bool

@@ -1,0 +1,17 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "image2image"
+prediction_key: null  # Type: Any
+target_key: null  # Type: Any
+loss_coefficient: 1  # Type: Any
+name: "InOutToneSyncLoss"
+debug_config: null
+transforms: []
+params:
+  type: 0
+  lambda: 0.1
+  gauss_kernel_sigma: 3.0
+  gauss_kernel_size: 21
+  clip_ratio: 0.05
+  downsample_mode: "nearest"

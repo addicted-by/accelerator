@@ -1,0 +1,5 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+name: "RGB2YUV"
+transform_type: "loss"

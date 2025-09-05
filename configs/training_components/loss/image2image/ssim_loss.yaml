@@ -1,0 +1,16 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "image2image"
+prediction_key: null
+target_key: null
+loss_coefficient: 1.0
+name: "ssim_loss"
+debug_config: null
+transforms: []
+window_size: 11  # Type: int
+reduction: "mean"  # Type: str
+max_val: 1.0  # Type: float
+alpha: 1  # Type: float
+beta: 1  # Type: float
+gamma: 1  # Type: float

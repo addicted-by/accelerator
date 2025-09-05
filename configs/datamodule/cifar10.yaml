@@ -1,0 +1,18 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+dataloaders:
+  train:
+    batch_size: 32
+    shuffle: true
+    num_workers: 4
+    pin_memory: true
+    drop_last: false
+datasets:
+  train:
+    _target_: "torchvision.datasets.CIFAR10"
+    root: null  # Type: Union[str, Path] (required)
+    train: true  # Type: bool
+    transform: null  # Type: Optional[Callable[]]
+    target_transform: null  # Type: Optional[Callable[]]
+    download: false  # Type: bool

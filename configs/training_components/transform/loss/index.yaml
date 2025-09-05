@@ -1,0 +1,3 @@
+defaults:
+- pyramid@pyramid
+- rgb2yuv@rgb2yuv

@@ -1,0 +1,13 @@
+# @package _group_.step
+
+step_name: null                      # parent YAML must set
+name: ${job_name}_${.step_name}      # resolved at compose-time
+
+total_epochs: 0
+overrides: []                  # list[str]  — Hydra CLI syntax
+
+load_from_previous: false
+load_overrides_from_previous: false # not implemented yet
+save_frequency: 1
+validate_every: 1
+test_every: 1

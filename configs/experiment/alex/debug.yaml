@@ -1,0 +1,69 @@
+# @package _global_
+
+defaults:
+  # global setup
+  - /model/SwinIRRB_V1
+  - /engine/vanilla_torch
+
+  - /training_components/optimizer: adam
+  - /training_components/scheduler: null
+  - /training_components/distillation: null
+
+  - /training_components/loss@losses.wide_main_fusion_loss: custom/wide_main_fusion_loss
+  - /training_components/loss@losses.mse_loss_fn: regression/mse_loss_fn
+  - /training_components/loss@losses.ssim_loss: image2image/ssim_loss
+
+  - /step/phase@pipeline.active_steps.step1
+  - /step/phase@pipeline.active_steps.step2
+  - /step/phase@pipeline.active_steps.step3
+  - /step/phase@pipeline.active_steps.step4
+
+  - _self_
+
+
+losses:
+  ssim_loss:
+    loss_coefficient: 0.5
+    transforms:
+    - build_gauss_pyramid_lvl5: ${index.LT.build_pyramid_lvl5}
+
+
+pipeline:
+  active_steps:
+    step1:
+      step_name: step1
+      total_epochs: 30
+      overrides:
+        - datamodule=step1
+        - checkpoint_load.load_strategy=raw
+        - paths.data_dir=/data/phase1
+        - ~losses.wide_main_fusion_loss
+        - ~losses.mse_loss_fn
+        - +training_components/loss@losses.color_difference=image2image/color_difference
+        - losses.color_difference.loss_coefficient=0.5
+
+    step2:
+      step_name: step2
+      total_epochs: 20
+      load_from_previous: true
+      overrides:
+        - datamodule=step2_3_4
+        - paths.data_dir=/data/phase2
+
+    step3:
+      step_name: step3
+      total_epochs: 15
+      load_from_previous: true
+      overrides:
+        - datamodule=step2_3_4
+        - training_components.optimizer.lr=5e-4
+        - paths.data_dir=/data/phase3
+
+    step4:
+      step_name: step4
+      total_epochs: 10
+      load_from_previous: true
+      overrides:
+        - datamodule=step2_3_4
+        - training_components.optimizer.lr=1e-4
+        - paths.data_dir=/data/phase4

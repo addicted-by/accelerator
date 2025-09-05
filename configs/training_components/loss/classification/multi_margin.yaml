@@ -1,0 +1,16 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "classification"
+prediction_key: null
+target_key: null
+loss_coefficient: 1.0
+name: "MultiMarginLoss"
+debug_config: null
+transforms: []
+p: 1  # Type: int
+margin: 1.0  # Type: float
+weight: null  # Type: Optional[Tensor]
+size_average: null  # Type: Any
+reduce: null  # Type: Any
+reduction: "mean"  # Type: str

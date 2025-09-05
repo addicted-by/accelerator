@@ -1,0 +1,9 @@
+_target_: accelerator.runtime.engine.vanilla_torch.DDPEngine
+
+config:
+  backend: "nccl"  # Backend type for distributed communication (nccl, gloo, etc)
+  auto_spawn: True
+  init_method: "env://"  # Initialization method for process group
+  find_unused_parameters: True
+  master_addr: localhost
+  master_port: '1337'

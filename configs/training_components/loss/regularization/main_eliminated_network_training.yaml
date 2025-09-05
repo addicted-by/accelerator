@@ -1,0 +1,11 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "regularization"
+prediction_key: null  # Type: Any
+target_key: null  # Type: Any
+loss_coefficient: 1  # Type: Any
+name: "main_eliminated_network_training"
+debug_config: null
+transforms: []
+num_layer: 5  # Type: int

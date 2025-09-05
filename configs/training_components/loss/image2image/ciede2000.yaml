@@ -1,0 +1,14 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "image2image"
+prediction_key: null
+target_key: null
+loss_coefficient: 1.0
+name: "ciede2000"
+debug_config: null
+transforms: []
+eps: 1e-16  # Type: float
+kL: 1  # Type: float
+kC: 1  # Type: float
+kH: 1  # Type: float

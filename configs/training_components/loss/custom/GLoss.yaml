@@ -1,0 +1,18 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "custom"
+prediction_key: null
+target_key: null
+loss_coefficient: 1.0
+name: "GLoss"
+debug_config: null
+transforms: []
+downsample_ratios: [2, 4, 8]  # Type: Iterable[]
+avg_pool_coeffs: [0.0, 0.0, 0.0]  # Type: Iterable[]
+max_pool_coeffs: [0.0, 0.0, 0.0]  # Type: Iterable[]
+splitting_coeffs: [0.25, 0.0625, 0.0]  # Type: Iterable[]
+p: 1  # Type: int
+EPS: 1e-17  # Type: float
+delta: 1e-05  # Type: float
+beta: 1e-06  # Type: float

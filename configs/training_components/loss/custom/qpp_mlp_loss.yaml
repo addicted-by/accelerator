@@ -1,0 +1,11 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "custom"
+prediction_key: null
+target_key: null
+loss_coefficient: 1.0
+name: "qpp_mlp_loss"
+debug_config: null
+transforms: []
+type_a: 1  # Type: Any

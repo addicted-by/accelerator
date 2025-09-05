@@ -1,0 +1,14 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "custom"
+prediction_key: null
+target_key: null
+loss_coefficient: 1.0
+name: "noise_map_loss"
+debug_config: null
+transforms: []
+apply_downsample: false  # Type: bool
+downsample_type: "bilinear"  # Type: str
+p: 2  # Type: int
+ssim: true  # Type: bool

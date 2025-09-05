@@ -1,0 +1,7 @@
+gamma: 
+  use_gamma: False
+
+d2s: 0
+
+collate_fn: ~
+separate_fn: ~

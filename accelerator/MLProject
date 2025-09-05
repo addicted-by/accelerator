@@ -1,0 +1,24 @@
+entry_points:
+  accelerator:
+    parameters:
+      cfg:             {type: str}
+      nnodes:          {type: int, default: 1}
+      nproc_per_node:  {type: int, default: 8}
+    command: >
+      python -m torch.distributed.run --standalone --nnodes={nnodes} --nproc_per_node={nproc_per_node} -m accelerator.cli experiment train {cfg}
+
+  model_analysis:
+    parameters:
+      cfg:             {type: str}
+      nnodes:          {type: int, default: 1}
+      nproc_per_node:  {type: int, default: 1}
+    command: >
+      python -m accelerator.cli experiment analyze_model {cfg}
+
+  data_analysis:
+    parameters:
+      cfg:             {type: str}
+      nnodes:          {type: int, default: 1}
+      nproc_per_node:  {type: int, default: 1}
+    command: >
+      python -m accelerator.cli experiment analyze_data {cfg}

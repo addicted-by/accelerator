@@ -1,0 +1,5 @@
+operation_type: optimization
+operation: SmoothlyRemoveLayer
+epoch_freq: 1
+epochs_num: 10
+layers: []

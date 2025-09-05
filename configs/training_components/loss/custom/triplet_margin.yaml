@@ -1,0 +1,17 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "custom"
+prediction_key: null
+target_key: null
+loss_coefficient: 1.0
+name: "TripletMarginLoss"
+debug_config: null
+transforms: []
+margin: 1.0  # Type: float
+p: 2.0  # Type: float
+eps: 1e-06  # Type: float
+swap: false  # Type: bool
+size_average: null  # Type: Any
+reduce: null  # Type: Any
+reduction: "mean"  # Type: str

@@ -1,0 +1,16 @@
+# Auto-generated configuration file
+# Modify parameters as needed
+
+loss_type: "custom"
+prediction_key: null
+target_key: null
+loss_coefficient: 1.0
+name: "PoissonNLLLoss"
+debug_config: null
+transforms: []
+log_input: true  # Type: bool
+full: false  # Type: bool
+size_average: null  # Type: Any
+eps: 1e-08  # Type: float
+reduce: null  # Type: Any
+reduction: "mean"  # Type: str
