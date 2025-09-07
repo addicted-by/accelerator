@@ -27,3 +27,10 @@ progress_bar: null
 
 User-provided callbacks can still be added through the standard `callbacks`
 configuration and will be appended to the always-on set.
+
+## Timing Metrics
+
+When time tracking is enabled, the training metrics include `eta` (estimated
+time remaining) and `elapsed` (total time spent). These fields are
+automatically logged by all logger callbacks and shown on the active progress
+bar whenever they are available.
