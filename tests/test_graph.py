@@ -4,7 +4,6 @@ from torch.fx import GraphModule
 
 from accelerator.tools.analysis.model_analysis import NodeSpec, trace_model
 
-
 class Simple(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -29,7 +28,6 @@ def test_trace_model_returns_graph_and_registry():
 
     relu_spec = next(n for n in registry if n.target_type == "relu")
     assert relu_spec.op == "call_function"
-
     input_spec = next(n for n in registry if n.op == "placeholder")
     assert input_spec.shape == (2, 3)
     assert input_spec.dtype == torch.float32
