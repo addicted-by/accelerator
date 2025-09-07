@@ -2,8 +2,7 @@ import torch
 import pytest
 from torch.fx import GraphModule
 
-from analysis.graph import NodeSpec, trace_model
-
+from accelerator.tools.analysis.model_analysis import NodeSpec, trace_model
 
 class Simple(torch.nn.Module):
     def __init__(self):
@@ -25,7 +24,10 @@ def test_trace_model_returns_graph_and_registry():
     lin_spec = next(n for n in registry if n.name == "linear")
     assert lin_spec.shape == (2, 4)
     assert lin_spec.dtype == torch.float32
+    assert lin_spec.target_type == "Linear"
 
+    relu_spec = next(n for n in registry if n.target_type == "relu")
+    assert relu_spec.op == "call_function"
     input_spec = next(n for n in registry if n.op == "placeholder")
     assert input_spec.shape == (2, 3)
     assert input_spec.dtype == torch.float32

@@ -172,4 +172,7 @@ def remove_patch():
 
 
 if is_package_installed('mlflow'):
-    apply_patch()
+    try:
+        apply_patch()
+    except Exception as e:  # pragma: no cover - best effort logging
+        log.debug(f"Skipping MLflow patch due to error: {e}")
