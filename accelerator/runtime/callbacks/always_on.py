@@ -4,16 +4,13 @@ These constructors return instances of callbacks that are considered
 core to the training loop and are therefore attached by default by the
 :class:`ComponentManager`.
 """
+
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 
 from .base import BaseCallback
-from .progress import (
-    StepEpochTrackerCallback,
-    TimeTrackingCallback,
-    TqdmProgressBar,
-)
+from .progress import RichProgressBar, StepEpochTrackerCallback, TimeTrackingCallback, TqdmProgressBar
 
 
 def create_step_epoch_tracker_callback() -> StepEpochTrackerCallback:
@@ -26,19 +23,34 @@ def create_time_tracking_callback() -> TimeTrackingCallback:
     return TimeTrackingCallback()
 
 
-def create_progress_bar_callback() -> TqdmProgressBar:
-    """Return a default progress bar callback.
+def create_progress_bar_callback(kind: str = "tqdm") -> BaseCallback:
+    """Return a progress bar callback instance.
 
-    Currently this uses :class:`~accelerator.runtime.callbacks.progress.TqdmProgressBar`.
+    Args:
+        kind: Type of progress bar to create. Supported values are
+            ``"tqdm"`` and ``"rich"``.
+
+    Returns:
+        Instantiated progress bar callback.
+
+    Raises:
+        ValueError: If an unsupported progress bar type is provided.
     """
-    return TqdmProgressBar()
+    kind = kind.lower()
+    if kind == "rich":
+        return RichProgressBar()
+    if kind == "tqdm":
+        return TqdmProgressBar()
+    raise ValueError(f"Unsupported progress bar type: {kind}")
 
 
-def create_always_on_callbacks(include_progress: bool = False) -> List[BaseCallback]:
+def create_always_on_callbacks(progress_bar: Optional[str] = None) -> List[BaseCallback]:
     """Create the list of callbacks that are always enabled.
 
     Args:
-        include_progress: Whether to include a default progress bar. Defaults to False.
+        progress_bar: Which progress bar to use. Supported values are
+            ``"tqdm"`` and ``"rich"``. Pass ``None`` to disable the progress
+            bar entirely. Defaults to ``None``.
 
     Returns:
         List of instantiated callback objects.
@@ -47,6 +59,6 @@ def create_always_on_callbacks(include_progress: bool = False) -> List[BaseCallb
         create_step_epoch_tracker_callback(),
         create_time_tracking_callback(),
     ]
-    if include_progress:
-        callbacks.append(create_progress_bar_callback())
+    if progress_bar:
+        callbacks.append(create_progress_bar_callback(progress_bar))
     return callbacks
