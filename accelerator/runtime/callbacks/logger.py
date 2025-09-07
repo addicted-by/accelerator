@@ -46,8 +46,13 @@ class TensorBoardLogger(BaseLoggerCallback):
             
             train_metrics = context.training_manager.state.training_metrics
             if train_metrics:
-                prefixed_metrics = {f"train/{k}": v for k, v in train_metrics.items()}
-                self.log_metrics(prefixed_metrics, epoch)
+                timing = {k: v for k, v in train_metrics.items() if k in ("eta", "elapsed")}
+                other_metrics = {k: v for k, v in train_metrics.items() if k not in timing}
+                if other_metrics:
+                    prefixed_metrics = {f"train/{k}": v for k, v in other_metrics.items()}
+                    self.log_metrics(prefixed_metrics, epoch)
+                if timing:
+                    self.log_metrics(timing, epoch)
             
             val_metrics = getattr(context.training_manager.state, 'validation_metrics', {})
             if val_metrics:
@@ -63,10 +68,13 @@ class TensorBoardLogger(BaseLoggerCallback):
         if self.writer:
             self.writer.add_scalar(name, value, step)
                 
-    def log_metrics(self, metrics: Dict[str, float], step: int):
+    def log_metrics(self, metrics: Dict[str, Any], step: int):
         if self.writer:
             for k, v in metrics.items():
-                if isinstance(v, (int, float)):
+                if k in ("eta", "elapsed"):
+                    # Log timing metrics as text to preserve formatting
+                    self.writer.add_text(k, str(v), step)
+                elif isinstance(v, (int, float)):
                     self.writer.add_scalar(k, v, step)
                 
     def log_hyperparams(self, hparams: Dict[str, Any]):
@@ -129,21 +137,36 @@ class MLflowLogger(BaseLoggerCallback):
             
             train_metrics = context.training_manager.state.training_metrics
             if train_metrics:
-                prefixed_metrics = {f"train_{k}": v for k, v in train_metrics.items()}
-                self.log_metrics(prefixed_metrics, epoch)
+                timing = {k: v for k, v in train_metrics.items() if k in ("eta", "elapsed")}
+                other_metrics = {k: v for k, v in train_metrics.items() if k not in timing}
+                if other_metrics:
+                    prefixed_metrics = {f"train_{k}": v for k, v in other_metrics.items()}
+                    self.log_metrics(prefixed_metrics, epoch)
+                if timing:
+                    self.log_metrics(timing, epoch)
             
             val_metrics = getattr(context.training_manager.state, 'validation_metrics', {})
             if val_metrics:
-                prefixed_metrics = {f"val_{k}": v for k, v in val_metrics.items()}
-                self.log_metrics(prefixed_metrics, epoch)
+                timing = {k: v for k, v in val_metrics.items() if k in ("eta", "elapsed")}
+                other_metrics = {k: v for k, v in val_metrics.items() if k not in timing}
+                if other_metrics:
+                    prefixed_metrics = {f"val_{k}": v for k, v in other_metrics.items()}
+                    self.log_metrics(prefixed_metrics, epoch)
+                if timing:
+                    self.log_metrics(timing, epoch)
             
     def log_scalar(self, name: str, value: float, step: int):
         if self.run:
             mlflow.log_metric(name, value, step=step)
             
-    def log_metrics(self, metrics: Dict[str, float], step: int):
+    def log_metrics(self, metrics: Dict[str, Any], step: int):
         if self.run:
-            clean_metrics = {k: v for k, v in metrics.items() if isinstance(v, (int, float))}
+            clean_metrics = {}
+            for k, v in metrics.items():
+                if k in ("eta", "elapsed"):
+                    mlflow.log_text(str(v), f"{k}_step_{step}.txt")
+                elif isinstance(v, (int, float)):
+                    clean_metrics[k] = v
             if clean_metrics:
                 mlflow.log_metrics(clean_metrics, step=step)
                 
@@ -219,13 +242,11 @@ class CSVLogger(BaseLoggerCallback):
         }
         
         for k, v in metrics.items():
-            if isinstance(v, (int, float)):
+            if isinstance(v, (int, float)) or k in ("eta", "elapsed"):
                 row_data[k] = v
-                if k not in self.fieldnames:
-                    self.fieldnames.append(k)
-        
-        
-        print(self.fieldnames)
+            if k not in self.fieldnames:
+                self.fieldnames.append(k)
+
         with open(self.file_path, "a", newline='') as f:
             writer = csv.DictWriter(f, fieldnames=self.fieldnames)
             writer.writerow(row_data)
