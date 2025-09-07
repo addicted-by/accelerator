@@ -4,7 +4,10 @@ from accelerator.utilities import (
     logging,
     patches,  # noqa: F401 - side-effect import
 )
-from accelerator import domain
+try:
+    from accelerator import domain  # noqa: F401 - optional heavy import
+except Exception:  # pragma: no cover - allow partial installs
+    domain = None
 import importlib
 
 log = logging.get_logger()
