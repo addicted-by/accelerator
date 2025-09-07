@@ -155,11 +155,21 @@ class ComponentManager(BaseContainer):
 
     def _create_callbacks(self):
         from accelerator.runtime.callbacks.manager import CallbackManager
-        
-        cb = self.config.get('callbacks', {})
-        if not cb:
-            return CallbackManager()
-        return CallbackManager.initialize_from_config(cb)
+        from accelerator.runtime.callbacks.always_on import create_always_on_callbacks
+
+        cb_cfg = self.config.get('callbacks', {})
+
+        # Instantiate always-on callbacks first
+        manager = CallbackManager(create_always_on_callbacks())
+
+        # Append user defined callbacks, avoiding duplicates
+        if cb_cfg:
+            user_manager = CallbackManager.initialize_from_config(cb_cfg)
+            for cb in user_manager.callbacks:
+                if not any(isinstance(existing, cb.__class__) for existing in manager.callbacks):
+                    manager.add_callback(cb)
+
+        return manager
     
     
     def _create_distributed(self):
