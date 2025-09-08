@@ -13,6 +13,7 @@ from .collector import (
     TensorStatsCollector,
     VarianceTensorCollector,
 )
+from .storage import save_tensor_stats
 
 __all__ = [
     "HistogramTensorCollector",
@@ -28,4 +29,5 @@ __all__ = [
     "StatsConfig",
     "TensorStatsCollector",
     "VarianceTensorCollector",
+    "save_tensor_stats",
 ]
