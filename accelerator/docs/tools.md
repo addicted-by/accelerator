@@ -25,3 +25,13 @@ print(node_metrics["aten::linear"])
 ```
 
 See [examples/inference_time_example.py](../examples/inference_time_example.py) for a usage example.
+
+### `measure_gpu_power`
+
+Samples GPU power draw during inference to report total energy, mean, and peak power usage.
+
+```python
+from accelerator.tools.performance import measure_gpu_power
+metrics = measure_gpu_power(model, dataloader, device=0)
+print(metrics)
+```
