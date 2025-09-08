@@ -377,16 +377,40 @@ class PercentileTensorCollector(_BaseTensorCollector):
 
 
 class HistogramTensorCollector(_BaseTensorCollector):
-    """Collector building per-channel histograms with dynamic ranges."""
+    """Collector building per-channel histograms with dynamic ranges.
+
+    The collector optionally performs a *calibration* step before creating the
+    histogram. During calibration incoming tensors are flattened and buffered
+    until ``calibration_size`` samples per channel have been seen. Once the
+    threshold is reached the bin edges are determined according to ``strategy``
+    (currently only the Freedman\u2013Diaconis rule is supported) and the histogram
+    is populated using the buffered samples. After calibration the raw sample
+    buffer is discarded and only histogram counts are updated.
+
+    Parameters
+    ----------
+    channel_dim:
+        Dimension treated as channel dimension.
+    calibration_size:
+        Number of samples per channel to collect before initializing the
+        histogram. A value of ``0`` skips calibration and creates the histogram
+        on the first update.
+    strategy:
+        Strategy used to compute the bin width during calibration. The default
+        "fd" uses the Freedman\u2013Diaconis rule.
+    """
 
     name = "histogram"
     bins: int = 10
 
-    def __init__(self, channel_dim: int) -> None:
+    def __init__(self, channel_dim: int, calibration_size: int, strategy: str = "fd") -> None:
         super().__init__(channel_dim)
         self.hist: torch.Tensor | None = None
         self.min: torch.Tensor | None = None
         self.max: torch.Tensor | None = None
+        self.calibration_size = calibration_size
+        self.strategy = strategy
+        self._calibration_buffer: torch.Tensor | None = None
 
     def _rebin(self, new_min: torch.Tensor, new_max: torch.Tensor) -> None:
         assert self.hist is not None and self.min is not None and self.max is not None
@@ -403,6 +427,49 @@ class HistogramTensorCollector(_BaseTensorCollector):
 
     def update(self, tensor: torch.Tensor) -> None:  # pragma: no cover - loops
         flat = _flatten_tensor(tensor, self.channel_dim)
+
+        # --------------------------------------------------------------
+        # Calibration phase
+        # --------------------------------------------------------------
+        if self.hist is None and self.calibration_size > 0:
+            if self._calibration_buffer is None:
+                self._calibration_buffer = flat
+            else:
+                self._calibration_buffer = torch.cat([self._calibration_buffer, flat], dim=1)
+            if self._calibration_buffer.size(1) < self.calibration_size:
+                return
+
+            buffer = self._calibration_buffer
+            self.min = buffer.min(dim=1).values
+            self.max = buffer.max(dim=1).values
+
+            if self.strategy == "fd":
+                q75 = torch.quantile(buffer, 0.75, dim=1)
+                q25 = torch.quantile(buffer, 0.25, dim=1)
+                iqr = q75 - q25
+                n = buffer.size(1)
+                width = 2 * iqr / (n ** (1 / 3))
+                range_ = self.max - self.min  # type: ignore[operator]
+                width = torch.where(width > 0, width, range_)
+                bins = torch.ceil(range_ / width)
+                bins = torch.clamp(bins, min=1)
+                self.bins = int(bins.max().item())
+            else:  # pragma: no cover - defensive
+                raise ValueError(f"Unknown strategy: {self.strategy}")
+
+            self.hist = torch.zeros(buffer.size(0), self.bins, dtype=torch.float32)
+            for c in range(buffer.size(0)):
+                rmin = self.min[c].item()
+                rmax = self.max[c].item()
+                if rmin == rmax:
+                    rmax = rmin + 1e-6
+                self.hist[c] += torch.histc(buffer[c], bins=self.bins, min=rmin, max=rmax)
+            self._calibration_buffer = None
+            return
+
+        # --------------------------------------------------------------
+        # Standard histogram update
+        # --------------------------------------------------------------
         min_val = flat.min(dim=1).values
         max_val = flat.max(dim=1).values
         if self.hist is None:
