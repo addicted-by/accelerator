@@ -31,8 +31,8 @@ def main() -> None:
         outputs.sum().backward()
         break  # collect statistics from a single batch for brevity
 
-    activations, gradients = collector.compute()
-    save_tensor_stats(activations, gradients, "resnet18_cifar10_stats.json")
+    input_activations, activations, gradients = collector.compute()
+    save_tensor_stats(activations, gradients, "resnet18_cifar10_stats.json", input_activations)
     print("Saved statistics to resnet18_cifar10_stats.json")
 
 

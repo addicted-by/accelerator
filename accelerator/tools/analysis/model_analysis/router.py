@@ -47,6 +47,11 @@ class StatsRouter:
         return True
 
     # ------------------------------------------------------------------
+    def forward_pre(self, node, tensors) -> None:
+        if self._match(node.name):
+            self.collector.update_activation(node.name, tensors, input=True)
+
+    # ------------------------------------------------------------------
     def forward_post(self, node, tensors) -> None:
         if self._match(node.name):
             self.collector.update_activation(node.name, tensors)

@@ -537,6 +537,7 @@ class TensorStatsCollector:
         self.activation_configs = activation_configs or {}
         self.gradient_configs = gradient_configs or {}
 
+        self.input_activation_collectors: Dict[str, List[_BaseTensorCollector]] = {}
         self.activation_collectors: Dict[str, List[_BaseTensorCollector]] = {}
         self.gradient_collectors: Dict[str, List[_BaseTensorCollector]] = {}
 
@@ -563,9 +564,12 @@ class TensorStatsCollector:
     # ------------------------------------------------------------------
     # Update methods
     # ------------------------------------------------------------------
-    def update_activation(self, node: str, tensors: Iterable[torch.Tensor]) -> None:
+    def update_activation(
+        self, node: str, tensors: Iterable[torch.Tensor], input: bool = False
+    ) -> None:
+        store = self.input_activation_collectors if input else self.activation_collectors
         collectors = self._get_collectors(
-            node, self.activation_configs, self.activation_collectors, self.default_activation_config
+            node, self.activation_configs, store, self.default_activation_config
         )
         for t in tensors:
             for c in collectors:
@@ -582,7 +586,17 @@ class TensorStatsCollector:
     # ------------------------------------------------------------------
     # Compute results
     # ------------------------------------------------------------------
-    def compute(self) -> Tuple[Dict[str, Dict[str, torch.Tensor]], Dict[str, Dict[str, torch.Tensor]]]:
+    def compute(
+        self,
+    ) -> Tuple[
+        Dict[str, Dict[str, torch.Tensor]],
+        Dict[str, Dict[str, torch.Tensor]],
+        Dict[str, Dict[str, torch.Tensor]],
+    ]:
+        input_activations = {
+            node: {collector.name: collector.compute() for collector in collectors}
+            for node, collectors in self.input_activation_collectors.items()
+        }
         activations = {
             node: {collector.name: collector.compute() for collector in collectors}
             for node, collectors in self.activation_collectors.items()
@@ -591,4 +605,4 @@ class TensorStatsCollector:
             node: {collector.name: collector.compute() for collector in collectors}
             for node, collectors in self.gradient_collectors.items()
         }
-        return activations, gradients
+        return input_activations, activations, gradients

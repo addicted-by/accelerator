@@ -15,6 +15,7 @@ def save_tensor_stats(
     activations: Dict[str, Dict[str, torch.Tensor]],
     gradients: Dict[str, Dict[str, torch.Tensor]],
     path: str | Path,
+    input_activations: Dict[str, Dict[str, torch.Tensor]] | None = None,
 ) -> None:
     """Save collected tensor statistics to a JSON file.
 
@@ -32,6 +33,11 @@ def save_tensor_stats(
             node: {name: _tensor_to_list(t) for name, t in stats.items()} for node, stats in gradients.items()
         },
     }
+    if input_activations is not None:
+        serializable["input_activations"] = {
+            node: {name: _tensor_to_list(t) for name, t in stats.items()}
+            for node, stats in input_activations.items()
+        }
     path = Path(path)
     if path.parent:
         path.parent.mkdir(parents=True, exist_ok=True)
