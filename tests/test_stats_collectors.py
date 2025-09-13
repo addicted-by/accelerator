@@ -27,7 +27,9 @@ def test_per_layer_channel_dim_configs():
     collector.update_gradient("layer1", [grad])
     collector.update_gradient("layer2", [grad])
 
-    activations, gradients = collector.compute()
+    input_activations, activations, gradients = collector.compute()
+
+    assert input_activations == {}
 
     assert torch.allclose(activations["layer1"]["mean"], torch.tensor([1.5, 3.5]))
     assert torch.allclose(activations["layer2"]["mean"], torch.tensor([2.0, 3.0]))

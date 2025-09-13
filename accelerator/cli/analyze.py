@@ -151,9 +151,9 @@ class ModelAnalysisCLI:
             loss = result.sum() if isinstance(result, torch.Tensor) else result[0].sum()
             loss.backward()
 
-        activations, gradients = collector.compute()
+        input_activations, activations, gradients = collector.compute()
         out_file = output or "analysis_stats.json"
-        save_tensor_stats(activations, gradients, out_file)
+        save_tensor_stats(activations, gradients, out_file, input_activations)
         return out_file
 
 
