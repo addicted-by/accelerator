@@ -41,3 +41,13 @@ def test_trace_model_handles_resnet18():
     fc_spec = next(n for n in registry if n.name == "fc")
     assert fc_spec.shape == (1, 1000)
     assert fc_spec.dtype == torch.float32
+
+
+def test_traced_module_runs_after_shape_prop():
+    model = Simple()
+    inputs = torch.randn(2, 3)
+    gm, _ = trace_model(model, (inputs,))
+
+    # Ensure the traced module can still execute with real inputs and produces
+    # the same results as the original model.
+    torch.testing.assert_close(gm(inputs), model(inputs))

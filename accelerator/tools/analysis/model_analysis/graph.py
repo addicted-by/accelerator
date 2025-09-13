@@ -54,11 +54,28 @@ def trace_model(
     gm = symbolic_trace(model)
 
     if example_inputs is not None:
-        # Move parameters and buffers to meta device so that shape propagation
-        # does not allocate real memory or trigger device mismatches.
+        # Record the original device placement of parameters and buffers along
+        # with their values so that we can restore the ``GraphModule`` after
+        # running shape propagation on ``device='meta'``.
+        param_devices = {name: p.device for name, p in gm.named_parameters()}
+        buffer_devices = {name: b.device for name, b in gm.named_buffers()}
+        state = gm.state_dict()
+
+        # Move parameters and buffers to the meta device to avoid allocating
+        # real memory or hitting device mismatches during propagation.
         gm.to(device="meta")
         meta_args = [t.to(device="meta") for t in example_inputs]
         ShapeProp(gm).propagate(*meta_args)
+
+        # Restore parameters and buffers to their original devices so the
+        # module can be executed with real inputs.
+        gm.load_state_dict(state, assign=True)
+        for name, device in param_devices.items():
+            if gm.get_parameter(name).device != device:
+                gm.get_parameter(name).data = gm.get_parameter(name).data.to(device)
+        for name, device in buffer_devices.items():
+            if gm.get_buffer(name).device != device:
+                gm.get_buffer(name).data = gm.get_buffer(name).data.to(device)
 
     registry: List[NodeSpec] = []
     for node in gm.graph.nodes:
