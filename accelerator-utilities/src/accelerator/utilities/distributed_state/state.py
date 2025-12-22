@@ -35,6 +35,19 @@ class DistributedState:
     def __new__(cls) -> 'DistributedState':
         if cls._instance is None:
             with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._initialized = False
+        return cls._instance
+    
+    def __init__(self):
+        if not getattr(self, '_initialized', False):
+            self._engine: Optional['DistributedBackend'] = None
+            self._initialized = True
+            self._cpu_execution = False
+            self._device_set = None
+    
+    def _get_rank_from_env(self) -> int:
         # torchrun/accelerate launch/mp launch/if mp spawn set os env
         rank_keys = ("RANK", "LOCAL_RANK", "SLURM_PROCID", "JSM_NAMESPACE_RANK")
         for key in rank_keys:
@@ -78,6 +91,17 @@ class DistributedState:
             return self._device_set    
 
         if self._engine is not None and hasattr(self._engine, 'device'):
+            return self._engine.device
+
+        
+        return torch.device(f'cuda:{self.rank}')
+    
+    def set_engine(self, engine: Optional['DistributedBackend']) -> None:
+        self._engine = engine
+    
+    def reset(self) -> None:
+        self._engine = None
+    
     @property
     def is_distributed(self) -> bool:
         return self._engine is not None or self.world_size > 1
