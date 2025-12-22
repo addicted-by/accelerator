@@ -2,6 +2,19 @@ import os
 from typing import Any, Callable, Optional, TYPE_CHECKING
 from contextlib import contextmanager
 from threading import Lock
+from accelerator.utilities.typings import _DEVICE
+import torch
+import torch.distributed as dist
+
+from accelerator.utilities.api_desc import APIDesc
+
+if TYPE_CHECKING:
+    from accelerator.core.engine import DistributedBackend
+
+
+@APIDesc.developer(dev_info='Ryabykin Alexey r00926208')
+@APIDesc.status(status_level='Stable')
+@APIDesc.see_also([
     'https://pytorch-lightning.readthedocs.io/en/1.7.7/api/pytorch_lightning.utilities.rank_zero.html',
     'https://pytorch-lightning.readthedocs.io/en/1.7.7/_modules/pytorch_lightning/utilities/rank_zero.html#rank_zero_only'
 ])

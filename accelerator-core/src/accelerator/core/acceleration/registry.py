@@ -13,8 +13,8 @@ class AccelerationType(Enum):
     """Enumeration of acceleration types supported by the registry."""
     QUANTIZATION = "quantization"
     PRUNING = "pruning"
-    OPTIMIZATION = "optimization"
     REPARAMETRIZATION = "reparametrization"
+    OPTIMIZATION = "optimization"
     CUSTOM = "custom"
 
 
@@ -106,5 +106,4 @@ class AccelerationRegistry(BaseRegistry):
         return self.has_object(acceleration_type, name)
 
 
-# Singleton instance
 acceleration_registry = AccelerationRegistry()
