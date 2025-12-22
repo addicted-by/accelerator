@@ -31,6 +31,39 @@ PhaseMetricsDict = Dict[str, Union[TensorType, float, List[float]]]
 
 class MetricsDict(TypedDict):
     train: PhaseMetricsDict
+from pathlib import Path
+from omegaconf import DictConfig
+import torch
+from typing import (
+    Any, AnyStr, Dict, List, 
+    Protocol, Tuple, TypedDict, 
+    Union
+)
+
+
+_DEVICE = Union[torch.device, str, int]
+
+
+# Config type
+ConfigType = Union[Dict[str, Any], DictConfig]
+
+# Path types
+PathType = Union[AnyStr, Path]
+InputPathType = PathType
+OutputPathType = PathType
+
+# Common tensor types
+TensorType = Union[torch.Tensor, List[torch.Tensor]]
+BatchTensorType = Union[torch.Tensor, Tuple[torch.Tensor, ...], Dict[str, torch.Tensor]]
+ModelOutputType = Union[torch.Tensor, Tuple[torch.Tensor, ...], Dict[str, torch.Tensor]]
+OptimizerStateType = Dict[str, Any]
+ModuleType = torch.nn.Module
+
+# Phase metrics dict
+PhaseMetricsDict = Dict[str, Union[TensorType, float, List[float]]]
+
+class MetricsDict(TypedDict):
+    train: PhaseMetricsDict
     val: PhaseMetricsDict
     test: PhaseMetricsDict
 
@@ -39,3 +72,14 @@ class ModelProtocol(Protocol):
 
 class TrainingFunction(Protocol):
     def __call__(self, context) -> Dict[str, float]: ...
+
+class DistributedBackendProtocol(Protocol):
+    @property
+    def device(self) -> torch.device: ...
+    def rank(self) -> int: ...
+    def world_size(self) -> int: ...
+    def is_main_process(self) -> bool: ...
+    def barrier(self) -> None: ...
+    def all_reduce(self, tensor: Any, op: str = 'mean') -> Any: ...
+    def gather(self, tensor: Any) -> Any: ...
+    def broadcast(self, obj: Any, src: int = 0) -> Any: ...

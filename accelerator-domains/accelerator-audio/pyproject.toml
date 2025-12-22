@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "accelerator-audio"
+version = "0.1.0"
+description = "Audio losses, transforms, and utilities"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Accelerator Team"}
+]
+dependencies = [
+    "accelerator-core",
+    "accelerator-utilities",
+    "torch>=2.5.1",
+    "torchaudio",
+    "librosa",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["accelerator*"]
+
+[tool.setuptools.package-dir]
+"" = "src"

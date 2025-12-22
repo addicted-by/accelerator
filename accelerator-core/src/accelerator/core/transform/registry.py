@@ -3,16 +3,20 @@ from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from .base import BaseTransform
 
-from accelerator.utilities.api_desc import APIDesc
-from accelerator.utilities.base_registry import BaseRegistry
-from accelerator.utilities.logging import _IS_DEBUG_LEVEL
+
+from accelerator.utilities import (
+    APIDesc,
+    BaseRegistry,
+    _IS_DEBUG_LEVEL
+)
 
 
-class TensorTransformType(Enum):
+class TransformScopeType(Enum):
     """Enumeration of transformation types supported by the registry."""
-    INPUT = 'input'
-    LOSS_TRANSFORM = 'loss'
-    MODEL = 'model'
+    MODEL = "model"
+    TENSOR = "tensor"
+    CONTAINER = "container"
+    STATE_DICT = "state_dict"
 
 
 @APIDesc.developer(dev_info='Ryabykin Alexey r00926208')
@@ -39,12 +43,12 @@ class TensorTransformsRegistry(BaseRegistry):
         """
         super().__init__(enable_logging=enable_logging)
         
-        for transform_type in TensorTransformType:
+        for transform_type in TransformScopeType:
             self._registry_types[transform_type.value] = {}
         
         self._instance_cache: List[BaseTransform] = []
     
-    def register_transform(self, transform_type: Union[str, Iterable[str], TensorTransformType, Iterable[TensorTransformType]]):
+    def register_transform(self, transform_type: Union[str, Iterable[str], TransformScopeType, Iterable[TransformScopeType]]):
         """
         Decorator for registering transform classes in the registry.
         

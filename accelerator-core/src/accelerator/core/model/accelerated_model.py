@@ -152,7 +152,7 @@ class AcceleratedModel(torch.nn.Module):
             value, None if no regularization is active
     """
 
-    _regularization_term: torch.Tensor
+    _regularization_term: torch.Tensor = torch.tensor([0.])
 
     def __init__(self, model: torch.nn.Module, cfg: Optional[Dict[str, Any]] = None):
         """Initialize an accelerated model wrapper.
@@ -176,7 +176,6 @@ class AcceleratedModel(torch.nn.Module):
         # Acceleration tracking
         self._acceleration_operations: List[AccelerationOperationBase] = []
 
-        # Initialize all components
         self._init_components()
 
     def _init_components(self):
@@ -191,7 +190,7 @@ class AcceleratedModel(torch.nn.Module):
         self._init_gamma()
         self._init_pixel_shuffle()
         self._init_processing_functions()
-        self._register_reg_term()
+        # self._register_reg_term()
 
     def _init_gamma(self):
         """Initialize gamma correction component."""
@@ -225,7 +224,7 @@ class AcceleratedModel(torch.nn.Module):
             log.warning(
                 "Model outputs separate function is set to `None`. Using default"
             )
-            self.separate_fn = lambda x: {"prediction": x}
+            self.separate_fn = lambda x: {"net_result": x}
         elif separate_fn_name == "empty":
             log.info("Using pre-default `separate_fn`")
             self.separate_fn = lambda x: x
@@ -378,6 +377,8 @@ class AcceleratedModel(torch.nn.Module):
 
         inputs, additional = self.collate_fn(*args, **kwargs)
 
+        print(inputs[0].shape)
+
         if self.gamma:
             x, extra, _ = self.gamma._gamma_forward(*inputs, ref_frame_index=0) # pylint: disable=protected-access
             inputs = (x, extra)
@@ -387,10 +388,10 @@ class AcceleratedModel(torch.nn.Module):
         outputs = self.separate_fn(output)
 
         if self.d2s:
-            outputs["prediction"] = self.d2s(outputs["prediction"])
+            outputs["net_result"] = self.d2s(outputs["net_result"])
 
         if self.gamma:
-            outputs["prediction"] = self.gamma._gamma_inverse(outputs["prediction"]) # pylint: disable=protected-access
+            outputs["net_result"] = self.gamma._gamma_inverse(outputs["net_result"]) # pylint: disable=protected-access
 
         outputs["additional"] = additional
         return outputs

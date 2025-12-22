@@ -2,19 +2,6 @@ import os
 from typing import Any, Callable, Optional, TYPE_CHECKING
 from contextlib import contextmanager
 from threading import Lock
-from accelerator.utilities.typings import _DEVICE
-import torch
-import torch.distributed as dist
-
-from accelerator.utilities.api_desc import APIDesc
-
-if TYPE_CHECKING:
-    from accelerator.core.engine import DistributedBackend
-
-
-@APIDesc.developer(dev_info='Ryabykin Alexey r00926208')
-@APIDesc.status(status_level='Stable')
-@APIDesc.see_also([
     'https://pytorch-lightning.readthedocs.io/en/1.7.7/api/pytorch_lightning.utilities.rank_zero.html',
     'https://pytorch-lightning.readthedocs.io/en/1.7.7/_modules/pytorch_lightning/utilities/rank_zero.html#rank_zero_only'
 ])
@@ -35,19 +22,6 @@ class DistributedState:
     def __new__(cls) -> 'DistributedState':
         if cls._instance is None:
             with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-                    cls._instance._initialized = False
-        return cls._instance
-    
-    def __init__(self):
-        if not getattr(self, '_initialized', False):
-            self._engine: Optional['DistributedBackend'] = None
-            self._initialized = True
-            self._cpu_execution = False
-            self._device_set = None
-    
-    def _get_rank_from_env(self) -> int:
         # torchrun/accelerate launch/mp launch/if mp spawn set os env
         rank_keys = ("RANK", "LOCAL_RANK", "SLURM_PROCID", "JSM_NAMESPACE_RANK")
         for key in rank_keys:
@@ -91,19 +65,6 @@ class DistributedState:
             return self._device_set    
 
         if self._engine is not None and hasattr(self._engine, 'device'):
-            return self._engine.device
-
-        
-        return torch.device(f'cuda:{self.rank}')
-    
-
-    def set_engine(self, engine: Optional['DistributedBackend']) -> None:
-        self._engine = engine
-    
-
-    def reset(self) -> None:
-        self._engine = None
-    
     @property
     def is_distributed(self) -> bool:
         return self._engine is not None or self.world_size > 1
