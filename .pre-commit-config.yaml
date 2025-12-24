@@ -2,44 +2,55 @@ default_language_version:
   python: python3.10
 
 repos:
+  # -------------------------
+  # Basic hygiene
+  # -------------------------
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v4.4.0
     hooks:
       - id: check-yaml
       - id: check-json
       - id: check-added-large-files
+        args: ["--maxkb=1024"]
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-case-conflict
       - id: mixed-line-ending
 
+  # -------------------------
+  # Black (formatting)
+  # -------------------------
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 23.9.1
     hooks:
       - id: black
 
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.13.2
+  # -------------------------
+  # Ruff (lint + isort replacement)
+  # -------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.7
     hooks:
-      - id: isort
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
-    hooks:
-      - id: flake8
-
+  # -------------------------
+  # Notebooks
+  # -------------------------
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.9.1
+    rev: 1.7.0
     hooks:
       - id: nbqa-black
         additional_dependencies: [black==23.9.1]
-      - id: nbqa-isort
-        additional_dependencies: [isort==5.12.0]
-      - id: nbqa-flake8
-        additional_dependencies: [flake8==3.9.2]
+      - id: nbqa-ruff
+        additional_dependencies: [ruff==0.1.7]
+        args: ["--fix"]
 
+  # -------------------------
+  # Non-Python formatting
+  # -------------------------
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+    rev: v3.0.3
     hooks:
       - id: prettier
         types_or: [markdown, yaml, toml, json, dockerfile, shell]

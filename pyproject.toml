@@ -1,40 +1,68 @@
-[tool.poetry]
-name = "accelerator"
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "accelerator-utilities"
 version = "0.1.0"
-description = ""
-authors = ["addicted-by <ras.unlucky@yandex.ru>"]
+description = "Framework-agnostic utilities and helpers for the accelerator framework"
 readme = "README.md"
+requires-python = ">=3.9"
 
-[tool.poetry.dependencies]
-python = "^3.9"
-torch = "^2.5.1"
-hydra-core = "^1.3.2"
-omegaconf = "^2.3.0"
-pynvml = "^11.5.0"
+dependencies = [
+    "torch>=2.5.1",
+    "hydra-core>=1.3.2",
+    "omegaconf>=2.3.0",
+    "rich",
+    "onnx",
+]
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "ruff",
+    "pre-commit",
+]
+
+# -----------------------
+# Packaging
+# -----------------------
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["accelerator*"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+# -----------------------
+# Formatting
+# -----------------------
 [tool.black]
 line-length = 120
-target-version = ['py310']
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-| \.hg
-| \.mypy_cache
-| \.tox
-| \.venv
-| _build
-| buck-out
-| build
-)/
-'''
+target-version = ["py39", "py310"]
 
-[tool.isort]
-atomic = true
-profile = "black"
-line_length = 120
-skip_gitignore = true
+# -----------------------
+# Ruff (lint + imports)
+# -----------------------
+[tool.ruff]
+target-version = ["py39", "py310"]
+line-length = 120
+fix = true
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort replacement
+    "UP",  # pyupgrade
+    "B",   # bugbear
+]
+
+ignore = [
+    "E203",  # Black compatibility
+    "E501",  # Line length handled by Black
+]
+
+[tool.ruff.isort]
+combine-as-imports = true
+known-first-party = ["accelerator"]
