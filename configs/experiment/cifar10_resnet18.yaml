@@ -8,15 +8,15 @@ defaults:
   - /model/resnet18
   - /datamodule/cifar10
   - /engine/vanilla_torch
-  
+
   # Training components
   - /training_components/optimizer: adam
   - /training_components/scheduler: null
   - /training_components/distillation: null
-  
+
   # Loss function for classification
   - /training_components/loss@losses.cross_entropy: classification/cross_entropy
-  
+
   - _self_
 
 # Project configuration
@@ -31,9 +31,7 @@ nproc_per_node: 1
 gpu_idxs: ~
 
 # Tags for experiment organization
-tags: ['cifar10', 'resnet18', 'classification', 'baseline']
-
-
+tags: ["cifar10", "resnet18", "classification", "baseline"]
 
 load_from_previous: false
 
@@ -74,7 +72,7 @@ datamodule:
           - _target_: torchvision.transforms.Normalize
             mean: [0.4914, 0.4822, 0.4465]
             std: [0.2023, 0.1994, 0.2010]
-  
+
   dataloaders:
     train:
       batch_size: 128

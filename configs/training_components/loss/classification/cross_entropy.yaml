@@ -8,9 +8,9 @@ loss_coefficient: 1.0
 name: "CrossEntropyLoss"
 debug_config: null
 transforms: []
-weight: null  # Type: Optional[Tensor]
-size_average: null  # Type: Any
-ignore_index: -100  # Type: int
-reduce: null  # Type: Any
-reduction: "mean"  # Type: str
-label_smoothing: 0.0  # Type: float
+weight: null # Type: Optional[Tensor]
+size_average: null # Type: Any
+ignore_index: -100 # Type: int
+reduce: null # Type: Any
+reduction: "mean" # Type: str
+label_smoothing: 0.0 # Type: float

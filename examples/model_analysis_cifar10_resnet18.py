@@ -4,7 +4,6 @@ This script demonstrates how to use the model analysis utilities to collect
 per-layer activation and gradient statistics.
 """
 
-import torch
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.models import resnet18

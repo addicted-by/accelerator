@@ -3,8 +3,8 @@
 Debug imports to find the issue.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath("."))
 
@@ -12,22 +12,18 @@ print("Starting import debug...")
 
 try:
     print("1. Importing torch...")
-    import torch
 
     print("✓ torch imported")
 
     print("2. Importing torch.nn...")
-    import torch.nn as nn
 
     print("✓ torch.nn imported")
 
     print("3. Importing types...")
-    from accelerator.hooks.types import HookType
 
     print("✓ HookType imported")
 
     print("4. Importing HookInfo...")
-    from accelerator.hooks.types import HookInfo
 
     print("✓ HookInfo imported")
 

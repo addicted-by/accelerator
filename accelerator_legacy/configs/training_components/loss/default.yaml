@@ -1,7 +1,0 @@
-loss_type: ~
-prediction_key: null
-target_key: null
-loss_coefficient: 1.0
-name: ""
-debug_config: null
-transforms: []

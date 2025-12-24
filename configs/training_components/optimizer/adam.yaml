@@ -2,14 +2,14 @@
 # Modify parameters as needed
 
 _target_: "torch.optim.Adam"
-lr: 0.001  # Type: Union[float, Tensor]
-betas: [0.9, 0.999]  # Type: tuple[Union[float, Tensor], Union[float, Tensor]]
-eps: 1e-08  # Type: float
-weight_decay: 0  # Type: float
-amsgrad: false  # Type: bool
-foreach: null  # Type: Optional[bool]
-maximize: false  # Type: bool
-capturable: false  # Type: bool
-differentiable: false  # Type: bool
-fused: null  # Type: Optional[bool]
-decoupled_weight_decay: false  # Type: bool
+lr: 0.001 # Type: Union[float, Tensor]
+betas: [0.9, 0.999] # Type: tuple[Union[float, Tensor], Union[float, Tensor]]
+eps: 1e-08 # Type: float
+weight_decay: 0 # Type: float
+amsgrad: false # Type: bool
+foreach: null # Type: Optional[bool]
+maximize: false # Type: bool
+capturable: false # Type: bool
+differentiable: false # Type: bool
+fused: null # Type: Optional[bool]
+decoupled_weight_decay: false # Type: bool

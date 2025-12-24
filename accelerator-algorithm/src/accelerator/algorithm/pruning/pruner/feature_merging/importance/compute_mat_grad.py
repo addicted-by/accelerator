@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 def _extract_patches(x, kernel_size, stride, padding):
     """
     :param x: The input feature maps.  (batch_size, in_c, h, w)
@@ -11,16 +12,12 @@ def _extract_patches(x, kernel_size, stride, padding):
     :return: (batch_size, out_h, out_w, in_c*kh*kw)
     """
     if padding[0] + padding[1] > 0:
-        x = F.pad(x, (padding[1], padding[1], padding[0],
-                      padding[0])).data  # Actually check dims
+        x = F.pad(x, (padding[1], padding[1], padding[0], padding[0])).data  # Actually check dims
     x = x.unfold(2, kernel_size[0], stride[0])
     x = x.unfold(3, kernel_size[1], stride[1])
     x = x.transpose_(1, 2).transpose_(2, 3).contiguous()
-    x = x.view(
-        x.size(0), x.size(1), x.size(2),
-        x.size(3) * x.size(4) * x.size(5))
+    x = x.view(x.size(0), x.size(1), x.size(2), x.size(3) * x.size(4) * x.size(5))
     return x
-
 
 
 def try_contiguous(x):
@@ -31,7 +28,6 @@ def try_contiguous(x):
 
 
 class ComputeMatGrad:
-
     @classmethod
     def __call__(cls, input, grad_output, layer):
         if isinstance(layer, nn.Linear):
@@ -75,5 +71,5 @@ class ComputeMatGrad:
             if layer.bias is not None:
                 input = torch.cat([input, input.new(input.size(0), 1).fill_(1)], 1)
             input = input.view(grad_output.size(0), -1, input.size(-1))  # b * hw * in_c*kh*kw
-            grad = torch.einsum('abm,abn->amn', (grad_output, input))
+            grad = torch.einsum("abm,abn->amn", (grad_output, input))
         return grad

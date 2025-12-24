@@ -1,6 +1,7 @@
 def setup_seed(seed: int):
     import os
     import random
+
     import numpy as np
     import torch
 
@@ -19,7 +20,7 @@ def setup_seed(seed: int):
 
     # Disable silent mixed-precision paths
     torch.backends.cuda.matmul.allow_tf32 = False
-    torch.backends.cudnn.allow_tf32       = False
+    torch.backends.cudnn.allow_tf32 = False
 
     # Deterministic cuBLAS (CUDA ≥ 10.2)
     os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"

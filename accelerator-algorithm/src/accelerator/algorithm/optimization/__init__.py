@@ -1,6 +1,3 @@
 from .smooth_removing import SmoothlyRemoveLayer
 
-
-__all__ = [
-    'SmoothlyRemoveLayer'
-]
+__all__ = ["SmoothlyRemoveLayer"]

@@ -8,15 +8,15 @@ loss_coefficient: 1.0
 name: "color_difference"
 debug_config: null
 transforms: []
-mode: "lab"  # Type: str
-scales: 1  # Type: Any
-kernels: 1  # Type: Any
-weights: 1  # Type: Any
+mode: "lab" # Type: str
+scales: 1 # Type: Any
+kernels: 1 # Type: Any
+weights: 1 # Type: Any
 coef:
   l: 1
   a: 1
   b: 1
-use_abs: true  # Type: Any
-use_mask: true  # Type: Any
-use_l_smape: false  # Type: Any
-eps: 1e-16  # Type: Any
+use_abs: true # Type: Any
+use_mask: true # Type: Any
+use_l_smape: false # Type: Any
+eps: 1e-16 # Type: Any

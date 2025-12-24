@@ -11,8 +11,8 @@ dataloaders:
 datasets:
   train:
     _target_: "torchvision.datasets.CIFAR10"
-    root: null  # Type: Union[str, Path] (required)
-    train: true  # Type: bool
-    transform: null  # Type: Optional[Callable[]]
-    target_transform: null  # Type: Optional[Callable[]]
-    download: false  # Type: bool
+    root: null # Type: Union[str, Path] (required)
+    train: true # Type: bool
+    transform: null # Type: Optional[Callable[]]
+    target_transform: null # Type: Optional[Callable[]]
+    download: false # Type: bool

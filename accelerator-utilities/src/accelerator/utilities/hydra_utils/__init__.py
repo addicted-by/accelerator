@@ -1,13 +1,3 @@
-from .utils import (
-    instantiate, 
-    jupyter_overrides, 
-    _compose_with_existing_hydra
-)
+from .utils import _compose_with_existing_hydra, instantiate, jupyter_overrides
 
-
-
-__all__ = [
-    'instantiate',
-    'jupyter_overrides',
-    '_compose_with_existing_hydra'
-]
+__all__ = ["instantiate", "jupyter_overrides", "_compose_with_existing_hydra"]

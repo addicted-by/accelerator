@@ -29,13 +29,13 @@ Example:
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Callable, TypeVar, Type
+from typing import Any, Callable, TypeVar
+
+import torch
 from torch.nn import Module
 from torch.utils.data import DataLoader
-import torch
 
 from accelerator.utilities.default_config import _DefaultConfig
-
 
 T = TypeVar("T", bound="_DefaultConfig")
 
@@ -79,9 +79,7 @@ class DistributedBackend(ABC):
         >>> backend.setup()
     """
 
-    def __init__(
-        self, config: Dict[str, Any], default_config: Type[T] = _DefaultConfig
-    ):
+    def __init__(self, config: dict[str, Any], default_config: type[T] = _DefaultConfig):
         self.config = default_config.create(config)
 
     @property
@@ -89,11 +87,11 @@ class DistributedBackend(ABC):
     def device(self) -> torch.DeviceObjType:
         """
         Get the device used by this distributed backend.
-        
+
         This property returns the torch device object that represents the
         hardware device (CPU, GPU, etc.) that this backend is configured
         to use for distributed training operations.
-        
+
         Returns:
             torch.DeviceObjType: The torch device object representing the
                 hardware device used by this backend.

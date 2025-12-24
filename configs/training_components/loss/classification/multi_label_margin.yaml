@@ -8,6 +8,6 @@ loss_coefficient: 1.0
 name: "MultiLabelMarginLoss"
 debug_config: null
 transforms: []
-size_average: null  # Type: Any
-reduce: null  # Type: Any
-reduction: "mean"  # Type: str
+size_average: null # Type: Any
+reduce: null # Type: Any
+reduction: "mean" # Type: str

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 from omegaconf import DictConfig
 
@@ -7,7 +7,6 @@ from accelerator.utilities.hydra_utils import instantiate
 from accelerator.utilities.logging import get_logger
 from accelerator.utilities.model_utils.unwrap import unwrap_model
 
-
 T = TypeVar("T")
 logger = get_logger(__name__)
 
@@ -15,10 +14,10 @@ logger = get_logger(__name__)
 class ComponentManager(BaseContainer):
     def __init__(self, config: Optional[DictConfig] = None):
         self.config = config or DictConfig({})
-        self._components: Dict[str, Any] = {}
-        self._manual_components: Dict[str, Any] = {}
-        self._factories: Dict[str, Callable[[], Any]] = {}
-        self._dependency_map: Dict[str, List[str]] = {"model": ["optimizer", "scheduler"], "optimizer": ["scheduler"]}
+        self._components: dict[str, Any] = {}
+        self._manual_components: dict[str, Any] = {}
+        self._factories: dict[str, Callable[[], Any]] = {}
+        self._dependency_map: dict[str, list[str]] = {"model": ["optimizer", "scheduler"], "optimizer": ["scheduler"]}
         self._setup_default_factories()
 
     def _setup_default_factories(self):
@@ -53,7 +52,7 @@ class ComponentManager(BaseContainer):
     def has_component(self, name: str) -> bool:
         return name in self._components or name in self._manual_components
 
-    def configure_dependencies(self, dependency_map: Dict[str, List[str]]):
+    def configure_dependencies(self, dependency_map: dict[str, list[str]]):
         self._dependency_map = dependency_map
 
     def _process_component(self, name: str, instance: Any) -> Any:
@@ -170,7 +169,7 @@ class ComponentManager(BaseContainer):
         self._components.clear()
         self._manual_components.clear()
 
-    def list_components(self) -> List[str]:
+    def list_components(self) -> list[str]:
         return list(set(self._components.keys()) | set(self._manual_components.keys()))
 
     def _get_summary_info(self) -> str:
@@ -178,7 +177,7 @@ class ComponentManager(BaseContainer):
         active_components = len(self._components)
         return f"{active_components}/{total_factories} active"
 
-    def _get_representation_sections(self) -> List[Tuple[str, List[str]]]:
+    def _get_representation_sections(self) -> list[tuple[str, list[str]]]:
         sections = []
 
         if self.config:

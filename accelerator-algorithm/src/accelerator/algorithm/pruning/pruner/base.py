@@ -1,36 +1,33 @@
+import os
+import sys
 from abc import abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, TextIO
+from typing import Any, Callable, Optional, TextIO
+
 import torch
-import os
-import sys
 import yaml
-from ..utils.typing import PathType, ModuleType, InOutType
-from ..utils import (
-    to_device,
-    save_report,
-    fuse_batchnorm,
-    remove_parametrizations,
-    reapply_parametrizations
-)
+
+from ..utils import fuse_batchnorm, reapply_parametrizations, remove_parametrizations, save_report, to_device
 from ..utils.op_counter import count_ops_and_params
+from ..utils.typing import InOutType, ModuleType, PathType
+
 
 class BasePruner:
     """Base class for implementing pruning strategies.
-    
+
     This class provides the foundation for implementing various pruning approaches.
     It handles common functionality such as loss calculation, statistics tracking,
     and reporting.
     """
-    
+
     def __init__(
         self,
         experiment_path: Optional[PathType] = None,
         log_file: Optional[TextIO] = None,
         loss_fn: Optional[Callable] = None,
         postprocess_output: Optional[Callable] = None,
-        pruner_cfg: Dict = None,
+        pruner_cfg: dict = None,
         **kwargs,
     ):
         """Initialize the BasePruner.
@@ -53,15 +50,15 @@ class BasePruner:
         self.req_grad = False
         self.stats = defaultdict()
         self.pruning_record = []
-        
+
         # Handle pruning dictionary configuration
         if self.pruner_cfg.get("pruning_dict"):
-            self.pruner_cfg["pruning_ratio"] = 0.
-        
+            self.pruner_cfg["pruning_ratio"] = 0.0
+
         self.postprocess_output = postprocess_output
         if self.verbose:
             print(self)
-    
+
     @abstractmethod
     def prune(self, model: ModuleType, dataloader: torch.utils.data.DataLoader, **kwargs) -> ModuleType:
         """Implement pruning logic in derived classes.
@@ -82,7 +79,7 @@ class BasePruner:
         dataloader: torch.utils.data.DataLoader,
         device: torch.device,
         req_grad: bool = False,
-        num_batches: int = -1
+        num_batches: int = -1,
     ) -> float:
         """Calculate average loss over the dataset.
 
@@ -98,11 +95,11 @@ class BasePruner:
         """
         if self.verbose:
             print(f"Loss calculation with grad: {req_grad}")
-            
+
         loss = 0.0
         if num_batches == -1:
             num_batches = len(dataloader)
-            
+
         for idx, sample in enumerate(dataloader):
             if idx == num_batches:
                 break
@@ -163,11 +160,7 @@ class BasePruner:
         return (loss, net_result) if return_net_result else loss
 
     def _calculate_stats(
-        self,
-        model: ModuleType,
-        dataloader: torch.utils.data.DataLoader,
-        stage: str,
-        req_grad: bool = False
+        self, model: ModuleType, dataloader: torch.utils.data.DataLoader, stage: str, req_grad: bool = False
     ) -> None:
         """Calculate and store model statistics.
 
@@ -212,7 +205,7 @@ class BasePruner:
         """
         model.train(False)
         fuse_batchnorm(model)
-        
+
         if self.req_grad:
             for name, p in model.named_parameters():
                 if not p.requires_grad:
@@ -226,14 +219,14 @@ class BasePruner:
         self.input_example, *_ = sample
 
         # Calculate initial statistics
-        self._calculate_stats(model, dataloader, 'before', self.req_grad)
+        self._calculate_stats(model, dataloader, "before", self.req_grad)
 
         # Perform pruning
         model = self.prune(model, dataloader=dataloader, **kwargs)
 
         # Calculate final statistics
         parametrized = remove_parametrizations(model)
-        self._calculate_stats(model, dataloader, 'after', False)
+        self._calculate_stats(model, dataloader, "after", False)
         reapply_parametrizations(model, parametrized, True)
 
         if self.verbose:
@@ -256,12 +249,12 @@ class BasePruner:
             f"Total parameters after: {(self.stats['total_params_after'] / 1e6):.4f}M",
             f"FLOPs: {self.stats['flops_before']:.5f}G -> {self.stats['flops_after']:.5f}G",
             f"Compression ratio: {self.stats['ratio']:.4f}x",
-            f"Compression rate: {self.stats['compression']:.4f}"
+            f"Compression rate: {self.stats['compression']:.4f}",
         ]
         print("\n".join(stats_lines))
 
     @property
-    def get_last_stats(self) -> Dict:
+    def get_last_stats(self) -> dict:
         """Get the most recent pruning statistics.
 
         Returns:
@@ -275,13 +268,11 @@ class BasePruner:
         Returns:
             YAML-formatted string of pruner attributes.
         """
-        attrs = {
-            k: str(v)
-            for k, v in vars(self).items()
-            if not callable(v) and not k.startswith("_")
-        }
-        return "\n".join([
-            self.__class__.__name__,
-            "Attributes:",
-            yaml.dump(attrs),
-        ])
+        attrs = {k: str(v) for k, v in vars(self).items() if not callable(v) and not k.startswith("_")}
+        return "\n".join(
+            [
+                self.__class__.__name__,
+                "Attributes:",
+                yaml.dump(attrs),
+            ]
+        )

@@ -1,5 +1,7 @@
 import importlib
+
 # from itertools import islice
+
 
 def is_package_installed(package_name: str) -> bool:
     """
@@ -16,9 +18,9 @@ def is_package_installed(package_name: str) -> bool:
         return True
     except ImportError:
         return False
-    
+
 
 # def _chunked_indices(n_items: int, chunk: int):
 #     it = iter(range(n_items))
 #     while (sl := list(islice(it, chunk))):
-        # yield sl
+# yield sl

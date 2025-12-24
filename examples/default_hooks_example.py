@@ -5,21 +5,21 @@ This example shows how to use the default hook functions provided by the
 accelerator hooks system to capture activations and gradients from a neural network.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import torch
 import torch.nn as nn
+
 from accelerator.hooks import (
     DataCollector,
     HooksConfig,
-    default_forward_hook,
-    default_backward_hook,
-    default_full_backward_hook,
     create_activation_capture_hook,
-    create_gradient_capture_hook,
+    default_backward_hook,
+    default_forward_hook,
+    default_full_backward_hook,
 )
 
 
@@ -28,11 +28,9 @@ def main():
     print("=" * 50)
 
     # Create a simple neural network
-    model = nn.Sequential(
-        nn.Linear(10, 8), nn.ReLU(), nn.Linear(8, 5), nn.ReLU(), nn.Linear(5, 1)
-    )
+    model = nn.Sequential(nn.Linear(10, 8), nn.ReLU(), nn.Linear(8, 5), nn.ReLU(), nn.Linear(5, 1))
 
-    print(f"Model architecture:")
+    print("Model architecture:")
     print(model)
     print()
 
@@ -69,9 +67,7 @@ def main():
 
     # Register backward hook on the first linear layer
     backward_hook = default_backward_hook(data_collector, "layer_0")
-    handle2 = model[0].register_full_backward_hook(
-        backward_hook
-    )  # Use full backward hook
+    handle2 = model[0].register_full_backward_hook(backward_hook)  # Use full backward hook
 
     # Run forward and backward pass
     x = torch.randn(3, 10, requires_grad=True)
@@ -123,9 +119,7 @@ def main():
     print("-" * 30)
 
     # Register activation capture hook that captures both input and output
-    activation_hook = create_activation_capture_hook(
-        data_collector, "layer_0", capture_input=True, capture_output=True
-    )
+    activation_hook = create_activation_capture_hook(data_collector, "layer_0", capture_input=True, capture_output=True)
     handle4 = model[0].register_forward_hook(activation_hook)
 
     # Run forward pass
@@ -170,10 +164,8 @@ def main():
 
     # Get data summary
     summary = data_collector.get_data_summary()
-    print(f"\nData summary:")
-    print(
-        f"Total modules with activations: {summary['total_modules_with_activations']}"
-    )
+    print("\nData summary:")
+    print(f"Total modules with activations: {summary['total_modules_with_activations']}")
     print(f"Memory usage: {summary['memory_usage_mb']:.2f} MB")
 
     # Clean up

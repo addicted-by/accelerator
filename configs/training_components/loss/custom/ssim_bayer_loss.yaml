@@ -8,5 +8,5 @@ loss_coefficient: 1.0
 name: "ssim_bayer_loss"
 debug_config: null
 transforms: []
-per_pixel: false  # Type: bool
-window_size: 11  # Type: int
+per_pixel: false # Type: bool
+window_size: 11 # Type: int

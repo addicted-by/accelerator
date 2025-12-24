@@ -1,5 +1,5 @@
 import importlib
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import torch
 
@@ -32,15 +32,11 @@ class LossReportFormatter:
             "Coefficient",
         ]
 
-    def update_widths(
-        self, loss_name: str, prediction_key: Optional[str] = None
-    ) -> None:
+    def update_widths(self, loss_name: str, prediction_key: Optional[str] = None) -> None:
         """Update column widths based on content."""
         self._max_loss_name_width = max(self._max_loss_name_width, len(loss_name))
         if prediction_key:
-            self._max_prediction_name_width = max(
-                self._max_prediction_name_width, len(prediction_key)
-            )
+            self._max_prediction_name_width = max(self._max_prediction_name_width, len(prediction_key))
 
     def format_row(
         self,
@@ -78,7 +74,7 @@ class LossReportFormatter:
 
     def generate_report(
         self,
-        losses: List[LossWrapper],
+        losses: list[LossWrapper],
         combiner_stats: LossStatistics,
         combiner_name: str,
         combiner_coefficient: float,
@@ -94,14 +90,12 @@ class LossReportFormatter:
             ]
 
             for loss in losses:
-                (loss_name, loss_value, coeff, prediction_key, target_key) = (
-                    loss.logger_step(tb_logger=tb_logger, step=step)
+                (loss_name, loss_value, coeff, prediction_key, target_key) = loss.logger_step(
+                    tb_logger=tb_logger, step=step
                 )
 
                 value_str = f"{loss_value:2.6E}" if loss_value is not None else "None"
-                report_line = self.format_row(
-                    loss_name, prediction_key, target_key, value_str, f"{coeff:.2f}"
-                )
+                report_line = self.format_row(loss_name, prediction_key, target_key, value_str, f"{coeff:.2f}")
                 report_lines.append(report_line)
 
             report_lines.append(self.separator)
@@ -127,7 +121,7 @@ class LossFactory:
     """Factory for creating loss instances from configuration."""
 
     @staticmethod
-    def validate_config(loss_name: str, loss_config: Dict[str, Any]) -> None:
+    def validate_config(loss_name: str, loss_config: dict[str, Any]) -> None:
         """Validate individual loss configuration."""
         if LOSS_TARGET_FIELD not in loss_config:
             raise LossConfigurationError(
@@ -136,8 +130,7 @@ class LossFactory:
 
         if "prediction_key" not in loss_config or "target_key" not in loss_config:
             raise LossConfigurationError(
-                f"Loss '{loss_name}' configuration missing required 'prediction_key' "
-                f"or 'target_key' fields"
+                f"Loss '{loss_name}' configuration missing required 'prediction_key' " f"or 'target_key' fields"
             )
 
     @staticmethod
@@ -149,22 +142,19 @@ class LossFactory:
             return getattr(loss_module, loss_class_name)
         except (ImportError, AttributeError) as e:
             raise ImportError(
-                f"Failed to import loss class '{loss_class_name}' from '{package}' "
-                f"for loss '{loss_name}': {str(e)}"
+                f"Failed to import loss class '{loss_class_name}' from '{package}' " f"for loss '{loss_name}': {str(e)}"
             ) from e
 
     @staticmethod
     def create_loss_instance(
-        loss_class: type, loss_name: str, loss_config: Dict[str, Any], device: _DEVICE
+        loss_class: type, loss_name: str, loss_config: dict[str, Any], device: _DEVICE
     ) -> LossWrapper:
         """Create a single loss instance from configuration."""
         try:
             loss_config.update(device=device, name=loss_name)
             return loss_class(**loss_config)
         except Exception as e:
-            raise TypeError(
-                f"Failed to instantiate loss '{loss_name}' with config {loss_config}: {str(e)}"
-            ) from e
+            raise TypeError(f"Failed to instantiate loss '{loss_name}' with config {loss_config}: {str(e)}") from e
 
 
 class LossCombiner(LossWrapperBase):
@@ -185,7 +175,7 @@ class LossCombiner(LossWrapperBase):
 
     def __init__(
         self,
-        losses: List[LossWrapper],
+        losses: list[LossWrapper],
         device: Optional[_DEVICE] = None,
         validation_config: Optional[ValidationConfig] = None,
         *args,
@@ -233,7 +223,7 @@ class LossCombiner(LossWrapperBase):
 
     @staticmethod
     def from_config(
-        config: Dict[str, Any],
+        config: dict[str, Any],
         device: Optional[_DEVICE] = None,
         validation_config: Optional[ValidationConfig] = None,
         *args,
@@ -262,9 +252,7 @@ class LossCombiner(LossWrapperBase):
 
         for loss_name in config["active_losses"]:
             if loss_name not in config["loss_configs"]:
-                raise LossConfigurationError(
-                    f"Loss '{loss_name}' not found in loss_configs"
-                )
+                raise LossConfigurationError(f"Loss '{loss_name}' not found in loss_configs")
 
             loss_config = config["loss_configs"][loss_name].copy()
 
@@ -292,7 +280,7 @@ class LossCombiner(LossWrapperBase):
         return combiner
 
     @staticmethod
-    def _validate_config_structure(config: Dict[str, Any]) -> None:
+    def _validate_config_structure(config: dict[str, Any]) -> None:
         """Validate the overall configuration structure."""
         if "active_losses" not in config:
             raise LossConfigurationError("Config missing 'active_losses' key")
@@ -300,9 +288,7 @@ class LossCombiner(LossWrapperBase):
         if not config["active_losses"]:
             raise LossConfigurationError("No active losses specified")
 
-    def validate_inputs(
-        self, predictions: ModelOutputType, labels: ModelOutputType
-    ) -> None:
+    def validate_inputs(self, predictions: ModelOutputType, labels: ModelOutputType) -> None:
         """Validate inputs for all losses."""
         try:
             InputValidator.validate(predictions, labels, self._validation_config)
@@ -311,9 +297,7 @@ class LossCombiner(LossWrapperBase):
         except Exception as e:
             raise ValidationError(f"Unexpected validation error: {str(e)}") from e
 
-    def add_get_loss(
-        self, predictions: ModelOutputType, labels: ModelOutputType, *args, **kwargs
-    ) -> torch.Tensor:
+    def add_get_loss(self, predictions: ModelOutputType, labels: ModelOutputType, *args, **kwargs) -> torch.Tensor:
         """
         Calculate combined loss from all active losses with shared transform caching.
 
@@ -356,9 +340,7 @@ class LossCombiner(LossWrapperBase):
                         result += loss_value
 
                 except Exception as e:
-                    raise LossCalculationError(
-                        f"Failed to calculate loss '{loss.name}': {str(e)}"
-                    ) from e
+                    raise LossCalculationError(f"Failed to calculate loss '{loss.name}': {str(e)}") from e
 
             if result is None:
                 raise LossCalculationError("No active losses to calculate")
@@ -370,9 +352,7 @@ class LossCombiner(LossWrapperBase):
         except (ValidationError, LossCalculationError):
             raise
         except Exception as e:
-            raise LossCalculationError(
-                f"Unexpected error in loss combination: {str(e)}"
-            ) from e
+            raise LossCalculationError(f"Unexpected error in loss combination: {str(e)}") from e
         finally:
             self.transform_manager.clear_cache()
 
@@ -432,7 +412,7 @@ class LossCombiner(LossWrapperBase):
         self.transform_manager.clear_cache()
 
     @property
-    def active_losses(self) -> List[LossWrapper]:
+    def active_losses(self) -> list[LossWrapper]:
         """Get list of active losses."""
         return self._active_losses.copy()
 
@@ -452,7 +432,7 @@ class LossCombiner(LossWrapperBase):
         return self._statistics.last_loss
 
     @property
-    def transform_manager_stats(self) -> Dict[str, int]:
+    def transform_manager_stats(self) -> dict[str, int]:
         """Get transform cache statistics."""
         return {
             "pred_cache_size": len(self.transform_manager.pred_cache),
@@ -490,9 +470,7 @@ class LossCombiner(LossWrapperBase):
 
         if tb_logger is not None and step is not None:
             cache_stats = self.transform_manager_stats
-            tb_logger.add_scalar(
-                "loss_cache/total_size", cache_stats["total_cache_size"], step
-            )
+            tb_logger.add_scalar("loss_cache/total_size", cache_stats["total_cache_size"], step)
 
         return report
 
@@ -509,11 +487,7 @@ class LossCombiner(LossWrapperBase):
         if self._active_losses:
             lines.append("\nActive Losses:")
             for i, loss in enumerate(self._active_losses, 1):
-                transform_info = (
-                    f" [{loss.transform_count} transforms]"
-                    if loss.has_transforms
-                    else ""
-                )
+                transform_info = f" [{loss.transform_count} transforms]" if loss.has_transforms else ""
                 lines.append(
                     f"  {i}. {loss.name} (pred: {loss._prediction_key}, target: {loss._target_key}){transform_info}"
                 )

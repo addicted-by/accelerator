@@ -8,7 +8,7 @@ loss_coefficient: 1.0
 name: "BCELoss"
 debug_config: null
 transforms: []
-weight: null  # Type: Optional[Tensor]
-size_average: null  # Type: Any
-reduce: null  # Type: Any
-reduction: "mean"  # Type: str
+weight: null # Type: Optional[Tensor]
+size_average: null # Type: Any
+reduce: null # Type: Any
+reduction: "mean" # Type: str

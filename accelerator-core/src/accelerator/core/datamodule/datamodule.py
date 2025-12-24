@@ -1,40 +1,35 @@
-from typing import Dict, Optional
-from torch.utils.data import Dataset, DataLoader
+from typing import Optional
 
+from torch.utils.data import DataLoader, Dataset
 
-from accelerator.utilities.hydra_utils import instantiate
 from accelerator.utilities.default_config import _DefaultConfig
-
+from accelerator.utilities.hydra_utils import instantiate
 from accelerator.utilities.typings import ConfigType
 
 
 class DataModuleDefaults(_DefaultConfig):
-    train_name: str = 'train'
-    val_name: str = 'val'
-    test_name: str = 'test'
-
+    train_name: str = "train"
+    val_name: str = "val"
+    test_name: str = "test"
 
 
 class DataModule:
     def __init__(
-        self, 
-        datasets: Dict[str, Dataset], 
-        dataloaders: Dict[str, DataLoader], 
-        config: Optional[ConfigType] = None
+        self, datasets: dict[str, Dataset], dataloaders: dict[str, DataLoader], config: Optional[ConfigType] = None
     ):
         self._cfg: ConfigType = DataModuleDefaults.create(config)
-        self._datasets: Dict[str, Dataset] = datasets
-        self._dataloaders: Dict[str, DataLoader] = dataloaders
+        self._datasets: dict[str, Dataset] = datasets
+        self._dataloaders: dict[str, DataLoader] = dataloaders
 
     @staticmethod
-    def initialize_from_config(cfg: ConfigType) -> 'DataModule':
+    def initialize_from_config(cfg: ConfigType) -> "DataModule":
         datasets = {}
-        if cfg.get('datasets'):
+        if cfg.get("datasets"):
             for name, dataset_cfg in cfg.datasets.items():
                 datasets[name] = instantiate(dataset_cfg)
 
         dataloaders = {}
-        if cfg.get('dataloaders'):
+        if cfg.get("dataloaders"):
             for name, loader_cfg in cfg.dataloaders.items():
                 dataset = datasets.get(name)
                 if dataset is not None:
@@ -53,20 +48,20 @@ class DataModule:
         self._cfg = DataModuleDefaults.create(value)
 
     @property
-    def datasets(self) -> Dict[str, Dataset]:
+    def datasets(self) -> dict[str, Dataset]:
         return self._datasets
-    
+
     @property
-    def dataloaders(self) -> Dict[str, DataLoader]:
+    def dataloaders(self) -> dict[str, DataLoader]:
         return self._dataloaders
 
     @property
     def loader_names(self) -> list:
-        return list(self.cfg.get('dataloaders', {}).keys())
+        return list(self.cfg.get("dataloaders", {}).keys())
 
     @property
     def dataset_names(self) -> list:
-        return list(self.cfg.get('datasets', {}).keys())
+        return list(self.cfg.get("datasets", {}).keys())
 
     def get_dataloader(self, name: str) -> Optional[DataLoader]:
         return self._dataloaders.get(name)
@@ -80,8 +75,8 @@ class DataModule:
 
     @property
     def val_loader(self) -> Optional[DataLoader]:
-        return self.get_dataloader('val')
+        return self.get_dataloader("val")
 
     @property
     def test_loader(self) -> Optional[DataLoader]:
-        return self.get_dataloader('test')
+        return self.get_dataloader("test")

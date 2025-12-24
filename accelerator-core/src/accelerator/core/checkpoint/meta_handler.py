@@ -1,24 +1,23 @@
-from typing import Any, Dict, Optional, List, Tuple, Union
-from omegaconf import DictConfig
+from typing import Any, Optional, Union
 
+from omegaconf import DictConfig
 
 from accelerator.core.acceleration import AccelerationOperationBase
 from accelerator.core.model import AcceleratedModel
-
 from accelerator.utilities.logging import get_logger
-
 
 logger = get_logger(__name__)
 
 
-METADATA_VERSION = '1.0'
+METADATA_VERSION = "1.0"
 
-def _filter_latest_ops(ops: List[AccelerationOperationBase]) -> List[AccelerationOperationBase]:
+
+def _filter_latest_ops(ops: list[AccelerationOperationBase]) -> list[AccelerationOperationBase]:
     """
     Collapse a list of AccelerationOperation so that for each distinct only the last one remains.
     """
-    seen: List[str] = list()
-    filtered: List[Tuple[str, AccelerationOperationBase]] = []
+    seen: list[str] = list()
+    filtered: list[tuple[str, AccelerationOperationBase]] = []
     for op in reversed(ops):
         key = op.__class__.registry_type
         # print(key, seen)
@@ -34,7 +33,7 @@ class MetadataHandler:
     def __init__(self, config: DictConfig):
         self.config = DictConfig(config)
 
-    def get_metadata(self, model: Union[AcceleratedModel, Any]) -> Dict:
+    def get_metadata(self, model: Union[AcceleratedModel, Any]) -> dict:
         """Extract metadata from accelerated model.
 
         Args:
@@ -45,15 +44,16 @@ class MetadataHandler:
         """
         if not isinstance(model, AcceleratedModel):
             return {}
-        
+
         return {
             "version": METADATA_VERSION,
             "model_config": model.model_config,
             "acceleration__meta_data__": _filter_latest_ops(model.acceleration__meta_data__),
         }
 
-    def validate_configs(self, model: AcceleratedModel, saved_model_config: Optional[Dict], 
-                        acceleration_metadata: Optional[Dict]) -> None:
+    def validate_configs(
+        self, model: AcceleratedModel, saved_model_config: Optional[dict], acceleration_metadata: Optional[dict]
+    ) -> None:
         """Validate model and acceleration configurations.
 
         Args:
@@ -69,17 +69,15 @@ class MetadataHandler:
         if saved_model_config:
             diff = self._deep_diff(saved_model_config, model.model_config, ignore=ignore_model)
             if diff:
-                raise RuntimeError(
-                    f"Model config mismatch:\n{self._format_diff(diff)}"
-                )
+                raise RuntimeError(f"Model config mismatch:\n{self._format_diff(diff)}")
             else:
-                logger.info('[PASSED] Model configs are identical. Good job!')
+                logger.info("[PASSED] Model configs are identical. Good job!")
         else:
             logger.warning("No model config found in checkpoint")
 
         if acceleration_metadata:
-            logger.info('[PLACEHOLDER] FOR ACCELERATION CONFIG VALIDATION. SHOULD BE DISCUSSED')
-            print(f'ignore {ignore_accel}')
+            logger.info("[PLACEHOLDER] FOR ACCELERATION CONFIG VALIDATION. SHOULD BE DISCUSSED")
+            print(f"ignore {ignore_accel}")
             # for accel_name, accel_meta in acceleration_metadata.items():
             #     current_cfg = OmegaConf.select(self.config.acceleration, accel_name)
             #     diff = self._deep_diff(accel_meta["cfg"], current_cfg, ignore=ignore_accel)
@@ -92,19 +90,19 @@ class MetadataHandler:
         else:
             logger.warning("No acceleration metadata found in checkpoint")
 
-    def _format_diff(self, diff: Dict) -> str:
+    def _format_diff(self, diff: dict) -> str:
         """
         Format configuration differences for better readability.
-        
+
         Args:
             diff: Dictionary of differences from _deep_diff
-            
+
         Returns:
             Formatted string representation of differences
         """
         if not diff:
             return "No differences"
-        
+
         lines = ["Configuration differences:"]
         for path, values in diff.items():
             if isinstance(values, dict) and "saved" in values and "current" in values:
@@ -113,10 +111,10 @@ class MetadataHandler:
                 lines.append(f"    + current: {values['current']}")
             else:
                 lines.append(f"  {path}: {values}")
-        
+
         return "\n".join(lines)
-    
-    def _deep_diff(self, d1: Dict, d2: Dict, ignore: List = [], path: str = "") -> Dict:
+
+    def _deep_diff(self, d1: dict, d2: dict, ignore: tuple = (), path: str = "") -> dict:
         """Compare two dictionaries deeply and return differences.
 
         Args:

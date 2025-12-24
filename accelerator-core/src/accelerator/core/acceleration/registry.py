@@ -1,16 +1,16 @@
-from typing import Dict, Callable, Iterable, Union, List, Optional
+from collections.abc import Iterable
 from enum import Enum
-
+from typing import Callable, Optional, Union
 
 from accelerator.utilities.base_registry import BaseRegistry
 from accelerator.utilities.logging import get_logger
-
 
 log = get_logger(__name__)
 
 
 class AccelerationType(Enum):
     """Enumeration of acceleration types supported by the registry."""
+
     QUANTIZATION = "quantization"
     PRUNING = "pruning"
     REPARAMETRIZATION = "reparametrization"
@@ -20,7 +20,7 @@ class AccelerationType(Enum):
 
 class AccelerationRegistry(BaseRegistry):
     """A registry for managing acceleration operations used in model optimization.
-    
+
     This registry allows for registering, retrieving, and listing acceleration operations
     by their type and name. It provides a centralized way to manage different
     acceleration implementations across the `accelerator` framework.
@@ -28,7 +28,7 @@ class AccelerationRegistry(BaseRegistry):
 
     NOT_REGISTERED_MSG: str = (
         "Acceleration operation '{op_name}' not found in registry for '{op_type}'. "
-        "Register it with 'registry.register_acceleration('{op_type}')' " 
+        "Register it with 'registry.register_acceleration('{op_type}')' "
         "or use an existing operation: {available}."
     )
 
@@ -39,19 +39,21 @@ class AccelerationRegistry(BaseRegistry):
             enable_logging: Whether to wrap acceleration operations with logging.
         """
         super().__init__(enable_logging=enable_logging)
-        
+
         for acc_type in AccelerationType:
             self._registry_types[acc_type.value] = {}
 
-    def register_acceleration(self, acceleration_type: Union[str, Iterable[str], AccelerationType, Iterable[AccelerationType]]):
+    def register_acceleration(
+        self, acceleration_type: Union[str, Iterable[str], AccelerationType, Iterable[AccelerationType]]
+    ):
         """Decorator for registering acceleration operations in the registry.
-        
+
         Args:
             acceleration_type: The type(s) under which to register the acceleration operation.
-            
+
         Returns:
             Decorator function that registers the decorated acceleration operation.
-            
+
         Raises:
             TypeError: If acceleration_type is not a string, AccelerationType, or iterable of these.
         """
@@ -82,7 +84,7 @@ class AccelerationRegistry(BaseRegistry):
         """
         return self.get_object(acceleration_type, name)
 
-    def list_accelerations(self, acceleration_type: Optional[str] = None) -> Dict[str, List[str]]:
+    def list_accelerations(self, acceleration_type: Optional[str] = None) -> dict[str, list[str]]:
         """List all registered acceleration operations.
 
         Args:

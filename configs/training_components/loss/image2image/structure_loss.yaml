@@ -8,7 +8,7 @@ loss_coefficient: 1.0
 name: "structure_loss"
 debug_config: null
 transforms: []
-window_size: 11  # Type: int
-loss_fn: "l1"  # Type: str
-smape_p: 1  # Type: int
-smape_eps: 1e-07  # Type: float
+window_size: 11 # Type: int
+loss_fn: "l1" # Type: str
+smape_p: 1 # Type: int
+smape_eps: 1e-07 # Type: float

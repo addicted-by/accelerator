@@ -1,3 +1,13 @@
+exclude: |
+  (?x)(
+    /tests/|
+    ^tests/|
+    /examples/|
+    ^examples/|
+    /legacy/|
+    ^legacy/
+  )
+
 default_language_version:
   python: python3.10
 

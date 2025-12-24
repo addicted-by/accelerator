@@ -1,12 +1,12 @@
-from .base import BaseCallback
-from omegaconf import DictConfig
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
+from omegaconf import DictConfig
 
 from accelerator.utilities.hydra_utils import instantiate
 from accelerator.utilities.logging import get_logger
 
+from .base import BaseCallback
 
 if TYPE_CHECKING:
     from accelerator.core.context import Context
@@ -16,21 +16,21 @@ log = get_logger(__name__)
 
 
 class CallbackManager:
-    def __init__(self, callbacks: List[BaseCallback]=[]):
+    def __init__(self, callbacks: tuple[BaseCallback] = ()):
         """Initialize CallbackManager with a list of callbacks.
-        
+
         Args:
             callbacks: List of BaseCallback instances
         """
         self.callbacks = sorted(callbacks, key=lambda x: x.priority)
 
     @staticmethod
-    def initialize_from_config(callbacks_cfg: DictConfig) -> 'CallbackManager':
+    def initialize_from_config(callbacks_cfg: DictConfig) -> "CallbackManager":
         """Create CallbackManager from configuration.
-        
+
         Args:
             callbacks_cfg: Configuration for callbacks
-            
+
         Returns:
             CallbackManager instance
         """
@@ -38,12 +38,12 @@ class CallbackManager:
         return CallbackManager(callback_instances)
 
     @staticmethod
-    def _instantiate_callbacks(callbacks_cfg: DictConfig) -> List[BaseCallback]:
+    def _instantiate_callbacks(callbacks_cfg: DictConfig) -> list[BaseCallback]:
         """Instantiate callbacks from configuration.
-        
+
         Args:
             callbacks_cfg: Configuration for callbacks
-        
+
         Returns:
             List of instantiated callback objects
         """
@@ -70,7 +70,7 @@ class CallbackManager:
 
     def trigger(self, event_name: str, context):
         """Trigger callbacks for a specific event.
-        
+
         Args:
             event_name: Name of the event (without 'on_' prefix)
             context: Context object to pass to callbacks
@@ -79,22 +79,22 @@ class CallbackManager:
 
     def add_callback(self, callback: BaseCallback):
         """Add a callback to the manager.
-        
+
         Args:
             callback: BaseCallback instance to add
         """
         if not isinstance(callback, BaseCallback):
             raise ValueError("callback must be a BaseCallback instance")
-        
+
         self.callbacks.append(callback)
         self.callbacks.sort(key=lambda x: x.priority)
 
     def remove_callback(self, callback_class: type) -> bool:
         """Remove callback by class type.
-        
+
         Args:
             callback_class: Class type of callback to remove
-            
+
         Returns:
             True if callback was found and removed, False otherwise
         """
@@ -103,12 +103,12 @@ class CallbackManager:
                 self.callbacks.pop(i)
                 return True
         return False
-    
+
     @contextmanager
-    def phase(self, name: str, context: 'Context'):
+    def phase(self, name: str, context: "Context"):
         self._current_phase = name
-        hook_name_begin = f'{name}_begin'
-        hook_name_end = f'{name}_end'
+        hook_name_begin = f"{name}_begin"
+        hook_name_end = f"{name}_end"
 
         self.trigger(hook_name_begin, context)
         try:

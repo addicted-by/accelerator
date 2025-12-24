@@ -1,9 +1,8 @@
 from .context import Context
-from .reference_manager import ReferenceManager, DeadReferenceError
-
+from .reference_manager import DeadReferenceError, ReferenceManager
 
 __all__ = [
-    'Context',
-    'ReferenceManager',
-    'DeadReferenceError',
+    "Context",
+    "ReferenceManager",
+    "DeadReferenceError",
 ]

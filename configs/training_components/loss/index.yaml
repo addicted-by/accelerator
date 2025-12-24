@@ -1,59 +1,59 @@
 defaults:
-- cross_entropy@cross_entropy
-- nll_loss@nll_loss
-- bce_loss@bce_loss
-- bce_with_logits@bce_with_logits
-- multi_label_margin@multi_label_margin
-- multi_label_soft_margin@multi_label_soft_margin
-- multi_margin@multi_margin
-- l2_loss@l2_loss
-- l1_loss@l1_loss
-- smooth_l1@smooth_l1
-- huber_loss@huber_loss
-- mae_loss_fn@mae_loss_fn
-- mse_loss_fn@mse_loss_fn
-- multi_mse_loss_fn@multi_mse_loss_fn
-- ciede2000@ciede2000
-- color_difference@color_difference
-- gamma_correction_loss@gamma_correction_loss
-- gauss_pyramid_loss@gauss_pyramid_loss
-- InOutToneSyncLoss@InOutToneSyncLoss
-- rgb_color_diff_loss@rgb_color_diff_loss
-- yuv_pyramid_loss@yuv_pyramid_loss
-- geman_mcclure_extended@geman_mcclure_extended
-- tv_geman_mcclure_extended@tv_geman_mcclure_extended
-- laplace_loss@laplace_loss
-- laplace_smape_loss@laplace_smape_loss
-- psf_loss@psf_loss
-- sobel_loss@sobel_loss
-- sobel_smape_loss@sobel_smape_loss
-- ssim_c_loss@ssim_c_loss
-- ssim_loss@ssim_loss
-- structure_loss@structure_loss
-- tv_loss@tv_loss
-- tv_smape_loss@tv_smape_loss
-- tv_smape_masked_loss@tv_smape_masked_loss
-- vgg_loss@vgg_loss
-- main_eliminated_network_training@main_eliminated_network_training
-- ott_regularization@ott_regularization
-- pc_std_regularization@pc_std_regularization
-- kl_div@kl_div
-- poisson_nll@poisson_nll
-- gaussian_nll@gaussian_nll
-- hinge_embedding@hinge_embedding
-- margin_ranking@margin_ranking
-- triplet_margin@triplet_margin
-- triplet_margin_distance@triplet_margin_distance
-- cosine_embedding@cosine_embedding
-- ctc_loss@ctc_loss
-- bayer_correlation_loss@bayer_correlation_loss
-- cosine_loss@cosine_loss
-- entropy_loss@entropy_loss
-- GLoss@GLoss
-- GradVarianceLoss@GradVarianceLoss
-- noise_map_loss@noise_map_loss
-- qpp_mlp_loss@qpp_mlp_loss
-- rgb_std_loss@rgb_std_loss
-- ssim_bayer_loss@ssim_bayer_loss
-- std_stride2_loss@std_stride2_loss
-- wide_main_fusion_loss@wide_main_fusion_loss
+  - cross_entropy@cross_entropy
+  - nll_loss@nll_loss
+  - bce_loss@bce_loss
+  - bce_with_logits@bce_with_logits
+  - multi_label_margin@multi_label_margin
+  - multi_label_soft_margin@multi_label_soft_margin
+  - multi_margin@multi_margin
+  - l2_loss@l2_loss
+  - l1_loss@l1_loss
+  - smooth_l1@smooth_l1
+  - huber_loss@huber_loss
+  - mae_loss_fn@mae_loss_fn
+  - mse_loss_fn@mse_loss_fn
+  - multi_mse_loss_fn@multi_mse_loss_fn
+  - ciede2000@ciede2000
+  - color_difference@color_difference
+  - gamma_correction_loss@gamma_correction_loss
+  - gauss_pyramid_loss@gauss_pyramid_loss
+  - InOutToneSyncLoss@InOutToneSyncLoss
+  - rgb_color_diff_loss@rgb_color_diff_loss
+  - yuv_pyramid_loss@yuv_pyramid_loss
+  - geman_mcclure_extended@geman_mcclure_extended
+  - tv_geman_mcclure_extended@tv_geman_mcclure_extended
+  - laplace_loss@laplace_loss
+  - laplace_smape_loss@laplace_smape_loss
+  - psf_loss@psf_loss
+  - sobel_loss@sobel_loss
+  - sobel_smape_loss@sobel_smape_loss
+  - ssim_c_loss@ssim_c_loss
+  - ssim_loss@ssim_loss
+  - structure_loss@structure_loss
+  - tv_loss@tv_loss
+  - tv_smape_loss@tv_smape_loss
+  - tv_smape_masked_loss@tv_smape_masked_loss
+  - vgg_loss@vgg_loss
+  - main_eliminated_network_training@main_eliminated_network_training
+  - ott_regularization@ott_regularization
+  - pc_std_regularization@pc_std_regularization
+  - kl_div@kl_div
+  - poisson_nll@poisson_nll
+  - gaussian_nll@gaussian_nll
+  - hinge_embedding@hinge_embedding
+  - margin_ranking@margin_ranking
+  - triplet_margin@triplet_margin
+  - triplet_margin_distance@triplet_margin_distance
+  - cosine_embedding@cosine_embedding
+  - ctc_loss@ctc_loss
+  - bayer_correlation_loss@bayer_correlation_loss
+  - cosine_loss@cosine_loss
+  - entropy_loss@entropy_loss
+  - GLoss@GLoss
+  - GradVarianceLoss@GradVarianceLoss
+  - noise_map_loss@noise_map_loss
+  - qpp_mlp_loss@qpp_mlp_loss
+  - rgb_std_loss@rgb_std_loss
+  - ssim_bayer_loss@ssim_bayer_loss
+  - std_stride2_loss@std_stride2_loss
+  - wide_main_fusion_loss@wide_main_fusion_loss

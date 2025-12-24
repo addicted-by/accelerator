@@ -45,7 +45,7 @@ class SmoothConv1d(SmoothAverage, torch.nn.Conv1d):
 
     def core_forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.padding_mode != "zeros":
-            return F.conv1d( # pylint: disable=not-callable
+            return F.conv1d(  # pylint: disable=not-callable
                 F.pad(x, self._reversed_padding_repeated_twice, mode=self.padding_mode),
                 self.weight,
                 self.bias,
@@ -54,7 +54,7 @@ class SmoothConv1d(SmoothAverage, torch.nn.Conv1d):
                 self.dilation,
                 self.groups,
             )
-        return F.conv1d( # pylint: disable=not-callable
+        return F.conv1d(  # pylint: disable=not-callable
             x,
             self.weight,
             self.bias,
@@ -71,7 +71,6 @@ class SmoothConv1d(SmoothAverage, torch.nn.Conv1d):
     #             out = out + self.bias
     #         return out
     #     return input
-
 
     def set_standard_mode(self) -> None:  # noqa: D401
         super().set_standard_mode()
@@ -117,7 +116,7 @@ class SmoothConv2d(SmoothAverage, torch.nn.Conv2d):
 
     def core_forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.padding_mode != "zeros":
-            return F.conv2d( # pylint: disable=not-callable
+            return F.conv2d(  # pylint: disable=not-callable
                 F.pad(x, self._reversed_padding_repeated_twice, mode=self.padding_mode),
                 self.weight,
                 self.bias,
@@ -126,7 +125,7 @@ class SmoothConv2d(SmoothAverage, torch.nn.Conv2d):
                 self.dilation,
                 self.groups,
             )
-        return F.conv2d( # pylint: disable=not-callable
+        return F.conv2d(  # pylint: disable=not-callable
             x,
             self.weight,
             self.bias,
@@ -188,7 +187,7 @@ class SmoothConv3d(SmoothAverage, torch.nn.Conv3d):
 
     def core_forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.padding_mode != "zeros":
-            return F.conv3d( # pylint: disable=not-callable
+            return F.conv3d(  # pylint: disable=not-callable
                 F.pad(x, self._reversed_padding_repeated_twice, mode=self.padding_mode),
                 self.weight,
                 self.bias,
@@ -197,7 +196,7 @@ class SmoothConv3d(SmoothAverage, torch.nn.Conv3d):
                 self.dilation,
                 self.groups,
             )
-        return F.conv3d( # pylint: disable=not-callable
+        return F.conv3d(  # pylint: disable=not-callable
             x,
             self.weight,
             self.bias,

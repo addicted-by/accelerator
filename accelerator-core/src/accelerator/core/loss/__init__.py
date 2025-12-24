@@ -1,10 +1,9 @@
 from .base import LossWrapper
-from .registry import registry, LossType
 from .combiner import LossCombiner
-from .validation import InputValidator, ValidationConfig, ValidationError
 from .errors import LossAPIException, LossCalculationError, LossConfigurationError
-from .statistics import LossStatistics, GradientLogger
-
+from .registry import LossType, registry
+from .statistics import GradientLogger, LossStatistics
+from .validation import InputValidator, ValidationConfig, ValidationError
 
 __all__ = [
     "LossWrapper",
@@ -18,5 +17,5 @@ __all__ = [
     "LossCalculationError",
     "LossConfigurationError",
     "LossStatistics",
-    "GradientLogger"
+    "GradientLogger",
 ]

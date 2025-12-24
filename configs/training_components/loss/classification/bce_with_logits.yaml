@@ -8,8 +8,8 @@ loss_coefficient: 1.0
 name: "BCEWithLogitsLoss"
 debug_config: null
 transforms: []
-weight: null  # Type: Optional[Tensor]
-size_average: null  # Type: Any
-reduce: null  # Type: Any
-reduction: "mean"  # Type: str
-pos_weight: null  # Type: Optional[Tensor]
+weight: null # Type: Optional[Tensor]
+size_average: null # Type: Any
+reduce: null # Type: Any
+reduction: "mean" # Type: str
+pos_weight: null # Type: Optional[Tensor]

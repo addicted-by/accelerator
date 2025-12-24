@@ -1,8 +1,9 @@
-import torch
 import pytest
+import torch
 from torch.fx import GraphModule
 
 from accelerator.tools.analysis.model_analysis import NodeSpec, trace_model
+
 
 class Simple(torch.nn.Module):
     def __init__(self):

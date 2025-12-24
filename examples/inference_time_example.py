@@ -32,9 +32,7 @@ def main() -> None:
     metrics = measure_inference_time(model, inputs, warmup=2, runs=10, device=device)
     print("Inference time metrics:", metrics)
 
-    node_metrics = measure_per_node_inference_time(
-        model, inputs, warmup=2, runs=10, device=device
-    )
+    node_metrics = measure_per_node_inference_time(model, inputs, warmup=2, runs=10, device=device)
     print("Per-node average self times (seconds):")
     for op_name, times in list(node_metrics.items())[:5]:
         print(f"  {op_name}: {times}")

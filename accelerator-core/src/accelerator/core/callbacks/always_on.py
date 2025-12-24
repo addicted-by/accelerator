@@ -7,7 +7,7 @@ core to the training loop and are therefore attached by default by the
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
 from .base import BaseCallback
 from .progress import RichProgressBar, StepEpochTrackerCallback, TimeTrackingCallback, TqdmProgressBar
@@ -44,7 +44,7 @@ def create_progress_bar_callback(kind: str = "tqdm") -> BaseCallback:
     raise ValueError(f"Unsupported progress bar type: {kind}")
 
 
-def create_always_on_callbacks(progress_bar: Optional[str] = None) -> List[BaseCallback]:
+def create_always_on_callbacks(progress_bar: Optional[str] = None) -> list[BaseCallback]:
     """Create the list of callbacks that are always enabled.
 
     Args:

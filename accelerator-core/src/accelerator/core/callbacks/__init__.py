@@ -1,14 +1,13 @@
 from .always_on import create_always_on_callbacks
 from .base import BaseCallback, BaseLoggerCallback
-from .logger import TensorBoardLogger, MLflowLogger, CSVLogger
+from .logger import CSVLogger, MLflowLogger, TensorBoardLogger
 from .manager import CallbackManager
 from .progress import (
-    TimeTrackingCallback, 
-    StepEpochTrackerCallback,
-    TqdmProgressBar,
     RichProgressBar,
+    StepEpochTrackerCallback,
+    TimeTrackingCallback,
+    TqdmProgressBar,
 )
-
 
 __all__ = [
     "create_always_on_callbacks",
@@ -21,5 +20,5 @@ __all__ = [
     "TimeTrackingCallback",
     "StepEpochTrackerCallback",
     "TqdmProgressBar",
-    "RichProgressBar"
+    "RichProgressBar",
 ]

@@ -2,9 +2,9 @@
 # Modify parameters as needed
 
 loss_type: "image2image"
-prediction_key: null  # Type: Any
-target_key: null  # Type: Any
-loss_coefficient: 1  # Type: Any
+prediction_key: null # Type: Any
+target_key: null # Type: Any
+loss_coefficient: 1 # Type: Any
 name: "InOutToneSyncLoss"
 debug_config: null
 transforms: []

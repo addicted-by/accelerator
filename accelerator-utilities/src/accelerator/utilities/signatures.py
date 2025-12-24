@@ -1,5 +1,5 @@
 import inspect
-from typing import Callable, Any, List
+from typing import Any, Callable
 
 
 def get_documentation(obj: Any) -> str:
@@ -37,7 +37,7 @@ def format_annotation(annotation: Any) -> str:
         return str(annotation)
 
 
-def get_method_info(cls: type) -> List[str]:
+def get_method_info(cls: type) -> list[str]:
     """Get formatted information about public methods of a class.
 
     Args:

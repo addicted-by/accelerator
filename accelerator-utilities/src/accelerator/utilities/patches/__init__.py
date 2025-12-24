@@ -5,5 +5,4 @@ try:
 except Exception:  # pragma: no cover - optional dependency
     mlflow = None
 
-__all__ = ['mlflow'] if mlflow is not None else []
-
+__all__ = ["mlflow"] if mlflow is not None else []

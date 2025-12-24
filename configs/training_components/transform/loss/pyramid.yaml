@@ -3,6 +3,6 @@
 
 name: "BuildPyramid"
 transform_type: "loss"
-pyramid_type: "gauss"  # Type: str
-num_levels: 3  # Type: int
-sigma: 0.5  # Type: float
+pyramid_type: "gauss" # Type: str
+num_levels: 3 # Type: int
+sigma: 0.5 # Type: float

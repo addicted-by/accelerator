@@ -1,6 +1,9 @@
 import operator
+
 import torch
+
 from .group import RelatedGroup
+
 
 def merge_groups(x, x_dim, y, y_dim):
     """Merges two groups of tensors ``x`` and `yy`` with indices ``x_dim`` and ``y_dim``."""

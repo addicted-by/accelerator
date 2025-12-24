@@ -1,10 +1,9 @@
 from .base import AccelerationOperationBase
 from .registry import (
-    acceleration_registry,
-    AccelerationType,
     AccelerationRegistry,
+    AccelerationType,
+    acceleration_registry,
 )
-
 
 __all__ = [
     "AccelerationOperationBase",

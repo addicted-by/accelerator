@@ -8,12 +8,13 @@ Copyright (C) 2021 Sovrasov V. - All Rights Reserved
  * this file. If not visit https://opensource.org/licenses/MIT
 """
 
-import numpy as np
-import torch
-import torch.nn as nn
 import copy
 import sys
 from functools import partial
+
+import numpy as np
+import torch
+import torch.nn as nn
 
 
 @torch.no_grad()
@@ -110,9 +111,7 @@ def conv_flops_counter_hook(conv_module, input, output):
     groups = conv_module.groups
 
     filters_per_channel = out_channels // groups
-    conv_per_position_flops = (
-        int(np.prod(kernel_dims)) * in_channels * filters_per_channel
-    )
+    conv_per_position_flops = int(np.prod(kernel_dims)) * in_channels * filters_per_channel
 
     active_elements_count = batch_size * int(np.prod(output_dims))
 
@@ -147,13 +146,9 @@ def rnn_flops(flops, rnn_module, w_ih, w_hh, input_size):
         # adding operations from both states
         flops += rnn_module.hidden_size * 4
         # two hadamard product and add for C state
-        flops += (
-            rnn_module.hidden_size + rnn_module.hidden_size + rnn_module.hidden_size
-        )
+        flops += rnn_module.hidden_size + rnn_module.hidden_size + rnn_module.hidden_size
         # final hadamard
-        flops += (
-            rnn_module.hidden_size + rnn_module.hidden_size + rnn_module.hidden_size
-        )
+        flops += rnn_module.hidden_size + rnn_module.hidden_size + rnn_module.hidden_size
     return flops
 
 
@@ -212,9 +207,7 @@ def multihead_attention_counter_hook(multihead_attention_module, input, output):
     q, k, v = input
 
     batch_first = (
-        multihead_attention_module.batch_first
-        if hasattr(multihead_attention_module, "batch_first")
-        else False
+        multihead_attention_module.batch_first if hasattr(multihead_attention_module, "batch_first") else False
     )
     if batch_first:
         batch_size = q.shape[0]
@@ -246,22 +239,14 @@ def multihead_attention_counter_hook(multihead_attention_module, input, output):
     # Q scaling
     flops += qlen * qdim
     # Initial projections
-    flops += (
-        (qlen * qdim * qdim)  # QW
-        + (klen * kdim * kdim)  # KW
-        + (vlen * vdim * vdim)  # VW
-    )
+    flops += (qlen * qdim * qdim) + (klen * kdim * kdim) + (vlen * vdim * vdim)  # QW  # KW  # VW
     if multihead_attention_module.in_proj_bias is not None:
         flops += (qlen + klen + vlen) * qdim
     # attention heads: scale, matmul, softmax, matmul
     qk_head_dim = qdim // num_heads
     v_head_dim = vdim // num_heads
 
-    head_flops = (
-        (qlen * klen * qk_head_dim)  # QK^T
-        + (qlen * klen)  # softmax
-        + (qlen * klen * v_head_dim)  # AV
-    )
+    head_flops = (qlen * klen * qk_head_dim) + (qlen * klen) + (qlen * klen * v_head_dim)  # QK^T  # softmax  # AV
     flops += num_heads * head_flops
     # final projection, bias is always enabled
     flops += qlen * vdim * (vdim + 1)
@@ -345,9 +330,7 @@ def add_flops_counting_methods(net_main_module):
     net_main_module.start_flops_count = start_flops_count.__get__(net_main_module)
     net_main_module.stop_flops_count = stop_flops_count.__get__(net_main_module)
     net_main_module.reset_flops_count = reset_flops_count.__get__(net_main_module)
-    net_main_module.compute_average_flops_cost = compute_average_flops_cost.__get__(
-        net_main_module
-    )
+    net_main_module.compute_average_flops_cost = compute_average_flops_cost.__get__(net_main_module)
 
     net_main_module.reset_flops_count()
 
@@ -399,9 +382,7 @@ def start_flops_count(self, **kwargs):
             if hasattr(module, "__flops_handle__"):
                 return
             if type(module) in CUSTOM_MODULES_MAPPING:
-                handle = module.register_forward_hook(
-                    CUSTOM_MODULES_MAPPING[type(module)]
-                )
+                handle = module.register_forward_hook(CUSTOM_MODULES_MAPPING[type(module)])
             else:
                 handle = module.register_forward_hook(MODULES_MAPPING[type(module)])
             module.__flops_handle__ = handle
@@ -413,9 +394,7 @@ def start_flops_count(self, **kwargs):
                 and not isinstance(module, seen_types)
             ):
                 print(
-                    "Warning: module "
-                    + type(module).__name__
-                    + " is treated as a zero-op.",
+                    "Warning: module " + type(module).__name__ + " is treated as a zero-op.",
                     file=ost,
                 )
             seen_types.add(type(module))
@@ -454,10 +433,7 @@ def batch_counter_hook(module, input, output):
         batch_size = len(input)
     else:
         pass
-        print(
-            "Warning! No positional inputs found for a module,"
-            " assuming batch size is 1."
-        )
+        print("Warning! No positional inputs found for a module," " assuming batch size is 1.")
     module.__batch_counter__ += batch_size
 
 
@@ -484,9 +460,7 @@ def add_flops_counter_variable_or_reset(module):
         if hasattr(module, "__flops__") or hasattr(module, "__params__"):
             print(
                 "Warning: variables __flops__ or __params__ are already "
-                "defined for the module"
-                + type(module).__name__
-                + " ptflops can affect your code!"
+                "defined for the module" + type(module).__name__ + " ptflops can affect your code!"
             )
             module.__ptflops_backup_flops__ = module.__flops__
             module.__ptflops_backup_params__ = module.__params__

@@ -6,15 +6,13 @@ maintaining data integrity.
 """
 
 import weakref
-from typing import Any, Tuple, Optional
+from typing import Any, Optional
 
 
 class DeadReferenceError(Exception):
     """Raised when accessing a dead weak reference."""
 
-    def __init__(
-        self, message: str = "Weak reference target has been garbage collected"
-    ):
+    def __init__(self, message: str = "Weak reference target has been garbage collected"):
         super().__init__(message)
         self.message = message
 
@@ -68,9 +66,7 @@ class ReferenceManager:
         return True
 
     @staticmethod
-    def create_reference(
-        value: Any, use_weakref: Optional[bool] = None
-    ) -> Tuple[Any, bool]:
+    def create_reference(value: Any, use_weakref: Optional[bool] = None) -> tuple[Any, bool]:
         """Create appropriate reference for value.
 
         Creates either a weak reference or stores the value directly based
@@ -123,9 +119,7 @@ class ReferenceManager:
         if is_weakref:
             value = ref()
             if value is None:
-                raise DeadReferenceError(
-                    "Weak reference target has been garbage collected"
-                )
+                raise DeadReferenceError("Weak reference target has been garbage collected")
             return value
         return ref
 

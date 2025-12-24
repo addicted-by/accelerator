@@ -12,9 +12,9 @@ Available transforms:
 """
 
 from .transforms import (
+    fuse_batch_norm,
     set_eval_mode,
     set_train_mode,
-    fuse_batch_norm,
     unfreeze_parameters,
 )
 

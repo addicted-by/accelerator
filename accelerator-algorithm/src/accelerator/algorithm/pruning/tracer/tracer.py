@@ -1,15 +1,12 @@
 import torch
-from .operations import DEFAULT_HOOKS, DEFAULT_OPERATIONS, neutral_decorator, neutral_hook
-from .group import RelatedGroup
+
 from ..utils import remove_all_hooks
+from .group import RelatedGroup
+from .operations import DEFAULT_HOOKS, DEFAULT_OPERATIONS, neutral_decorator, neutral_hook
 
 
 class GroupTracer(torch.fx.Interpreter):
-    def __init__(
-        self,
-        model,
-        ignored_dims=None
-    ):
+    def __init__(self, model, ignored_dims=None):
         gm = self.symbolic_trace(model)
         super().__init__(gm, True)
         self.model = model
@@ -26,23 +23,14 @@ class GroupTracer(torch.fx.Interpreter):
     def filter_groups(self):
         if self.ignored_dims is None:
             return ...
-        
+
         indices_to_delete = set()
 
         for i, group in enumerate(self.groups):
-            if any(
-                p['name'] in self.ignored_dims 
-                and 
-                p['dim'] in self.ignored_dims[p['name']] 
-                for p in group.params
-            ):
+            if any(p["name"] in self.ignored_dims and p["dim"] in self.ignored_dims[p["name"]] for p in group.params):
                 indices_to_delete.add(i)
 
-        self.groups = [
-            group 
-            for i, group in enumerate(self.groups) 
-            if i not in indices_to_delete
-        ]
+        self.groups = [group for i, group in enumerate(self.groups) if i not in indices_to_delete]
 
     def build_groups(self, *args, initial_env=None, enable_io_processing=True):
         self.groups = []
@@ -50,7 +38,7 @@ class GroupTracer(torch.fx.Interpreter):
 
         for name, param in self.model.named_parameters():
             param.related_groups = [None] * param.ndim
-            layer_name, _ = name.rsplit('.', 1)
+            layer_name, _ = name.rsplit(".", 1)
             layer = self.model.get_submodule(layer_name)
             dims = list(range(param.ndim))
 
@@ -73,7 +61,7 @@ class GroupTracer(torch.fx.Interpreter):
         self.run(*args, initial_env, enable_io_processing)
         remove_all_hooks(self.model)
         self.groups = [group for group in self.groups if len(group.params) > 1]
-        
+
         self.filter_groups()
 
         def add_parent_groups(group, parents):

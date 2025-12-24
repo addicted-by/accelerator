@@ -1,5 +1,5 @@
 # pylint: disable=missing-module-docstring
-from typing import Tuple, Union
+from typing import Union
 
 import torch
 
@@ -15,7 +15,7 @@ class SmoothLayerNorm(SmoothAverage, torch.nn.LayerNorm):
 
     def __init__(
         self,
-        normalized_shape: Union[Tuple[int, ...], int],
+        normalized_shape: Union[tuple[int, ...], int],
         *,
         eps: float = 1e-5,
         elementwise_affine: bool = True,
@@ -33,9 +33,7 @@ class SmoothLayerNorm(SmoothAverage, torch.nn.LayerNorm):
         )
 
     def core_forward(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.nn.functional.layer_norm(
-            x, self.normalized_shape, self.weight, self.bias, self.eps
-        )
+        return torch.nn.functional.layer_norm(x, self.normalized_shape, self.weight, self.bias, self.eps)
 
     def identity_forward(self, x: torch.Tensor) -> torch.Tensor:  # noqa: D401
         if self.elementwise_affine and self.weight is not None:

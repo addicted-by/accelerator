@@ -1,7 +1,6 @@
 import pathlib
-from typing import Any
 import pickle
-
+from typing import Any
 
 
 def _pkl_dump(path: pathlib.Path, obj: Any) -> None:

@@ -4,23 +4,23 @@ This module provides common model transformations that can be applied
 before or after acceleration operations.
 """
 
-from typing import Optional, List
+from typing import Optional
+
 import torch
 import torch.nn as nn
-from collections import OrderedDict
 
 
 def set_eval_mode(model: nn.Module) -> None:
     """Set model to evaluation mode.
-    
+
     This transform disables dropout and batch normalization training behavior,
     making the model suitable for inference or pruning operations.
-    
+
     Parameters
     ----------
     model : nn.Module
         The model to set to evaluation mode.
-        
+
     Examples
     --------
     >>> model = MyModel()
@@ -32,14 +32,14 @@ def set_eval_mode(model: nn.Module) -> None:
 
 def set_train_mode(model: nn.Module) -> None:
     """Set model to training mode.
-    
+
     This transform enables dropout and batch normalization training behavior.
-    
+
     Parameters
     ----------
     model : nn.Module
         The model to set to training mode.
-        
+
     Examples
     --------
     >>> model = MyModel()
@@ -51,15 +51,15 @@ def set_train_mode(model: nn.Module) -> None:
 
 def unfreeze_parameters(model: nn.Module) -> None:
     """Unfreeze all model parameters.
-    
+
     This transform enables gradient computation for all parameters in the model,
     making them trainable.
-    
+
     Parameters
     ----------
     model : nn.Module
         The model whose parameters should be unfrozen.
-        
+
     Examples
     --------
     >>> model = MyModel()
@@ -75,19 +75,17 @@ def unfreeze_parameters(model: nn.Module) -> None:
 
 
 def fuse_batch_norm(
-    model: nn.Module,
-    fx_model: Optional[torch.fx.GraphModule] = None,
-    convs: Optional[List[str]] = None
+    model: nn.Module, fx_model: Optional[torch.fx.GraphModule] = None, convs: Optional[list[str]] = None
 ) -> None:
     """Fuse batch normalization layers into preceding convolutional layers.
-    
+
     This transform combines Conv2d and BatchNorm2d layers into a single Conv2d
     layer by folding the batch normalization parameters into the convolution
     weights and biases. This is only valid when the model is in evaluation mode.
-    
+
     The fusion reduces computational overhead and simplifies the model structure,
     which is particularly useful before pruning operations.
-    
+
     Parameters
     ----------
     model : nn.Module
@@ -97,19 +95,19 @@ def fuse_batch_norm(
     convs : Optional[List[str]], default=None
         List of convolutional layer names to fuse. If None, all eligible
         conv-bn pairs will be fused.
-        
+
     Raises
     ------
     AssertionError
         If the model or batch norm layers are in training mode.
-        
+
     Notes
     -----
     - Only fuses Conv2d -> BatchNorm2d sequences
     - Requires the model to be in evaluation mode
     - Replaces fused BatchNorm2d layers with Identity layers
     - Only fuses when the conv layer has a single user
-    
+
     Examples
     --------
     >>> model = MyModel()
@@ -123,10 +121,7 @@ def fuse_batch_norm(
     for node in fx_model.graph.nodes:
         if node.op != "call_module":
             continue
-        if (
-            type(modules[node.target]) is nn.BatchNorm2d
-            and type(modules[node.args[0].target]) is nn.Conv2d
-        ):
+        if type(modules[node.target]) is nn.BatchNorm2d and type(modules[node.args[0].target]) is nn.Conv2d:
             to_fuse = True if convs is None else node.args[0].target in convs
             if to_fuse:
                 if len(node.args[0].users) > 1:
@@ -141,7 +136,7 @@ def fuse_batch_norm(
 
 def _inplace_conv_bn_fusion(conv: nn.Conv2d, bn: nn.BatchNorm2d) -> None:
     """Fuse conv and batch norm layers in-place.
-    
+
     Parameters
     ----------
     conv : nn.Conv2d
@@ -173,10 +168,10 @@ def _fuse_conv_bn_weights(
     bn_rv: torch.Tensor,
     bn_eps: float,
     bn_w: Optional[torch.Tensor],
-    bn_b: Optional[torch.Tensor]
+    bn_b: Optional[torch.Tensor],
 ) -> tuple:
     """Compute fused weights and biases for conv-bn fusion.
-    
+
     Parameters
     ----------
     conv_w : torch.Tensor
@@ -193,7 +188,7 @@ def _fuse_conv_bn_weights(
         Batch norm weight (gamma).
     bn_b : Optional[torch.Tensor]
         Batch norm bias (beta).
-        
+
     Returns
     -------
     tuple
@@ -207,9 +202,7 @@ def _fuse_conv_bn_weights(
         bn_b = torch.zeros_like(bn_rm)
     bn_var_rsqrt = torch.rsqrt(bn_rv + bn_eps)
 
-    conv_w = conv_w * (bn_w * bn_var_rsqrt).reshape(
-        [-1] + [1] * (len(conv_w.shape) - 1)
-    )
+    conv_w = conv_w * (bn_w * bn_var_rsqrt).reshape([-1] + [1] * (len(conv_w.shape) - 1))
     conv_b = (conv_b - bn_rm) * bn_var_rsqrt * bn_w + bn_b
 
     return conv_w, conv_b
@@ -217,12 +210,12 @@ def _fuse_conv_bn_weights(
 
 def _get_parent_name(qualname: str) -> tuple:
     """Split a qualified name into parent path and last atom.
-    
+
     Parameters
     ----------
     qualname : str
         Qualified name (e.g., 'foo.bar.baz').
-        
+
     Returns
     -------
     tuple
@@ -234,14 +227,14 @@ def _get_parent_name(qualname: str) -> tuple:
 
 def _get_parent_module(module: nn.Module, attr_path: str) -> nn.Module:
     """Get the parent module of a nested attribute.
-    
+
     Parameters
     ----------
     module : nn.Module
         Root module.
     attr_path : str
         Attribute path (e.g., 'layer1.conv').
-        
+
     Returns
     -------
     nn.Module
@@ -259,14 +252,14 @@ def _get_parent_module(module: nn.Module, attr_path: str) -> nn.Module:
 
 def _get_attr_by_name(module: nn.Module, name: str) -> nn.Module:
     """Get a nested attribute by name.
-    
+
     Parameters
     ----------
     module : nn.Module
         Root module.
     name : str
         Attribute name (e.g., 'layer1.conv').
-        
+
     Returns
     -------
     nn.Module

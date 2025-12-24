@@ -1,21 +1,22 @@
-from functools import wraps
 import inspect
-from typing import Dict, Callable, Iterable, Union, List, Optional
+from collections.abc import Iterable
 from enum import Enum
+from functools import wraps
+from typing import Callable, Optional, Union
 
 import torch
-
-from .base import LossAdapter, LossWrapper
 
 from accelerator.utilities.base_registry import BaseRegistry
 from accelerator.utilities.logging import get_logger
 
+from .base import LossAdapter, LossWrapper
 
 log = get_logger(__name__)
 
 
 class LossType(Enum):
     """Enumeration of loss types supported by the registry."""
+
     CLASSIFICATION = "classification"
     REGRESSION = "regression"
     SEGMENTATION = "segmentation"
@@ -26,25 +27,30 @@ class LossType(Enum):
 
 
 def _adapt(obj, name: Optional[str] = None):
-    if (inspect.isclass(obj) and issubclass(obj, LossWrapper)):
+    if inspect.isclass(obj) and issubclass(obj, LossWrapper):
         return obj
 
     if inspect.isclass(obj) and issubclass(obj, torch.nn.Module):
+
         class _NNAdapter(LossAdapter):
             def __init__(self, *args, **kwargs):
                 loss_module = obj(*args, **kwargs)
                 super().__init__(loss_module=loss_module, **kwargs)
+
         _NNAdapter.__name__ = name or f"{obj.__name__}_Adapter"
         _NNAdapter.__original_cls__ = obj
         return _NNAdapter
 
     if inspect.isfunction(obj):
+
         class _FuncAdapter(LossWrapper):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self._fn = obj
+
             def calculate_batch_loss(self, pred, gt, *a, **kw):
                 return self._fn(pred, gt, *a, **kw, **self._cfg)
+
         _FuncAdapter.__name__ = name or f"{obj.__name__}_FuncAdapter"
         _FuncAdapter.__original_fn__ = obj
         return _FuncAdapter
@@ -52,10 +58,9 @@ def _adapt(obj, name: Optional[str] = None):
     return obj
 
 
-
 class LossRegistry(BaseRegistry):
     """A registry for managing loss functions used in model training.
-    
+
     This registry allows for registering, retrieving, and listing loss functions
     by their type and name. It provides a centralized way to manage different
     loss implementations across the accelerator framework.
@@ -63,7 +68,7 @@ class LossRegistry(BaseRegistry):
 
     NOT_REGISTERED_MSG: str = (
         "Loss '{loss_name}' not found in registry for '{loss_type}'. "
-        "Register it with 'registry.register_loss('{loss_type}')' " 
+        "Register it with 'registry.register_loss('{loss_type}')' "
         "or use an existing loss: {available}."
     )
 
@@ -74,25 +79,27 @@ class LossRegistry(BaseRegistry):
             enable_logging: Whether to wrap loss functions with logging.
         """
         super().__init__(enable_logging=enable_logging)
-        
+
         # Initialize registry types with loss types
         for loss_type in LossType:
             self._registry_types[loss_type.value] = {}
 
-    def register_loss(self, loss_type: Union[str, Iterable[str], LossType, Iterable[LossType]], name: Optional[str]=None):
+    def register_loss(
+        self, loss_type: Union[str, Iterable[str], LossType, Iterable[LossType]], name: Optional[str] = None
+    ):
         """Decorator for registering loss functions in the registry.
-        
+
         Args:
             loss_type: The type(s) under which to register the loss function.
-            
+
         Returns:
             Decorator function that registers the decorated loss function.
-            
+
         Raises:
             TypeError: If loss_type is not a string, LossType, or iterable of these.
         """
         base_decorator = self.register_object(loss_type, name=name)
-        
+
         @wraps(base_decorator)
         def decorator(cls_or_fn):
             return base_decorator(_adapt(cls_or_fn, name=name))
@@ -124,7 +131,7 @@ class LossRegistry(BaseRegistry):
         """
         return self.get_object(loss_type, name)
 
-    def list_losses(self, loss_type: Optional[str] = None) -> Dict[str, List[str]]:
+    def list_losses(self, loss_type: Optional[str] = None) -> dict[str, list[str]]:
         """List all registered loss functions.
 
         Args:

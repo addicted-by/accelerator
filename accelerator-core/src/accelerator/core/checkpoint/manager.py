@@ -1,80 +1,86 @@
-import torch
+from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
-from datetime import datetime
-from typing import Dict, Any, List, Optional, Union, TYPE_CHECKING
-from omegaconf import OmegaConf
+from typing import TYPE_CHECKING, Any, Optional, Union
 
+import torch
+from omegaconf import OmegaConf
 
 from .checkpoint_handler import CheckpointHandler
 from .meta_handler import MetadataHandler
-from .operation.registry import registry, OperationType
+from .operation.registry import OperationType, registry
 
 if TYPE_CHECKING:
     from accelerator.core.context import Context
 
 from accelerator.core.model.accelerated_model import AcceleratedModel
-from accelerator.utilities.distributed_state import distributed_state
-
 from accelerator.utilities.api_desc import APIDesc
-from accelerator.utilities.logging import get_logger
 from accelerator.utilities.default_config import _DefaultConfig, dataclass
-from accelerator.utilities.string import render_filename
+from accelerator.utilities.distributed_state import distributed_state
+from accelerator.utilities.logging import get_logger
 from accelerator.utilities.model_utils import unwrap_model
-from accelerator.utilities.typings import ModelProtocol, PathType, ConfigType
+from accelerator.utilities.string import render_filename
+from accelerator.utilities.typings import ConfigType, ModelProtocol, PathType
 
 logger = get_logger(__name__)
 
 
 @dataclass
 class CheckpointManagerDefaultConfig(_DefaultConfig):
-    monitor: str = 'loss'
-    mode: str = 'min'
-    filename_template: str = 'epoch_{epoch:05d}.pth' #'checkpoint_epoch{epoch:05d}_{monitor}_{metric:.4f}.pth'
-    
-    state_dict_key: str = 'model_state'
-    optimizer_state_dict_key: str = 'optimizer_state'
+    monitor: str = "loss"
+    mode: str = "min"
+    filename_template: str = "epoch_{epoch:05d}.pth"  #'checkpoint_epoch{epoch:05d}_{monitor}_{metric:.4f}.pth'
+
+    state_dict_key: str = "model_state"
+    optimizer_state_dict_key: str = "optimizer_state"
     load_optimizer_state: bool = False
-    load_strategy: str = 'accelerated'
-    save_strategy: str = 'accelerated'
+    load_strategy: str = "accelerated"
+    save_strategy: str = "accelerated"
     strict_validation: bool = True
     strict_loading: bool = True
-    
-    pre_load_ops: Optional[List[str]] = None
-    ckpt_transforms: Optional[List[str]] = None
-    post_load_ops: Optional[List[str]] = None
 
-    ignore_model_keys: Optional[List[str]] = None
-    ignore_acceleration_keys: Optional[List[str]] = None
+    pre_load_ops: Optional[list[str]] = None
+    ckpt_transforms: Optional[list[str]] = None
+    post_load_ops: Optional[list[str]] = None
 
-    weights_only: bool = False # checkpoint should contain only tensors and pickable structures, not objects
+    ignore_model_keys: Optional[list[str]] = None
+    ignore_acceleration_keys: Optional[list[str]] = None
+
+    weights_only: bool = False  # checkpoint should contain only tensors and pickable structures, not objects
 
 
 @dataclass
 class CheckpointManagerRawDefaultConfig(CheckpointManagerDefaultConfig):
-    load_strategy: str = 'raw'
+    load_strategy: str = "raw"
     strict_validation: bool = False
-    
+
 
 class CheckpointError(Exception):
     """Base exception for checkpoint-related errors."""
+
     pass
+
 
 class CheckpointLoadError(CheckpointError):
     """Raised when loading a checkpoint fails."""
+
     pass
+
 
 class CheckpointSaveError(CheckpointError):
     """Raised when saving a checkpoint fails."""
+
     pass
+
 
 class CheckpointValidationError(CheckpointError):
     """Raised when checkpoint validation fails."""
+
     pass
 
 
-@APIDesc.developer(dev_info='Ryabykin Alexey r00926208')
-@APIDesc.status(status_level='Beta')
+@APIDesc.developer(dev_info="Ryabykin Alexey r00926208")
+@APIDesc.status(status_level="Beta")
 class CheckpointManager:
     """Manages saving and loading of model checkpoints with acceleration support."""
 
@@ -85,20 +91,21 @@ class CheckpointManager:
             cfg: Configuration object with 'paths', 'checkpoint', and 'acceleration' sections.
         """
         self.setup_checkpoint_config(cfg)
-        
+
         self.checkpoint_handler = CheckpointHandler(self.checkpoint_cfg)
         self.metadata_handler = MetadataHandler(self.checkpoint_cfg)
-    
 
-    def setup_checkpoint_config(self, updates: ConfigType, default_config: _DefaultConfig=CheckpointManagerDefaultConfig):
+    def setup_checkpoint_config(
+        self, updates: ConfigType, default_config: _DefaultConfig = CheckpointManagerDefaultConfig
+    ):
         self.checkpoint_cfg = default_config.create(updates)
-    
+
     @distributed_state.on_main_process
     def save(
         self,
         model_: Union[torch.nn.Module, AcceleratedModel],
         save_dir: PathType,
-        metrics: Optional[Dict[str, float]] = None,
+        metrics: Optional[dict[str, float]] = None,
         optimizer: Optional[torch.optim.Optimizer] = None,
         config: Optional[ConfigType] = None,
         epoch: int = 0,
@@ -106,14 +113,14 @@ class CheckpointManager:
     ) -> str:
         """
         Save a model checkpoint with acceleration metadata and metrics.
-        
+
         This method:
         1. Determines if the model is accelerated or raw
         2. Extracts appropriate state dictionaries
         3. Collects acceleration metadata if applicable
         4. Saves everything to disk
         5. Updates the "best" checkpoint if this is better than previous checkpoints
-        
+
         Returns:
             Path to the saved checkpoint file
         """
@@ -128,16 +135,20 @@ class CheckpointManager:
 
             if save_strategy == "raw":
                 state_dict = model.model_core.state_dict() if is_accelerated else model.state_dict()
-                save_checkpoint_dict['load_strategy'] = 'raw'
+                save_checkpoint_dict["load_strategy"] = "raw"
             else:  # model_core.
                 if is_accelerated:
                     state_dict = model.state_dict()
-                    save_checkpoint_dict['load_strategy'] = 'accelerated'
+                    save_checkpoint_dict["load_strategy"] = "accelerated"
                 else:
-                    raise CheckpointValidationError(dedent(f"""
+                    raise CheckpointValidationError(
+                        dedent(
+                            f"""
                         Invalid `save_strategy`={save_strategy} for model type {type(model)}.
                         Use 'raw' for non-accelerated models or ensure model is an AcceleratedModel.
-                        """))
+                        """
+                        )
+                    )
 
             checkpoint = {
                 "epoch": epoch,
@@ -146,7 +157,7 @@ class CheckpointManager:
                 "acceleration_metadata": self.metadata_handler.get_metadata(model),
                 "checkpoint_config": save_checkpoint_dict,
                 "config": OmegaConf.to_container(config) if config else {},
-                **kwargs
+                **kwargs,
             }
 
             if optimizer is not None:
@@ -158,12 +169,12 @@ class CheckpointManager:
             self.checkpoint_handler.save_checkpoint(checkpoint, save_path)
 
             # self.checkpoint_handler.update_history(save_path, metrics)
-            if metrics and metrics.get(self.checkpoint_cfg['monitor'], None):
+            if metrics and metrics.get(self.checkpoint_cfg["monitor"], None):
                 self.checkpoint_handler.save_best(checkpoint, metrics, save_path, save_dir)
 
             return str(save_path)
 
-        except (OSError, IOError) as e:
+        except OSError as e:
             error_msg = f"Failed to save checkpoint due to I/O error: {str(e)}"
             logger.error(error_msg)
             raise CheckpointSaveError(error_msg) from e
@@ -172,25 +183,24 @@ class CheckpointManager:
             logger.error(error_msg)
             raise CheckpointSaveError(error_msg) from e
 
-    def save_checkpoint_context(self, context: 'Context') -> str:
+    def save_checkpoint_context(self, context: "Context") -> str:
         return self.save(
             model=context.model,
             optimizer=context.optimizer,
             config=context.config,
-            **context.training_manager.get_training_state_snapshot()
+            **context.training_manager.get_training_state_snapshot(),
         )
 
-    
     @distributed_state.on_main_process
     @staticmethod
     def save_checkpoint(
         model: Union[torch.nn.Module, AcceleratedModel],
         save_dir: PathType,
-        metrics: Optional[Dict[str, float]] = None,
+        metrics: Optional[dict[str, float]] = None,
         cfg: Optional[ConfigType] = None,
-        optimizer: Optional[torch.optim.Optimizer]=None,
+        optimizer: Optional[torch.optim.Optimizer] = None,
         epoch: int = 0,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Static method to save a checkpoint without instantiating CheckpointManager."""
         cm = CheckpointManager(cfg)
@@ -201,25 +211,24 @@ class CheckpointManager:
         path: Union[str, Path],
         device: str = "cpu",
         model: Optional[ModelProtocol] = None,
-        cfg_override: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        cfg_override: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
         """Static method to load checkpoints.
         TODO: realize cfg.model_cfg_override
         TODO: realize cfg.acceleration_cfg_override
         """
         cm = CheckpointManager()
         checkpoint_path = cm._resolve_path(path)
-        logger.info(f'Loading {checkpoint_path}...')
+        logger.info(f"Loading {checkpoint_path}...")
 
         checkpoint = cm.checkpoint_handler.load_checkpoint(checkpoint_path, device)
 
-        checkpoint_cfg = checkpoint.get('checkpoint_config', {})
-        
+        checkpoint_cfg = checkpoint.get("checkpoint_config", {})
+
         if cfg_override:
             checkpoint_cfg.update(cfg_override)
 
-
-        if not checkpoint.get('acceleration_metadata', None):
+        if not checkpoint.get("acceleration_metadata", None):
             # checkpoint is raw
             checkpoint_cfg = CheckpointManagerRawDefaultConfig.create(checkpoint_cfg)
 
@@ -227,26 +236,29 @@ class CheckpointManager:
             if not isinstance(model, AcceleratedModel):
                 # if model is not wrapped
                 checkpoint_cfg = CheckpointManagerRawDefaultConfig.create(checkpoint_cfg)
-                model_config = checkpoint.get('acceleration_metadata', {}).get('model_config', {})
+                model_config = checkpoint.get("acceleration_metadata", {}).get("model_config", {})
                 # if model_cfg_override:
                 model = AcceleratedModel(model, model_config)
-            
+
         else:
             # if model is not passed then it should be instantiated
             if "acceleration_metadata" not in checkpoint:
-                raise ValueError(dedent(
-                    """`load_checkpoint` requires 'acceleration_metadata' if you do not pass the model.
+                raise ValueError(
+                    dedent(
+                        """`load_checkpoint` requires 'acceleration_metadata' if you do not pass the model.
                     Pass the model or use general functions for loading."""
-                ))
+                    )
+                )
 
-            model_config = checkpoint['acceleration_metadata']['model_config']
+            model_config = checkpoint["acceleration_metadata"]["model_config"]
             if "model_core" not in model_config:
-                raise ValueError(dedent(
-                    """Checkpoint config or override must contain 'model.model_core'
+                raise ValueError(
+                    dedent(
+                        """Checkpoint config or override must contain 'model.model_core'
                     for Hydra instantiation of AcceleratedModel."""
-                ))
+                    )
+                )
 
-            
             model = AcceleratedModel.instantiate_model(model_config)
 
         cm.setup_checkpoint_config(checkpoint_cfg)
@@ -259,12 +271,12 @@ class CheckpointManager:
         model: Union[torch.nn.Module, AcceleratedModel],
         optimizer: Optional[torch.optim.Optimizer] = None,
         device: str = "cpu",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Load checkpoint with automatic acceleration handling and validation."""
         result = checkpoint
         state_dict = checkpoint.get(self.checkpoint_cfg["state_dict_key"])
         if state_dict is None:
-            raise CheckpointLoadError('Something went wrong, please check `state_dict_key`')
+            raise CheckpointLoadError("Something went wrong, please check `state_dict_key`")
         optimizer_state_dict = checkpoint.get(self.checkpoint_cfg["optimizer_state_dict_key"], None)
         metadata = checkpoint.get("acceleration_metadata", None)
 
@@ -280,11 +292,7 @@ class CheckpointManager:
 
         # 1. PRE LOAD OPS
         logger.info("\tApplying pre-load operations")
-        self._apply_operations(
-            model,
-            OperationType.PRE_LOAD_OPS.value,
-            self.checkpoint_cfg["pre_load_ops"]
-        )
+        self._apply_operations(model, OperationType.PRE_LOAD_OPS.value, self.checkpoint_cfg["pre_load_ops"])
 
         # 2. Reapply acceleration following the saved metadata
         if acceleration_metadata:
@@ -300,7 +308,6 @@ class CheckpointManager:
             ckpt_model_dict=state_dict,
         )
 
-        
         # 4. Loading state dict
         logger.info("\tLoading model state")
         load_strategy = self.checkpoint_cfg["load_strategy"]
@@ -311,19 +318,13 @@ class CheckpointManager:
             self._load_accel(model, state_dict)
 
         logger.info("\tApplying post-load operations")
-        self._apply_operations(
-            model,
-            OperationType.POST_LOAD_OPS.value,
-            self.checkpoint_cfg["post_load_ops"]
-        )
+        self._apply_operations(model, OperationType.POST_LOAD_OPS.value, self.checkpoint_cfg["post_load_ops"])
 
-        if optimizer_state_dict and self.checkpoint_cfg['load_optimizer_state']:
+        if optimizer_state_dict and self.checkpoint_cfg["load_optimizer_state"]:
             if optimizer:
                 optimizer.load_state_dict(optimizer_state_dict)
             else:
                 result["optimizer_state"] = optimizer_state_dict
-        
-        
 
         result.update(
             {
@@ -347,31 +348,30 @@ class CheckpointManager:
         return path
 
     def _get_save_path(self, save_dir: Path, **kwargs) -> Path:
-        metrics = kwargs.get('metrics', {})
+        metrics = kwargs.get("metrics", {})
         fill_values = {
-            'monitor': self.checkpoint_cfg['monitor'],
-            'metric': metrics.get(self.checkpoint_cfg['monitor']) if metrics else 0.,
-            'timestamp': datetime.now().strftime("%Y%m%d_%H%M%S")
+            "monitor": self.checkpoint_cfg["monitor"],
+            "metric": metrics.get(self.checkpoint_cfg["monitor"]) if metrics else 0.0,
+            "timestamp": datetime.now().strftime("%Y%m%d_%H%M%S"),
         }
         fill_values.update(kwargs)
 
-        template = self.checkpoint_cfg['filename_template']
+        template = self.checkpoint_cfg["filename_template"]
         filename = render_filename(template, fill_values)
         return save_dir / filename
 
-
-    def _load_accel(self, model: AcceleratedModel, state_dict: Dict):
-        err = model.load_state_dict(state_dict, strict=self.checkpoint_cfg['strict_loading'])
+    def _load_accel(self, model: AcceleratedModel, state_dict: dict):
+        err = model.load_state_dict(state_dict, strict=self.checkpoint_cfg["strict_loading"])
         logger.info(err)
 
-    def _load_raw(self, model: Union[torch.nn.Module, AcceleratedModel], state_dict: Dict):
+    def _load_raw(self, model: Union[torch.nn.Module, AcceleratedModel], state_dict: dict):
         if isinstance(model, AcceleratedModel):
-            err = model.model_core.load_state_dict(state_dict, strict=self.checkpoint_cfg['strict_loading'])
+            err = model.model_core.load_state_dict(state_dict, strict=self.checkpoint_cfg["strict_loading"])
         else:
-            err = model.load_state_dict(state_dict, strict=self.checkpoint_cfg['strict_loading'])
+            err = model.load_state_dict(state_dict, strict=self.checkpoint_cfg["strict_loading"])
         logger.info(err)
 
-    def _apply_operations(self, model: Any, op_type: str, ops_list: Optional[List] = None, **kwargs):
+    def _apply_operations(self, model: Any, op_type: str, ops_list: Optional[list] = None, **kwargs):
         """Apply operations of a given type from the registry.
 
         Args:
@@ -385,7 +385,7 @@ class CheckpointManager:
         """
         if ops_list is None:
             return
-        
+
         missed = []
         for op in ops_list:
             op_name = op if isinstance(op, str) else list(op.keys())[0]

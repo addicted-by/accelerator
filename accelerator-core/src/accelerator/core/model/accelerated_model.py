@@ -23,18 +23,16 @@ computer vision and machine learning workflows.
 import importlib
 from dataclasses import dataclass, field
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import torch
 
-from accelerator.core.acceleration import AccelerationOperationBase
-from accelerator.core.acceleration import acceleration_registry
-
-from accelerator.utilities.typings import ConfigType
+from accelerator.core.acceleration import AccelerationOperationBase, acceleration_registry
 from accelerator.utilities.api_desc import APIDesc
 from accelerator.utilities.default_config import _DefaultConfig
 from accelerator.utilities.hydra_utils import instantiate
 from accelerator.utilities.logging import get_logger
+from accelerator.utilities.typings import ConfigType
 
 from .gamma import Gamma, GammaDefaultConfig
 
@@ -152,9 +150,9 @@ class AcceleratedModel(torch.nn.Module):
             value, None if no regularization is active
     """
 
-    _regularization_term: torch.Tensor = torch.tensor([0.])
+    _regularization_term: torch.Tensor = torch.tensor([0.0])
 
-    def __init__(self, model: torch.nn.Module, cfg: Optional[Dict[str, Any]] = None):
+    def __init__(self, model: torch.nn.Module, cfg: Optional[dict[str, Any]] = None):
         """Initialize an accelerated model wrapper.
 
         Args:
@@ -174,7 +172,7 @@ class AcceleratedModel(torch.nn.Module):
         self.separate_fn: Callable = None
 
         # Acceleration tracking
-        self._acceleration_operations: List[AccelerationOperationBase] = []
+        self._acceleration_operations: list[AccelerationOperationBase] = []
 
         self._init_components()
 
@@ -194,19 +192,11 @@ class AcceleratedModel(torch.nn.Module):
 
     def _init_gamma(self):
         """Initialize gamma correction component."""
-        self.gamma = (
-            Gamma(self.model_config["gamma"])
-            if self.model_config["gamma"]["use_gamma"]
-            else None
-        )
+        self.gamma = Gamma(self.model_config["gamma"]) if self.model_config["gamma"]["use_gamma"] else None
 
     def _init_pixel_shuffle(self):
         """Initialize pixel shuffle component for upsampling."""
-        self.d2s = (
-            torch.nn.PixelShuffle(self.model_config["d2s"])
-            if self.model_config["d2s"] > 0
-            else None
-        )
+        self.d2s = torch.nn.PixelShuffle(self.model_config["d2s"]) if self.model_config["d2s"] > 0 else None
 
     def _init_processing_functions(self):
         """Initialize collate and separate functions for data processing."""
@@ -221,9 +211,7 @@ class AcceleratedModel(torch.nn.Module):
         # Separate function
         separate_fn_name = self.model_config["separate_fn"]
         if separate_fn_name is None:
-            log.warning(
-                "Model outputs separate function is set to `None`. Using default"
-            )
+            log.warning("Model outputs separate function is set to `None`. Using default")
             self.separate_fn = lambda x: {"net_result": x}
         elif separate_fn_name == "empty":
             log.info("Using pre-default `separate_fn`")
@@ -266,23 +254,23 @@ class AcceleratedModel(torch.nn.Module):
 
     def add_regularization(self, value: torch.Tensor):
         """Add a regularization value to the accumulated regularization term."""
-        self._regularization_term += value # pylint: disable=no-member
+        self._regularization_term += value  # pylint: disable=no-member
 
     def reset_regularization_term(self, value=0.0):
         """Reset the regularization term to a specified value."""
-        self._regularization_term.data = torch.full_like( # pylint: disable=no-member
-            self._regularization_term, value # pylint: disable=no-member
+        self._regularization_term.data = torch.full_like(  # pylint: disable=no-member
+            self._regularization_term, value  # pylint: disable=no-member
         )
 
     @property
     def regularization_term(self) -> Optional[torch.Tensor]:
         if torch.allclose(
-            self._regularization_term, # pylint: disable=no-member
-            torch.zeros_like(self._regularization_term), # pylint: disable=no-member
+            self._regularization_term,  # pylint: disable=no-member
+            torch.zeros_like(self._regularization_term),  # pylint: disable=no-member
         ):
             return None
 
-        return self._regularization_term # pylint: disable=no-member
+        return self._regularization_term  # pylint: disable=no-member
 
     @staticmethod
     def instantiate_model(model_config: ConfigType):
@@ -296,23 +284,17 @@ class AcceleratedModel(torch.nn.Module):
     def acceleration__meta_data__(self):
         return self._acceleration_operations
 
-    def accelerate(
-        self, context: "Context", acceleration_config: Optional[ConfigType] = None
-    ):
+    def accelerate(self, context: "Context", acceleration_config: Optional[ConfigType] = None):
         if acceleration_config is None:
             return
 
         self._apply_acceleration(context, acceleration_config)
         self._calibrate(context)
 
-    def update_acceleration_meta_data(
-        self, acceleration_operation: AccelerationOperationBase
-    ):
+    def update_acceleration_meta_data(self, acceleration_operation: AccelerationOperationBase):
         self._acceleration_operations.append(acceleration_operation)
 
-    def _apply_acceleration(
-        self, context: "Context", acceleration_config: Optional[ConfigType] = None
-    ) -> None:
+    def _apply_acceleration(self, context: "Context", acceleration_config: Optional[ConfigType] = None) -> None:
         """Apply acceleration techniques specified in the config."""
         if acceleration_config is None:
             return
@@ -324,9 +306,9 @@ class AcceleratedModel(torch.nn.Module):
             accel_type = accel_cfg.get("operation_type")
             accel_name = accel_cfg.get("operation")
 
-            accel_operation = acceleration_registry.get_acceleration(
-                accel_type, accel_name
-            )(acceleration_config=accel_cfg)
+            accel_operation = acceleration_registry.get_acceleration(accel_type, accel_name)(
+                acceleration_config=accel_cfg
+            )
             if accel_operation in self._acceleration_operations:
                 log.warning("You have already applied it. Skip...")
             else:
@@ -337,9 +319,7 @@ class AcceleratedModel(torch.nn.Module):
         for acceleration in self._acceleration_operations:
             acceleration.calibrate(context)
 
-    def _reapply_accelerations(
-        self, acceleration_metadata: Dict[str, Any]
-    ) -> "AcceleratedModel":
+    def _reapply_accelerations(self, acceleration_metadata: dict[str, Any]) -> "AcceleratedModel":
         """Reapply acceleration techniques from saved metadata.
 
         Args:
@@ -355,9 +335,9 @@ class AcceleratedModel(torch.nn.Module):
             accel_cfg = accel_state_dict["config"]
             accel_name = accel_cfg["operation"]
 
-            accel_operation: AccelerationOperationBase = (
-                acceleration_registry.get_acceleration(accel_type, accel_name)()
-            )
+            accel_operation: AccelerationOperationBase = acceleration_registry.get_acceleration(
+                accel_type, accel_name
+            )()
             accel_operation.load_state(accel_state_dict)
             if accel_operation in self._acceleration_operations:
                 log.warning("You have already applied it. Skip...")
@@ -380,7 +360,7 @@ class AcceleratedModel(torch.nn.Module):
         print(inputs[0].shape)
 
         if self.gamma:
-            x, extra, _ = self.gamma._gamma_forward(*inputs, ref_frame_index=0) # pylint: disable=protected-access
+            x, extra, _ = self.gamma._gamma_forward(*inputs, ref_frame_index=0)  # pylint: disable=protected-access
             inputs = (x, extra)
 
         output = self.model_core(*inputs, **additional)
@@ -391,39 +371,37 @@ class AcceleratedModel(torch.nn.Module):
             outputs["net_result"] = self.d2s(outputs["net_result"])
 
         if self.gamma:
-            outputs["net_result"] = self.gamma._gamma_inverse(outputs["net_result"]) # pylint: disable=protected-access
+            outputs["net_result"] = self.gamma._gamma_inverse(outputs["net_result"])  # pylint: disable=protected-access
 
         outputs["additional"] = additional
         return outputs
 
-    def _get_parameter_info(self) -> List[str]:
+    def _get_parameter_info(self) -> list[str]:
         """Calculate parameter statistics and return formatted lines.
-        
+
         Returns:
             List of strings containing parameter information.
         """
         total_params = sum(p.numel() for p in self.parameters())
         trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         frozen_params = total_params - trainable_params
-        
+
         mode = "training" if self.training else "evaluation"
-        
+
         return [
             f"  Parameters: {total_params:,} total ({trainable_params:,} trainable, {frozen_params:,} frozen)",
-            f"  Mode: {mode}"
+            f"  Mode: {mode}",
         ]
 
-    def _get_component_info(self) -> List[str]:
+    def _get_component_info(self) -> list[str]:
         """Generate component status information and return formatted lines.
-        
+
         Returns:
             List of strings containing component configuration and status.
         """
         lines = ["  Configuration:"]
         lines.append(f"    Gamma: {'enabled' if self.gamma else 'disabled'}")
-        lines.append(
-            f"    Pixel Shuffle (d2s): {'enabled' if self.d2s else 'disabled'}"
-        )
+        lines.append(f"    Pixel Shuffle (d2s): {'enabled' if self.d2s else 'disabled'}")
 
         collate_fn_name = getattr(self.collate_fn, "__name__", "custom_function")
         separate_fn_name = getattr(self.separate_fn, "__name__", "lambda")
@@ -433,9 +411,7 @@ class AcceleratedModel(torch.nn.Module):
         # Active components section
         components = []
         if self.gamma:
-            gamma_info = (
-                f"Gamma(enabled={self.model_config['gamma'].get('use_gamma', False)})"
-            )
+            gamma_info = f"Gamma(enabled={self.model_config['gamma'].get('use_gamma', False)})"
             components.append(gamma_info)
 
         if self.d2s:
@@ -446,12 +422,12 @@ class AcceleratedModel(torch.nn.Module):
             lines.append("  Active Components:")
             for component in components:
                 lines.append(f"    - {component}")
-        
+
         return lines
 
-    def _get_acceleration_info(self) -> List[str]:
+    def _get_acceleration_info(self) -> list[str]:
         """Format acceleration operation details and return formatted lines.
-        
+
         Returns:
             List of strings containing acceleration operation information.
         """
@@ -463,7 +439,7 @@ class AcceleratedModel(torch.nn.Module):
                 lines.append(f"    {i}. {accel_type} ({op_name})")
         else:
             lines = ["  Applied Accelerations: none"]
-        
+
         return lines
 
     def __repr__(self) -> str:
@@ -473,13 +449,13 @@ class AcceleratedModel(torch.nn.Module):
         """
         original_repr = super().__repr__()
         lines = [original_repr, "", "AcceleratedModel Extensions:"]
-        
+
         # Add parameter information
         lines.extend(self._get_parameter_info())
-        
+
         # Add component information
         lines.extend(self._get_component_info())
-        
+
         # Add acceleration information
         lines.extend(self._get_acceleration_info())
 

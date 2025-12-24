@@ -2,11 +2,11 @@
 # Modify parameters as needed
 
 loss_type: "image2image"
-prediction_key: null  # Type: Any
-target_key: null  # Type: Any
-loss_coefficient: 1  # Type: Any
+prediction_key: null # Type: Any
+target_key: null # Type: Any
+loss_coefficient: 1 # Type: Any
 name: "gauss_pyramid_loss"
 debug_config: null
 transforms: []
-num_layer: 5  # Type: int
-lf_lvl: 3  # Type: int
+num_layer: 5 # Type: int
+lf_lvl: 3 # Type: int

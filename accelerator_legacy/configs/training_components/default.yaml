@@ -1,7 +1,0 @@
-loss:
-  active_losses: {}
-distillation: null
-scheduler: null
-optimizer: null
-train_loop:
-  _target_: accelerator.runtime.loop.TrainLoop

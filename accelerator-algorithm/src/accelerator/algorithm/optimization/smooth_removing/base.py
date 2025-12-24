@@ -25,17 +25,12 @@ class SmoothlyRemoveLayer(AccelerationOperationBase):
         for module_name in self.config["layers"]:
             module = model.get_submodule(module_name)
             if not hasattr(module, "set_weighted_avg_mode"):
-                log.warning(
-                    "Mentioned module does not have the `set_weighted_avg_mode`"
-                )
+                log.warning("Mentioned module does not have the `set_weighted_avg_mode`")
             else:
                 log.info(f"{module_name}: Weighted avg mode set!")
-                module.set_weighted_avg_mode(
-                    total_epochs_for_decay=self.config["epochs_num"]
-                )
+                module.set_weighted_avg_mode(total_epochs_for_decay=self.config["epochs_num"])
 
         context.callbacks.add_callback(SmoothAverageCallback(self.config))
-
 
     def reapply(self, model):
         unwrapped_model = unwrap_model(model).model_core
@@ -43,14 +38,10 @@ class SmoothlyRemoveLayer(AccelerationOperationBase):
             for module_name in self.config["layers"]:
                 module = unwrapped_model.get_submodule(module_name)
                 if not hasattr(module, "set_weighted_avg_mode"):
-                    log.warning(
-                        "Mentioned module does not have the `set_weighted_avg_mode`"
-                    )
+                    log.warning("Mentioned module does not have the `set_weighted_avg_mode`")
                 else:
                     log.info(f"{module_name}: Weighted avg mode set!")
-                    module.set_weighted_avg_mode(
-                        total_epochs_for_decay=self.config["epochs_num"]
-                    )
+                    module.set_weighted_avg_mode(total_epochs_for_decay=self.config["epochs_num"])
         else:
             raise ValueError(self._not_loaded_error_msg)
 
@@ -105,10 +96,7 @@ class SmoothAverage(nn.Module, abc.ABC):
             return
         if self._mode != 1 or self._decay_total_epochs is None:
             raise RuntimeError("update_alpha is only valid in weighted‑avg mode")
-        new_val = 0.5 * (
-            1.0
-            + torch.cos(torch.tensor(torch.pi) * epoch / (self._decay_total_epochs - 1))
-        )
+        new_val = 0.5 * (1.0 + torch.cos(torch.tensor(torch.pi) * epoch / (self._decay_total_epochs - 1)))
         self._alpha.fill_(float(new_val))
 
     @abc.abstractmethod

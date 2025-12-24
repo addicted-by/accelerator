@@ -8,5 +8,5 @@ gamma:
 separate_fn: null
 model_core:
   _target_: "torchvision.models.resnet18"
-  weights: null  # Type: Optional[ResNet18_Weights]
-  progress: true  # Type: bool
+  weights: null # Type: Optional[ResNet18_Weights]
+  progress: true # Type: bool

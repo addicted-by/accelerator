@@ -1,7 +1,6 @@
 import abc
 from textwrap import dedent
-from typing import Any, Dict, Optional, TYPE_CHECKING
-
+from typing import TYPE_CHECKING, Any, Optional
 
 from accelerator.utilities.api_desc import APIDesc
 from accelerator.utilities.hashable import _HashableConfigMixin
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
 class AccelerationOperationBase(abc.ABC, _HashableConfigMixin):
     """Base class for acceleration operations."""
 
-    def __init__(self, acceleration_config: Optional[Dict[str, Any]] = None):
+    def __init__(self, acceleration_config: Optional[dict[str, Any]] = None):
         self.config = acceleration_config or {}
         self._meta_data = {}
         self.registry_type = None
@@ -39,11 +38,11 @@ class AccelerationOperationBase(abc.ABC, _HashableConfigMixin):
     def calibrate(self, context: "Context") -> None:
         """Apply calibrates logic to the model."""
 
-    def state_dict(self) -> Dict[str, Any]:
+    def state_dict(self) -> dict[str, Any]:
         """Return the state dictionary of the acceleration operation."""
         return {"config": self.config, "__meta_data__": self._meta_data}
 
-    def load_state(self, state: Dict[str, Any]) -> None:
+    def load_state(self, state: dict[str, Any]) -> None:
         """Load the state dictionary of the acceleration operation."""
         self.config = state.get("config", self.config)
         self._meta_data = state.get("__meta_data__", self._meta_data)

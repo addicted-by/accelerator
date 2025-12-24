@@ -1,5 +1,5 @@
 # pylint: disable=missing-module-docstring
-from typing import Tuple, Union
+from typing import Union
 
 import torch
 
@@ -11,7 +11,7 @@ class SmoothRMSNorm(SmoothAverage, torch.nn.RMSNorm):
 
     def __init__(
         self,
-        normalized_shape: Union[Tuple[int, ...], int],
+        normalized_shape: Union[tuple[int, ...], int],
         *,
         eps: float = 1e-5,
         elementwise_affine: bool = True,
@@ -29,9 +29,7 @@ class SmoothRMSNorm(SmoothAverage, torch.nn.RMSNorm):
         )
 
     def core_forward(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.nn.functional.rms_norm(
-            x, self.normalized_shape, self.weight, self.eps
-        )
+        return torch.nn.functional.rms_norm(x, self.normalized_shape, self.weight, self.eps)
 
     def identity_forward(self, x: torch.Tensor) -> torch.Tensor:  # noqa: D401
         if self.elementwise_affine and self.weight is not None:

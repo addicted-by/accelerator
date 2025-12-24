@@ -36,4 +36,3 @@ def test_per_layer_channel_dim_configs():
 
     assert torch.allclose(gradients["layer1"]["mean"], torch.tensor([1.5, 3.5]))
     assert torch.allclose(gradients["layer2"]["mean"], torch.tensor([2.0, 3.0]))
-

@@ -1,13 +1,12 @@
 import functools
 import inspect
 import warnings
-from typing import Union, List, Tuple, Type, Callable, TypeVar, Any, Optional
+from typing import Any, Callable, Optional, TypeVar, Union
+
+F = TypeVar("F", bound=Union[Callable[..., Any], type[Any]])
 
 
-F = TypeVar('F', bound=Union[Callable[..., Any], Type[Any]])
-
-
-def _append_to_docstring(obj: F, section_title: str, lines: List[str]) -> None:
+def _append_to_docstring(obj: F, section_title: str, lines: list[str]) -> None:
     """Helper to format and append a section to an object's docstring."""
     if not lines:
         return
@@ -33,7 +32,7 @@ class APIDesc:
     """
 
     @staticmethod
-    def developer(dev_info: Union[str, List[str], Tuple[str, ...]]):
+    def developer(dev_info: Union[str, list[str], tuple[str, ...]]):
         if isinstance(dev_info, str):
             developers = [dev_info]
         elif isinstance(dev_info, (list, tuple)) and all(isinstance(d, str) for d in dev_info):
@@ -44,14 +43,11 @@ class APIDesc:
         def decorator(obj: F) -> F:
             _append_to_docstring(obj, "Responsible Developer(s)", developers)
             return obj
+
         return decorator
 
     @staticmethod
-    def status(
-        status_level: str,
-        details: Optional[str] = None,
-        since: Optional[str] = None
-    ):
+    def status(status_level: str, details: Optional[str] = None, since: Optional[str] = None):
         """
         Decorator factory to add API status information (e.g., stable, experimental, internal).
 
@@ -61,7 +57,7 @@ class APIDesc:
             since: Optional version or date when this status became effective.
         """
         if not isinstance(status_level, str):
-             raise TypeError("status_level must be a string.")
+            raise TypeError("status_level must be a string.")
 
         lines = [status_level]
         if since:
@@ -72,6 +68,7 @@ class APIDesc:
         def decorator(obj: F) -> F:
             _append_to_docstring(obj, "API Status", lines)
             return obj
+
         return decorator
 
     @staticmethod
@@ -84,7 +81,7 @@ class APIDesc:
             description: Optional description of what was introduced.
         """
         if not isinstance(version, str):
-             raise TypeError("version must be a string.")
+            raise TypeError("version must be a string.")
 
         lines = [f"Introduced in version: {version}"]
         if description:
@@ -93,6 +90,7 @@ class APIDesc:
         def decorator(obj: F) -> F:
             _append_to_docstring(obj, "Availability", lines)
             return obj
+
         return decorator
 
     @staticmethod
@@ -100,7 +98,7 @@ class APIDesc:
         since: str,
         replacement: Optional[str] = None,
         removal_in: Optional[str] = None,
-        message: str = "This API is deprecated and may be removed in a future version."
+        message: str = "This API is deprecated and may be removed in a future version.",
     ):
         """
         Decorator factory to mark an API as deprecated. Also issues a DeprecationWarning.
@@ -112,21 +110,21 @@ class APIDesc:
             message: Custom deprecation message.
         """
         if not isinstance(since, str):
-             raise TypeError("since must be a string.")
+            raise TypeError("since must be a string.")
 
         lines = [f"Deprecated since: {since}"]
         if replacement:
             lines.append(f"Replacement: {replacement}")
         if removal_in:
             lines.append(f"Scheduled for removal in: {removal_in}")
-        if message and message not in lines[0]: # Avoid duplication if basic message used
-             lines.append(message)
+        if message and message not in lines[0]:  # Avoid duplication if basic message used
+            lines.append(message)
 
         full_warning_message = f"{message} (Deprecated since {since})"
         if replacement:
-             full_warning_message += f" Consider using {replacement}."
+            full_warning_message += f" Consider using {replacement}."
         if removal_in:
-             full_warning_message += f" It may be removed in {removal_in}."
+            full_warning_message += f" It may be removed in {removal_in}."
 
         def decorator(obj: F) -> F:
             _append_to_docstring(obj, "Deprecation Notice", lines)
@@ -137,18 +135,20 @@ class APIDesc:
                 def wrapper(*args, **kwargs):
                     warnings.warn(full_warning_message, DeprecationWarning, stacklevel=2)
                     return obj(*args, **kwargs)
+
                 return wrapper
             else:
                 # For classes, we can't easily wrap __init__ or all methods this way.
                 # Docstring modification is the primary effect for classes.
                 # A more complex implementation could wrap __init__.
-                 pass
+                pass
 
             return obj
+
         return decorator
 
     @staticmethod
-    def see_also(references: Union[str, List[str], Tuple[str, ...]]):
+    def see_also(references: Union[str, list[str], tuple[str, ...]]):
         """
         Decorator factory to add links or references to related documentation, tickets, or APIs.
 
@@ -166,6 +166,7 @@ class APIDesc:
         def decorator(obj: F) -> F:
             _append_to_docstring(obj, "See Also", refs)
             return obj
+
         return decorator
 
     @staticmethod
@@ -177,9 +178,10 @@ class APIDesc:
             message: The warning message text.
         """
         if not isinstance(message, str):
-             raise TypeError("message must be a string.")
+            raise TypeError("message must be a string.")
 
         def decorator(obj: F) -> F:
             _append_to_docstring(obj, "Warning", [message])
             return obj
+
         return decorator

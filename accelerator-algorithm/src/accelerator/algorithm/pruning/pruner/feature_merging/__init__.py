@@ -1,14 +1,4 @@
-from .parametrizations import (
-    FeatureMerging,
-    FeatureMergingMLP,
-    BiasParametrization
-)
 from .importance import imp_fns
+from .parametrizations import BiasParametrization, FeatureMerging, FeatureMergingMLP
 
-
-__all__ = [
-    'FeatureMerging',
-    'FeatureMergingMLP',
-    'BiasParametrization',
-    'imp_fns'
-]
+__all__ = ["FeatureMerging", "FeatureMergingMLP", "BiasParametrization", "imp_fns"]

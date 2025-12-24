@@ -1,33 +1,33 @@
-from typing import List, Optional, Tuple, Any, Dict
+from typing import Any, Optional
+
 from omegaconf import DictConfig
 
 from accelerator.core.callbacks import CallbackManager
 from accelerator.core.checkpoint import CheckpointManager
 from accelerator.core.datamodule import DataModule
-from accelerator.core.model import AcceleratedModel
 from accelerator.core.engine import DistributedBackend
-
-from accelerator.utilities.distributed_state import distributed_state
-from accelerator.utilities.rich_utils.config_tree import print_config_tree
-from accelerator.utilities.logging import get_logger
+from accelerator.core.model import AcceleratedModel
 from accelerator.utilities.base_container import BaseContainer
+from accelerator.utilities.distributed_state import distributed_state
+from accelerator.utilities.logging import get_logger
+from accelerator.utilities.rich_utils.config_tree import print_config_tree
 
 from .component import ComponentManager
-from .training import TrainingManager
 from .containers import (
+    PathResolutionError,
     PerBatchContainer,
-    PerStepContainer,
     PerEpochContainer,
     PersistentContainer,
-    PathResolutionError,
+    PerStepContainer,
 )
-
+from .training import TrainingManager
 
 logger = get_logger(__name__)
 
 
 class Context(BaseContainer):
     """Class used only as a container for all required components"""
+
     def __init__(self, config: Optional[DictConfig] = None):
         self.config = config or DictConfig({})
 
@@ -77,9 +77,7 @@ class Context(BaseContainer):
         container = self._get_lifecycle_container(scope)
         return container.get_item(sub_path)
 
-    def set_item(
-        self, path: str, value: Any, use_weakref: Optional[bool] = None
-    ) -> None:
+    def set_item(self, path: str, value: Any, use_weakref: Optional[bool] = None) -> None:
         """Set item using hierarchical path.
 
         Args:
@@ -118,21 +116,13 @@ class Context(BaseContainer):
             ValueError: If scope is not recognized
         """
         if scope not in self._CONTAINERS:
-            raise ValueError(
-                f"Unknown lifecycle scope: {scope}. "
-                f"Available: {list(self._CONTAINERS.keys())}"
-            )
+            raise ValueError(f"Unknown lifecycle scope: {scope}. " f"Available: {list(self._CONTAINERS.keys())}")
         return self._CONTAINERS[scope]
-    
-    def update_container(self, scope: str, update_dict: Dict):
 
+    def update_container(self, scope: str, update_dict: dict):
         if scope not in self._CONTAINERS:
-            raise ValueError(
-                f"Unknown lifecycle scope: {scope}. "
-                f"Available: {list(self._CONTAINERS.keys())}"
-            )
+            raise ValueError(f"Unknown lifecycle scope: {scope}. " f"Available: {list(self._CONTAINERS.keys())}")
 
-        
         self._CONTAINERS[scope].update(update_dict)
 
     @property
@@ -152,9 +142,7 @@ class Context(BaseContainer):
             print_config_tree(self.config)
 
     def setup_engine(self):
-        self.distributed_engine: DistributedBackend = self.components.get_component(
-            "distributed"
-        )
+        self.distributed_engine: DistributedBackend = self.components.get_component("distributed")
         if self.distributed_engine:
             distributed_state.set_engine(self.distributed_engine)
             self.distributed_engine.setup()
@@ -170,10 +158,8 @@ class Context(BaseContainer):
 
         if self.is_distributed and self.data:
             for loader_name in self.data.loader_names:
-                self.data._dataloaders[loader_name] = (
-                    self.distributed_engine.prepare_dataloader(
-                        self.data._dataloaders[loader_name]
-                    )
+                self.data._dataloaders[loader_name] = self.distributed_engine.prepare_dataloader(
+                    self.data._dataloaders[loader_name]
                 )
 
         if self.is_distributed and self.optimizer:
@@ -296,11 +282,11 @@ class Context(BaseContainer):
     def initialize_single(self, checkpoint_path: Optional[str] = None) -> None:
         self._print_config()
 
-        self.model
-        self.data
-        self.callbacks
-        self.optimizer
-        self.scheduler
+        _ = self.model
+        _ = self.data
+        _ = self.callbacks
+        _ = self.optimizer
+        _ = self.scheduler
 
         if checkpoint_path and self.model:
             result = self.checkpoint_manager.load_checkpoint(
@@ -353,23 +339,15 @@ class Context(BaseContainer):
 
     def _get_summary_info(self) -> str:
         distributed_status = "distributed" if self.is_distributed else "single-node"
-        engine_type = (
-            type(self.distributed_engine).__name__
-            if self.distributed_engine
-            else "None"
-        )
+        engine_type = type(self.distributed_engine).__name__ if self.distributed_engine else "None"
         training_info = f"epoch={self.training_manager.current_epoch}"
         return f"{distributed_status}, engine={engine_type}, {training_info}"
 
-    def _get_representation_sections(self) -> List[Tuple[str, List[str]]]:
+    def _get_representation_sections(self) -> list[tuple[str, list[str]]]:
         sections = []
 
         if self.config:
-            config_info = (
-                f"{len(self.config)} sections"
-                if hasattr(self.config, "__len__")
-                else "loaded"
-            )
+            config_info = f"{len(self.config)} sections" if hasattr(self.config, "__len__") else "loaded"
             sections.append(("Configuration", [config_info]))
 
         if self.is_distributed:

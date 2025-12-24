@@ -1,7 +1,7 @@
 """Lifecycle-scoped containers for managing training data with automatic memory management."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from .reference_manager import ReferenceManager
 
@@ -19,8 +19,8 @@ class BaseLifecycleContainer(ABC):
     """Base class for all lifecycle-scoped containers."""
 
     def __init__(self):
-        self._data: Dict[str, Dict[str, Any]] = {}
-        self._sub_containers: List[str] = []
+        self._data: dict[str, dict[str, Any]] = {}
+        self._sub_containers: list[str] = []
         self._initialize_sub_containers()
 
     @abstractmethod
@@ -61,9 +61,7 @@ class BaseLifecycleContainer(ABC):
         except TypeError as e:
             raise PathResolutionError(path, str(e)) from e
 
-    def set_item(
-        self, path: str, value: Any, use_weakref: Optional[bool] = None
-    ) -> None:
+    def set_item(self, path: str, value: Any, use_weakref: Optional[bool] = None) -> None:
         """Set item using dot-notation path with automatic reference management.
 
         Args:
@@ -93,7 +91,7 @@ class BaseLifecycleContainer(ABC):
         except TypeError as e:
             raise PathResolutionError(path, str(e)) from e
 
-    def _get_nested(self, data: Dict, path: str) -> Any:
+    def _get_nested(self, data: dict, path: str) -> Any:
         """Get value from nested dict using dot-notation path.
 
         Args:
@@ -125,16 +123,11 @@ class BaseLifecycleContainer(ABC):
                 current = current[key]
 
             if i < len(keys) - 1 and not isinstance(current, dict):
-                raise TypeError(
-                    f"Cannot navigate through non-dict at '{'.'.join(keys[: i + 1])}' "
-                    f"in path '{path}'"
-                )
+                raise TypeError(f"Cannot navigate through non-dict at '{'.'.join(keys[: i + 1])}' " f"in path '{path}'")
 
         return current
 
-    def _set_nested(
-        self, data: Dict, path: str, value: Any, use_weakref: Optional[bool]
-    ) -> None:
+    def _set_nested(self, data: dict, path: str, value: Any, use_weakref: Optional[bool]) -> None:
         """Set value in nested dict using dot-notation path, creating intermediate dicts.
 
         Args:
@@ -145,7 +138,7 @@ class BaseLifecycleContainer(ABC):
 
         Raises:
             TypeError: If trying to create nested path through non-dict
-        """2
+        """
         keys = path.split(".")
         current = data
 
@@ -153,9 +146,7 @@ class BaseLifecycleContainer(ABC):
             if key not in current:
                 current[key] = {}
             elif not isinstance(current[key], dict):
-                raise TypeError(
-                    f"Cannot create nested path through non-dict at '{key}'"
-                )
+                raise TypeError(f"Cannot create nested path through non-dict at '{key}'")
             current = current[key]
 
         final_key = keys[-1]
@@ -172,7 +163,7 @@ class BaseLifecycleContainer(ABC):
         for sub in self._sub_containers:
             self._cleanup_dict(self._data[sub])
 
-    def _cleanup_dict(self, d: Dict) -> None:
+    def _cleanup_dict(self, d: dict) -> None:
         """Recursively cleanup dead refs in dict.
 
         Args:
@@ -189,6 +180,7 @@ class BaseLifecycleContainer(ABC):
 
         for key in keys_to_remove:
             del d[key]
+
 
 class PerBatchContainer(BaseLifecycleContainer):
     """Container for single forward pass data."""

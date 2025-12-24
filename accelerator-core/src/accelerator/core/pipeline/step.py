@@ -1,19 +1,18 @@
 from pathlib import Path
 from typing import Optional
+
 from omegaconf import DictConfig, OmegaConf, open_dict
 
-
-from accelerator.utilities.logging import get_logger
 from accelerator.utilities.hydra_utils import _compose_with_existing_hydra
+from accelerator.utilities.logging import get_logger
 from accelerator.utilities.rich_utils.config_tree import print_config_tree
-
 
 log = get_logger(__name__)
 
 
 def resolve_checkpoint_path(
     run_cfg: DictConfig,
-    prev_cm: Optional['StepConfigManager'],
+    prev_cm: Optional["StepConfigManager"],
 ) -> None:
     """
     If `run_cfg.load_from_previous` is True and a previous StepConfigManager
@@ -27,10 +26,7 @@ def resolve_checkpoint_path(
         return
 
     if prev_cm is None:
-        log.warning(
-            "load_from_previous=True but no previous step exists; "
-            "keeping the checkpoint_path unchanged."
-        )
+        log.warning("load_from_previous=True but no previous step exists; " "keeping the checkpoint_path unchanged.")
         return
 
     with open_dict(run_cfg.paths):
@@ -38,8 +34,7 @@ def resolve_checkpoint_path(
 
 
 def make_step_cfg(full_cfg: DictConfig, step_name: str) -> DictConfig:
-    """
-    """
+    """ """
     meta = full_cfg.pipeline.active_steps[step_name]
 
     # step_cfg = copy.deepcopy(full_cfg)
@@ -133,9 +128,7 @@ class StepConfigManager:
                 unified_link.unlink()
             unified_link.symlink_to(self.log_dir, target_is_directory=True)
         except OSError as e:
-            log.warning(
-                f"Could not create global log symlink {unified_link} -> {self.log_dir}: {e}"
-            )
+            log.warning(f"Could not create global log symlink {unified_link} -> {self.log_dir}: {e}")
 
         self._cfg.paths.experiment_dir = str(self.step_dir)
         self._cfg.paths.base_artifacts_dir = str(self.artifact_dir)

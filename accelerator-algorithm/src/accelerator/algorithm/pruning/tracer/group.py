@@ -17,7 +17,7 @@ class RelatedGroup(torch.nn.Module):
     """
 
     def __init__(self, size):
-        super(RelatedGroup, self).__init__()
+        super().__init__()
         self.size = size
         self.subgroups = None
         self.parents = []
@@ -64,9 +64,7 @@ class RelatedGroup(torch.nn.Module):
         dim: int.
         operation: str.
         """
-        self.params.append(
-            {"value": value, "name": name, "dim": dim, "operation": operation, "layer": layer}
-        )
+        self.params.append({"value": value, "name": name, "dim": dim, "operation": operation, "layer": layer})
 
     def append_tensor(self, value, dim, operation=None):
         """

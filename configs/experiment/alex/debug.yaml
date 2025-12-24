@@ -20,13 +20,11 @@ defaults:
 
   - _self_
 
-
 losses:
   ssim_loss:
     loss_coefficient: 0.5
     transforms:
-    - build_gauss_pyramid_lvl5: ${index.LT.build_pyramid_lvl5}
-
+      - build_gauss_pyramid_lvl5: ${index.LT.build_pyramid_lvl5}
 
 pipeline:
   active_steps:

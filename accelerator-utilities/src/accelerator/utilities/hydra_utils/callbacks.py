@@ -1,28 +1,28 @@
 from __future__ import annotations
-import pathlib
-from typing import Callable, Any, Dict
+
 import errno
 import glob
 import json
 import os
-from pathlib import Path
+import pathlib
 import time
+from pathlib import Path
+from typing import Any, Callable
+
+import mlflow
+import omegaconf
 import pandas as pd
 from hydra.core.hydra_config import HydraConfig
 from hydra.core.utils import JobReturn, JobStatus
 from hydra.experimental.callback import Callback
 from hydra.types import TaskFunction
 from hydra.utils import to_absolute_path
-from omegaconf import DictConfig, open_dict, OmegaConf
-import omegaconf
-import mlflow
-
+from omegaconf import DictConfig, OmegaConf, open_dict
 
 from accelerator.utilities.experimental import get_experiment_tags
-from accelerator.utilities.logging import set_log_file, get_logger
+from accelerator.utilities.logging import get_logger, set_log_file
 
 from .monitor import ResourceMonitorService
-
 
 callback_logger = get_logger(__name__)
 
@@ -230,9 +230,7 @@ class LatestRunLink(Callback):
     ```
     """
 
-    def __init__(
-        self, run_base_dir: str = "outputs", multirun_base_dir: str = "multirun"
-    ):
+    def __init__(self, run_base_dir: str = "outputs", multirun_base_dir: str = "multirun"):
         callback_logger.debug("Init %s", self.__class__.__name__)
         self.run_base_dir = to_absolute_path(run_base_dir)
         self.multirun_base_dir = to_absolute_path(multirun_base_dir)
@@ -320,18 +318,14 @@ class ResourceMonitor(AnyRunCallback):
 
     def _set_monit_file(self, run_dir: str) -> None:
         """Configure the path for the monitoring file."""
-        self.monitoring_file = os.path.join(
-            to_absolute_path(run_dir), self.monitoring_file
-        )
+        self.monitoring_file = os.path.join(to_absolute_path(run_dir), self.monitoring_file)
         self._monitor = {}
 
     def _on_anyrun_end(self, config: DictConfig, **kwargs: None) -> None:
         """Run on any run end."""
         callback_logger.info(f"Writing monitoring data to {self.monitoring_file}")
 
-    def on_job_start(
-        self, config: DictConfig, *, task_function: TaskFunction, **kwargs: None
-    ) -> None:
+    def on_job_start(self, config: DictConfig, *, task_function: TaskFunction, **kwargs: None) -> None:
         """Execute before a single job."""
         job_full_id = self._get_job_info()
         self._monitor[job_full_id] = ResourceMonitorService(
@@ -366,8 +360,7 @@ class ResourceMonitor(AnyRunCallback):
             max_cpu = sampled_data["cpus"].max()
             max_mem = sampled_data["rss_GiB"].max()
             callback_logger.debug(
-                f"{job_full_id[0]}(#{job_full_id[1]}): max cpu: {max_cpu:.2f}%,"
-                f"max mem: {max_mem:.2f} GiB"
+                f"{job_full_id[0]}(#{job_full_id[1]}): max cpu: {max_cpu:.2f}%," f"max mem: {max_mem:.2f} GiB"
             )
 
     def _get_job_info(self) -> tuple[str, str]:
@@ -427,9 +420,7 @@ class RegisterRun(Callback):
         else:
             self.on_job_end = self._on_job_end  # type: ignore
 
-    def _on_job_end(
-        self, config: DictConfig, job_return: JobReturn, **kwargs: None
-    ) -> None:
+    def _on_job_end(self, config: DictConfig, job_return: JobReturn, **kwargs: None) -> None:
         """Execute after every job."""
         # The hydra part of the conf is not resolvable (frozen)
         # and we don't want to monitor it (if needed it would still be available in
@@ -534,10 +525,9 @@ class ExecShellCommand(AnyRunCallback):
         os.system(self.multirun_command)
 
 
-
 class SetLogFile(Callback):
     def on_job_start(self, config: DictConfig, *, task_function: TaskFunction, **kwargs: Any) -> None:
-        set_log_file((pathlib.Path(config.paths.experiment_dir) / config.job_name).with_suffix('.log'))
+        set_log_file((pathlib.Path(config.paths.experiment_dir) / config.job_name).with_suffix(".log"))
 
 
 mlflow_client = None
@@ -554,16 +544,12 @@ def ensure_experiment(name: str, artifact_root: str) -> str:
         return mlflow_client.create_experiment(name, artifact_location=artifact_root)
 
     if exp.artifact_location != artifact_root:
-        raise ValueError(
-            f"Experiment {name!r} already uses "
-            f"{exp.artifact_location!r}, not {artifact_root!r}"
-        )
+        raise ValueError(f"Experiment {name!r} already uses " f"{exp.artifact_location!r}, not {artifact_root!r}")
     return exp.experiment_id
 
 
 class SetupMLFLOW(Callback):
-    """
-    """
+    """ """
 
     def __init__(self, enabled: bool = True):
         self.enabled = enabled
@@ -573,17 +559,14 @@ class SetupMLFLOW(Callback):
             self.on_job_start = lambda *_, **__: None  # type: ignore
             self.on_job_end = lambda *_, **__: None  # type: ignore
 
-
     def on_job_start(self, config: DictConfig, **kwargs: Any) -> None:  # noqa: D401
         """Open MLflow root run."""
         if self._run_open:  # pragma: no cover
             return  # already started
 
-
         tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "")
         if tracking_uri:
             mlflow.set_tracking_uri(tracking_uri)
-
 
         global mlflow_client
 
@@ -591,78 +574,55 @@ class SetupMLFLOW(Callback):
 
         exp_name = config.job_name
         experiment_dir_resolved = pathlib.Path(config.paths.experiment_dir)
-        
-        artifact_root, attempt_id = (
-            str(experiment_dir_resolved.parent),
-            experiment_dir_resolved.stem
-        )
+
+        artifact_root, attempt_id = (str(experiment_dir_resolved.parent), experiment_dir_resolved.stem)
 
         exp_id = ensure_experiment(exp_name, artifact_root)
         mlflow.set_experiment(experiment_id=exp_id)
 
-        attempt_id = config.attempt_id #uuid.uuid4().hex[:8]
+        attempt_id = config.attempt_id  # uuid.uuid4().hex[:8]
 
-        base_tags: Dict[str, str] = {
+        base_tags: dict[str, str] = {
             "project": config.project_name,
             "experiment_name": config.job_name,
             "attempt_id": attempt_id,
         }
 
-        os_tags: Dict[str, str] = {
+        os_tags: dict[str, str] = {
             "git_commit": os.getenv("GIT_COMMIT", "unknown"),
             "git_branch": os.getenv("GIT_BRANCH", "unknown"),
-            "user": os.getenv("USER", "unknown")
+            "user": os.getenv("USER", "unknown"),
         }
         extra_tags = config.get("extra_tags", {})
-        mlflow_tags = {
-            'mlflow.run_id': attempt_id,
-            'mlflow.artifact_location': str(experiment_dir_resolved)
-        }
+        mlflow_tags = {"mlflow.run_id": attempt_id, "mlflow.artifact_location": str(experiment_dir_resolved)}
 
         tags = {**base_tags, **os_tags, **extra_tags, **mlflow_tags}
-
 
         ## PATCHED create_run for DB creation
         # TODO: Patch create_run for all store types
 
         tags_for_run = get_experiment_tags(tags)
 
-        mlflow_client.create_run(
-            experiment_id=exp_id,
-            run_name=attempt_id,
-            tags=tags_for_run
-        )
+        mlflow_client.create_run(experiment_id=exp_id, run_name=attempt_id, tags=tags_for_run)
 
-        active_run = mlflow.start_run(
-            run_name=attempt_id, 
-            experiment_id=exp_id, 
-            tags=tags,
-            log_system_metrics=True
-        )
+        active_run = mlflow.start_run(run_name=attempt_id, experiment_id=exp_id, tags=tags, log_system_metrics=True)
 
         mlflow.log_params(config, synchronous=True)
 
-        os.environ['PROJECT_NAME'] = base_tags['project']
-        os.environ['EXPERIMENT_NAME'] = base_tags['experiment_name']
-        os.environ['EXPERIMENT_ID'] = exp_id
-        os.environ['RUN_ID'] = active_run.info.run_id
+        os.environ["PROJECT_NAME"] = base_tags["project"]
+        os.environ["EXPERIMENT_NAME"] = base_tags["experiment_name"]
+        os.environ["EXPERIMENT_ID"] = exp_id
+        os.environ["RUN_ID"] = active_run.info.run_id
 
         self._run_open = True
-        callback_logger.info(
-            f"Started MLflow run {attempt_id} in experiment '{exp_name}'"
-        )
+        callback_logger.info(f"Started MLflow run {attempt_id} in experiment '{exp_name}'")
 
-
-    def on_job_end(  # noqa: D401
-        self, config: DictConfig, job_return: JobReturn, **kwargs: Any
-    ) -> None:
+    def on_job_end(self, config: DictConfig, job_return: JobReturn, **kwargs: Any) -> None:  # noqa: D401
         """Close MLflow run with SUCCESS or FAILED status."""
         if not self._run_open:
             return
 
-        status = (
-            "FINISHED" if job_return.status == JobStatus.COMPLETED else "FAILED"
-        )
+        status = "FINISHED" if job_return.status == JobStatus.COMPLETED else "FAILED"
 
         mlflow.end_run(status=status)
         self._run_open = False

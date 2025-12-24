@@ -1,14 +1,9 @@
-from .logging import get_logger, set_log_file, _IS_DEBUG_LEVEL
-from .hydra_utils import instantiate, _compose_with_existing_hydra
 from .api_desc import APIDesc
-from .registry import (
-    BaseRegistry,
-    Domain,
-    RegistrationMetadata
-)
 from .experimental import get_experiment_tags
+from .hydra_utils import _compose_with_existing_hydra, instantiate
+from .logging import _IS_DEBUG_LEVEL, get_logger, set_log_file
 from .move_to_device import move_data_to_device
-
+from .registry import BaseRegistry, Domain, RegistrationMetadata
 
 __all__ = [
     "get_logger",
@@ -21,5 +16,5 @@ __all__ = [
     "BaseRegistry",
     "Domain",
     "RegistrationMetadata",
-    "_IS_DEBUG_LEVEL"
+    "_IS_DEBUG_LEVEL",
 ]

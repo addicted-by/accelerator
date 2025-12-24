@@ -46,7 +46,7 @@ target-version = ["py39", "py310"]
 # Ruff (lint + imports)
 # -----------------------
 [tool.ruff]
-target-version = ["py39", "py310"]
+target-version = "py39"
 line-length = 120
 fix = true
 
@@ -61,6 +61,8 @@ select = [
 ignore = [
     "E203",  # Black compatibility
     "E501",  # Line length handled by Black
+    "UP007", # Use X | Y for type annotations
+    "B026", # Star-arg unpacking after a keyword argument is strongly discouraged
 ]
 
 [tool.ruff.isort]

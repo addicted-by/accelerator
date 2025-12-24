@@ -8,7 +8,7 @@ loss_coefficient: 1.0
 name: "KLDivLoss"
 debug_config: null
 transforms: []
-size_average: null  # Type: Any
-reduce: null  # Type: Any
-reduction: "mean"  # Type: str
-log_target: false  # Type: bool
+size_average: null # Type: Any
+reduce: null # Type: Any
+reduction: "mean" # Type: str
+log_target: false # Type: bool

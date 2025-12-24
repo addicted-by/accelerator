@@ -23,13 +23,7 @@ class RegistrationMetadata:
     obj: Callable
 
     @classmethod
-    def create(
-        cls, 
-        name: str, 
-        registry_type: str, 
-        domain: Domain, 
-        obj: Callable
-    ) -> "RegistrationMetadata":
+    def create(cls, name: str, registry_type: str, domain: Domain, obj: Callable) -> "RegistrationMetadata":
         """Factory method to create metadata with current timestamp.
 
         Args:

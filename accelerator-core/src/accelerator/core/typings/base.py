@@ -1,10 +1,12 @@
-from typing import TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
     from accelerator.core.context import Context as _Context
 else:
+
     class _Context:  # type: ignore[revived-private-name]
         ...
 
+
 # Core type variables
-CONTEXT = TypeVar('CONTEXT', bound=_Context)
+CONTEXT = TypeVar("CONTEXT", bound=_Context)

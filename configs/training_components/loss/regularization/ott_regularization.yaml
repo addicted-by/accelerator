@@ -8,4 +8,4 @@ loss_coefficient: 1.0
 name: "ott_regularization"
 debug_config: null
 transforms: []
-mono_ratio: 0.1  # Type: float
+mono_ratio: 0.1 # Type: float

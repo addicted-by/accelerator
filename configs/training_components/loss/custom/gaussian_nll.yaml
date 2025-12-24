@@ -8,6 +8,6 @@ loss_coefficient: 1.0
 name: "GaussianNLLLoss"
 debug_config: null
 transforms: []
-full: false  # Type: bool
-eps: 1e-06  # Type: float
-reduction: "mean"  # Type: str
+full: false # Type: bool
+eps: 1e-06 # Type: float
+reduction: "mean" # Type: str

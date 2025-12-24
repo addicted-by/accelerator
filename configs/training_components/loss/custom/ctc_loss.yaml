@@ -8,6 +8,6 @@ loss_coefficient: 1.0
 name: "CTCLoss"
 debug_config: null
 transforms: []
-blank: 0  # Type: int
-reduction: "mean"  # Type: str
-zero_infinity: false  # Type: bool
+blank: 0 # Type: int
+reduction: "mean" # Type: str
+zero_infinity: false # Type: bool

@@ -1,13 +1,16 @@
-import torch
-from typing import Tuple, Union, Iterable
-import torch.nn as nn
-from collections import OrderedDict
-from torch.nn.utils import parametrize
-import pandas as pd
 import csv
-import warnings
 import functools
 import pathlib
+import warnings
+from collections import OrderedDict
+from collections.abc import Iterable
+from typing import Union
+
+import pandas as pd
+import torch
+import torch.nn as nn
+from torch.nn.utils import parametrize
+
 
 def deprecated(func):
     """This is a decorator which can be used to mark functions
@@ -18,7 +21,7 @@ def deprecated(func):
     def new_func(*args, **kwargs):
         warnings.simplefilter("always", DeprecationWarning)  # turn off filter
         warnings.warn(
-            "Call to deprecated function {}.".format(func.__name__),
+            f"Call to deprecated function {func.__name__}.",
             category=DeprecationWarning,
             stacklevel=2,
         )
@@ -36,9 +39,7 @@ def reapply_parametrizations(model, parametrized_modules, unsafe=True):
 
         for p_name, parametrizations, orig_parameter in params:
             for parametrization in parametrizations:
-                parametrize.register_parametrization(
-                    module, p_name, parametrization, unsafe=unsafe
-                )
+                parametrize.register_parametrization(module, p_name, parametrization, unsafe=unsafe)
             getattr(module.parametrizations, p_name).original.data = orig_parameter
 
 
@@ -60,6 +61,7 @@ def save_report(pruning_record, experiment_path, ratio):
             pruning_reports_path / f"pruning_record_human_readable_{ratio:.4f}.csv"
         )
 
+
 def remove_parametrizations(model):
     """Function to remove parameterizations from a model."""
 
@@ -72,11 +74,9 @@ def remove_parametrizations(model):
             for p_name in list(module.parametrizations.keys()):
                 orig_parameter = getattr(module.parametrizations, p_name)
                 orig_parameter = orig_parameter.original.data.detach().clone()
-                parametrized_modules[name].append(
-                    (p_name, module.parametrizations[p_name], orig_parameter)
-                )
+                parametrized_modules[name].append((p_name, module.parametrizations[p_name], orig_parameter))
                 parametrize.remove_parametrizations(module, p_name, True)
-    
+
     return parametrized_modules
 
 
@@ -88,7 +88,7 @@ def get_attr_by_name(module, name):
     return module
 
 
-def get_parent_name(qualname: str) -> Tuple[str, str]:
+def get_parent_name(qualname: str) -> tuple[str, str]:
     """
     Splits a ``qualname`` into parent path and last atom.
     For example, `foo.bar.baz` -> (`foo.bar`, `baz`)
@@ -118,18 +118,14 @@ def get_parent_module(module, attr_path):
 
 def remove_all_hooks(model: torch.nn.Module) -> None:
     """ """
-    for name, child in model._modules.items():
+    for _, child in model._modules.items():
         if child is not None:
             if hasattr(child, "_forward_hooks"):
                 child._forward_hooks = OrderedDict()
             remove_all_hooks(child)
 
 
-def fuse_batchnorm(
-    model, 
-    fx_model=None, 
-    convs=None
-):
+def fuse_batchnorm(model, fx_model=None, convs=None):
     """
     Fuse conv and bn only if conv is in convs argument.
 
@@ -146,11 +142,8 @@ def fuse_batchnorm(
     for node in fx_model.graph.nodes:
         if node.op != "call_module":
             continue
-        if (
-            type(modules[node.target]) is nn.BatchNorm2d
-            and type(modules[node.args[0].target]) is nn.Conv2d
-        ):
-            to_fuse = True if convs is None else node.args[0].target in convs 
+        if type(modules[node.target]) is nn.BatchNorm2d and type(modules[node.args[0].target]) is nn.Conv2d:
+            to_fuse = True if convs is None else node.args[0].target in convs
             if to_fuse:
                 if len(node.args[0].users) > 1:
                     continue
@@ -191,18 +184,13 @@ def _fuse_conv_bn_weights(conv_w, conv_b, bn_rm, bn_rv, bn_eps, bn_w, bn_b):
         bn_b = torch.zeros_like(bn_rm)
     bn_var_rsqrt = torch.rsqrt(bn_rv + bn_eps)
 
-    conv_w = conv_w * (bn_w * bn_var_rsqrt).reshape(
-        [-1] + [1] * (len(conv_w.shape) - 1)
-    )
+    conv_w = conv_w * (bn_w * bn_var_rsqrt).reshape([-1] + [1] * (len(conv_w.shape) - 1))
     conv_b = (conv_b - bn_rm) * bn_var_rsqrt * bn_w + bn_b
 
     return conv_w, conv_b
 
 
-
-def to_device(
-    x: Union[torch.Tensor, Iterable], device: torch.device
-) -> Union[torch.Tensor, Iterable]:
+def to_device(x: Union[torch.Tensor, Iterable], device: torch.device) -> Union[torch.Tensor, Iterable]:
     """Recursively moves tensors in data structures (list, tuples, single tensors)
     to a specified device, making it handly for device-agnostic execution
     of model operations."""
@@ -222,13 +210,14 @@ def run_model(model, inputs, req_grad=False, device=None):
     if device is None:
         device = next(iter(model.parameters())).device
     if isinstance(inputs, torch.Tensor):
-        inputs = (inputs, )
-    
+        inputs = (inputs,)
+
     to_device(inputs, device)
     with torch.set_grad_enabled(mode=req_grad):
         outputs = model(*inputs)
-    
+
     return outputs
+
 
 def get_model(model):
     """
@@ -243,4 +232,3 @@ def get_model(model):
         true_model = true_model._orig_mod
 
     return true_model
-

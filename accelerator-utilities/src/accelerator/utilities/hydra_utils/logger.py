@@ -1,8 +1,8 @@
 """Performance tracking tool."""
 
-from time import perf_counter
-from logging import Logger
 import logging
+from logging import Logger
+from time import perf_counter
 from typing import Callable
 
 

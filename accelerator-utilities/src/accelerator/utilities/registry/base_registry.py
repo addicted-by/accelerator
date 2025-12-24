@@ -1,48 +1,51 @@
 """Base registry module for managing registered objects."""
 
 import functools
-from typing import Dict, Callable, Iterable, Union, List, Optional
-from threading import Lock
+from collections.abc import Iterable
 from enum import Enum
-from accelerator.utilities.logging import get_logger
+from threading import Lock
+from typing import Callable, Optional, Union
+
 from accelerator.utilities.api_desc import APIDesc
-from accelerator.utilities.signatures import get_object_info
+from accelerator.utilities.logging import get_logger
 from accelerator.utilities.registry.domain import Domain
 from accelerator.utilities.registry.registry_metadata import RegistrationMetadata
-
+from accelerator.utilities.signatures import get_object_info
 
 log = get_logger(__name__)
 
 
 def log_fn_call(func: callable) -> callable:
     """Decorator to log function calls.
-    
+
     Args:
         func: The function to wrap with logging.
-        
+
     Returns:
         Wrapped function that logs when called.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         log.info(f"Executing operation `{func.__qualname__}`")
         return func(*args, **kwargs)
+
     return wrapper
 
 
-@APIDesc.developer(dev_info='Ryabykin Alexey r00926208')
-@APIDesc.status(status_level='Internal use only')
+@APIDesc.developer(dev_info="Ryabykin Alexey r00926208")
+@APIDesc.status(status_level="Internal use only")
 class BaseRegistry:
     """Base registry class for managing registered objects.
-    
+
     This class provides core functionality for registering, retrieving, and listing
     objects in a thread-safe manner. It serves as the foundation for specialized registries
     like OperationRegistry, LossRegistry, and AccelerationRegistry.
     """
-    
+
     NOT_REGISTERED_MSG: str = (
         "Object '{obj_name}' not found in registry for '{reg_type}'. "
-        "Register it with 'registry.register_object('{reg_type}')' " 
+        "Register it with 'registry.register_object('{reg_type}')' "
         "or use an existing object: {available}."
     )
 
@@ -55,13 +58,13 @@ class BaseRegistry:
         self._enable_logging = enable_logging
         self._lock = Lock()
 
-        self._registry_types: Dict[str, Dict[str, RegistrationMetadata]] = {}
+        self._registry_types: dict[str, dict[str, RegistrationMetadata]] = {}
 
     def register_object(
         self,
         registry_type: Union[str, Iterable[str], Enum, Iterable[Enum]],
         name: Optional[str] = None,
-        domain: Domain = Domain.CROSS
+        domain: Domain = Domain.CROSS,
     ):
         """Decorator for registering objects in the registry.
 
@@ -77,6 +80,7 @@ class BaseRegistry:
             TypeError: If registry_type is not a string, Enum, or iterable of these.
             ValueError: If registry_type is not a valid registry type.
         """
+
         def decorator(cls_or_func: Callable) -> Callable:
             if isinstance(registry_type, (str, Enum)):
                 reg_types = [registry_type.value if isinstance(registry_type, Enum) else registry_type]
@@ -85,11 +89,7 @@ class BaseRegistry:
             else:
                 raise TypeError(f"registry_type must be str or Iterable, got {type(registry_type)}")
 
-            setattr(
-                cls_or_func,
-                'registry_type',
-                registry_type.value if isinstance(registry_type, Enum) else registry_type
-            )
+            cls_or_func.registry_type = registry_type.value if isinstance(registry_type, Enum) else registry_type
 
             with self._lock:
                 for reg_type in reg_types:
@@ -108,21 +108,15 @@ class BaseRegistry:
 
                     # Create and store metadata
                     metadata = RegistrationMetadata.create(
-                        name=_name,
-                        registry_type=reg_type,
-                        domain=domain,
-                        obj=wrapped_obj
+                        name=_name, registry_type=reg_type, domain=domain, obj=wrapped_obj
                     )
                     self._registry_types[reg_type][_name] = metadata
             return cls_or_func
+
         return decorator
 
     def add_object(
-        self,
-        registry_type: str,
-        func: Callable,
-        name: Optional[str] = None,
-        domain: Domain = Domain.CROSS
+        self, registry_type: str, func: Callable, name: Optional[str] = None, domain: Domain = Domain.CROSS
     ) -> None:
         """Dynamically add an object without a decorator.
 
@@ -140,11 +134,7 @@ class BaseRegistry:
             if registry_type not in self._registry_types:
                 self._registry_types[registry_type] = {}
 
-            setattr(
-                func,
-                'registry_type',
-                registry_type.value if isinstance(registry_type, Enum) else registry_type
-            )
+            func.registry_type = registry_type.value if isinstance(registry_type, Enum) else registry_type
             if name:
                 func.__name__ = name
             _name = func.__name__
@@ -156,10 +146,7 @@ class BaseRegistry:
 
             # Create and store metadata
             metadata = RegistrationMetadata.create(
-                name=_name,
-                registry_type=registry_type,
-                domain=domain,
-                obj=wrapped_obj
+                name=_name, registry_type=registry_type, domain=domain, obj=wrapped_obj
             )
             self._registry_types[registry_type][_name] = metadata
 
@@ -181,17 +168,13 @@ class BaseRegistry:
         objects = self._registry_types[registry_type]
         if name not in objects:
             raise KeyError(
-                self.NOT_REGISTERED_MSG.format(
-                    obj_name=name,
-                    reg_type=registry_type,
-                    available=list(objects.keys())
-                )
+                self.NOT_REGISTERED_MSG.format(obj_name=name, reg_type=registry_type, available=list(objects.keys()))
             )
         # Extract callable from metadata
         metadata = objects[name]
         return metadata.obj
 
-    def list_objects(self, registry_type: Optional[str] = None) -> Dict[str, List[str]]:
+    def list_objects(self, registry_type: Optional[str] = None) -> dict[str, list[str]]:
         """List all registered objects.
 
         Args:
@@ -238,16 +221,12 @@ class BaseRegistry:
             if registry_type not in self._registry_types:
                 raise KeyError(f"Registry type '{registry_type}' not found")
             if name not in self._registry_types[registry_type]:
-                raise KeyError(
-                    f"Object '{name}' not found in registry for '{registry_type}'"
-                )
+                raise KeyError(f"Object '{name}' not found in registry for '{registry_type}'")
             return self._registry_types[registry_type][name]
 
     def list_objects_by_domain(
-        self,
-        domain: Union[Domain, List[Domain]],
-        registry_type: Optional[str] = None
-    ) -> Dict[str, List[str]]:
+        self, domain: Union[Domain, list[Domain]], registry_type: Optional[str] = None
+    ) -> dict[str, list[str]]:
         """List registered objects filtered by domain(s).
 
         Args:
@@ -261,12 +240,10 @@ class BaseRegistry:
         domains = [domain] if isinstance(domain, Domain) else domain
 
         with self._lock:
-            result: Dict[str, List[str]] = {}
+            result: dict[str, list[str]] = {}
 
             # Determine which registry types to search
-            reg_types_to_search = (
-                [registry_type] if registry_type else list(self._registry_types.keys())
-            )
+            reg_types_to_search = [registry_type] if registry_type else list(self._registry_types.keys())
 
             for reg_type in reg_types_to_search:
                 if reg_type not in self._registry_types:
@@ -274,9 +251,7 @@ class BaseRegistry:
 
                 # Filter objects by domain
                 matching_objects = [
-                    name
-                    for name, metadata in self._registry_types[reg_type].items()
-                    if metadata.domain in domains
+                    name for name, metadata in self._registry_types[reg_type].items() if metadata.domain in domains
                 ]
 
                 if matching_objects:
@@ -284,17 +259,17 @@ class BaseRegistry:
 
             return result
 
-    def get_domain_summary(self) -> Dict[str, Dict[str, int]]:
+    def get_domain_summary(self) -> dict[str, dict[str, int]]:
         """Get count of objects per domain for each registry type.
 
         Returns:
             Nested dictionary structure: {registry_type: {domain: count}}
         """
         with self._lock:
-            summary: Dict[str, Dict[str, int]] = {}
+            summary: dict[str, dict[str, int]] = {}
 
             for reg_type, objects in self._registry_types.items():
-                domain_counts: Dict[str, int] = {}
+                domain_counts: dict[str, int] = {}
 
                 for metadata in objects.values():
                     domain_value = metadata.domain.value
@@ -304,10 +279,7 @@ class BaseRegistry:
 
             return summary
 
-    def export_metadata(
-        self,
-        registry_type: Optional[str] = None
-    ) -> Dict[str, List[Dict]]:
+    def export_metadata(self, registry_type: Optional[str] = None) -> dict[str, list[dict]]:
         """Export all registration metadata as structured dictionary.
 
         Args:
@@ -317,22 +289,17 @@ class BaseRegistry:
             Dictionary mapping registry types to lists of metadata dictionaries.
         """
         with self._lock:
-            result: Dict[str, List[Dict]] = {}
+            result: dict[str, list[dict]] = {}
 
             # Determine which registry types to export
-            reg_types_to_export = (
-                [registry_type] if registry_type else list(self._registry_types.keys())
-            )
+            reg_types_to_export = [registry_type] if registry_type else list(self._registry_types.keys())
 
             for reg_type in reg_types_to_export:
                 if reg_type not in self._registry_types:
                     continue
 
                 # Convert metadata to dictionaries
-                metadata_list = [
-                    metadata.to_dict()
-                    for metadata in self._registry_types[reg_type].values()
-                ]
+                metadata_list = [metadata.to_dict() for metadata in self._registry_types[reg_type].values()]
 
                 result[reg_type] = metadata_list
 
@@ -357,7 +324,7 @@ class BaseRegistry:
                 continue
 
             # Group objects by domain
-            domain_groups: Dict[Domain, List[tuple]] = {}
+            domain_groups: dict[Domain, list[tuple]] = {}
             for name, metadata in objects.items():
                 if metadata.domain not in domain_groups:
                     domain_groups[metadata.domain] = []
@@ -369,7 +336,7 @@ class BaseRegistry:
                 for name, metadata in domain_groups[domain]:
                     # Get the original object (in case it's wrapped with logging decorator)
                     original_obj = metadata.obj
-                    if hasattr(original_obj, '__wrapped__'):
+                    if hasattr(original_obj, "__wrapped__"):
                         original_obj = original_obj.__wrapped__
 
                     obj_info = get_object_info(name, original_obj)

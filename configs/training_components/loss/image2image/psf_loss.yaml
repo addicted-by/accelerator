@@ -8,7 +8,7 @@ loss_coefficient: 1.0
 name: "psf_loss"
 debug_config: null
 transforms: []
-asym_gradient_mask: true  # Type: bool
-tv_coeff: 0.333333  # Type: float
-sobel_coeff: 0.333333  # Type: float
-ssim_coeff: 0.333333  # Type: float
+asym_gradient_mask: true # Type: bool
+tv_coeff: 0.333333 # Type: float
+sobel_coeff: 0.333333 # Type: float
+ssim_coeff: 0.333333 # Type: float

@@ -8,5 +8,5 @@ loss_coefficient: 1.0
 name: "bayer_correlation_loss"
 debug_config: null
 transforms: []
-per_pixel: false  # Type: Any
-window_size: 11  # Type: Any
+per_pixel: false # Type: Any
+window_size: 11 # Type: Any

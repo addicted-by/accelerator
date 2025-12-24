@@ -3,18 +3,12 @@ from collections import OrderedDict, defaultdict
 from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from functools import cached_property
-from typing import Any, Callable, Optional, Union, Tuple
+from typing import Any, Callable, Optional, Union
 
 
 def is_namedtuple(obj: object) -> bool:
     """Check if object is namedtuple"""
-    return (
-        isinstance(obj, tuple)
-        and
-        hasattr(obj, '_asdict')
-        and
-        hasattr(obj, '_fields')
-    )
+    return isinstance(obj, tuple) and hasattr(obj, "_asdict") and hasattr(obj, "_fields")
 
 
 def is_dataclass_instance(obj: object) -> bool:
@@ -24,10 +18,10 @@ def is_dataclass_instance(obj: object) -> bool:
 
 def apply_to_collection(
     data: Any,
-    dtype: Union[type, Any, Tuple[Union[type, Any]]],
+    dtype: Union[type, Any, tuple[Union[type, Any]]],
     function: Callable,
     *args: Any,
-    wrong_dtype: Optional[Union[type, Tuple[type, ...]]] = None,
+    wrong_dtype: Optional[Union[type, tuple[type, ...]]] = None,
     include_none: bool = True,
     allow_frozen: bool = False,
     **kwargs: Any,
@@ -66,10 +60,10 @@ def apply_to_collection(
 
     if isinstance(data, list) and all(isinstance(x, dtype) for x in data):  # 1d homogeneous list
         return [function(x, *args, **kwargs) for x in data]
-        
+
     if isinstance(data, tuple) and all(isinstance(x, dtype) for x in data):  # 1d homogeneous tuple
         return tuple(function(x, *args, **kwargs) for x in data)
-        
+
     if isinstance(data, dict) and all(isinstance(x, dtype) for x in data.values()):  # 1d homogeneous dict
         return {k: function(v, *args, **kwargs) for k, v in data.items()}
 
@@ -87,10 +81,10 @@ def apply_to_collection(
 
 def _apply_to_collection_slow(
     data: Any,
-    dtype: Union[type, Any, Tuple[Union[type, Any]]],
+    dtype: Union[type, Any, tuple[Union[type, Any]]],
     function: Callable,
     *args: Any,
-    wrong_dtype: Optional[Union[type, Tuple[type, ...]]] = None,
+    wrong_dtype: Optional[Union[type, tuple[type, ...]]] = None,
     include_none: bool = True,
     allow_frozen: bool = False,
     **kwargs: Any,
@@ -182,10 +176,10 @@ def _apply_to_collection_slow(
 def apply_to_collections(
     data1: Optional[Any],
     data2: Optional[Any],
-    dtype: Union[type, Any, Tuple[Union[type, Any]]],
+    dtype: Union[type, Any, tuple[Union[type, Any]]],
     function: Callable,
     *args: Any,
-    wrong_dtype: Optional[Union[type, Tuple[type]]] = None,
+    wrong_dtype: Optional[Union[type, tuple[type]]] = None,
     **kwargs: Any,
 ) -> Any:
     """Zips two collections and applies a function to their items of a certain dtype.
@@ -222,10 +216,12 @@ def apply_to_collections(
     if isinstance(data1, Mapping) and data2 is not None:
         # use union because we want to fail if a key does not exist in both
         zipped = {k: (data1[k], data2[k]) for k in data1.keys() | data2.keys()}
-        return elem_type({
-            k: apply_to_collections(*v, dtype, function, *args, wrong_dtype=wrong_dtype, **kwargs)
-            for k, v in zipped.items()
-        })
+        return elem_type(
+            {
+                k: apply_to_collections(*v, dtype, function, *args, wrong_dtype=wrong_dtype, **kwargs)
+                for k, v in zipped.items()
+            }
+        )
 
     is_namedtuple_ = is_namedtuple(data1)
     is_sequence = isinstance(data1, Sequence) and not isinstance(data1, str)

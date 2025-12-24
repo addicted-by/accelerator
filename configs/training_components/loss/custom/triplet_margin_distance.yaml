@@ -8,7 +8,7 @@ loss_coefficient: 1.0
 name: "TripletMarginWithDistanceLoss"
 debug_config: null
 transforms: []
-distance_function: null  # Type: Optional[Callable[[<class 'torch.Tensor'>, <class 'torch.Tensor'>], Tensor]]
-margin: 1.0  # Type: float
-swap: false  # Type: bool
-reduction: "mean"  # Type: str
+distance_function: null # Type: Optional[Callable[[<class 'torch.Tensor'>, <class 'torch.Tensor'>], Tensor]]
+margin: 1.0 # Type: float
+swap: false # Type: bool
+reduction: "mean" # Type: str

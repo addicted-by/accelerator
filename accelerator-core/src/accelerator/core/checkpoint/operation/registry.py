@@ -1,13 +1,11 @@
-from typing import Dict, Callable, Iterable, Union, List, Optional
+from collections.abc import Iterable
 from enum import Enum
-
+from typing import Callable, Optional, Union
 
 from accelerator.utilities.base_registry import BaseRegistry
 from accelerator.utilities.logging import get_logger
 
-
 log = get_logger(__name__)
-
 
 
 class OperationType(Enum):
@@ -21,7 +19,7 @@ class OperationRegistry(BaseRegistry):
 
     NOT_REGISTERED_MSG: str = (
         "Operation '{op_name}' not found in registry for '{op_type}'. "
-        "Register it with 'registry.register_operation('{op_type}')' " 
+        "Register it with 'registry.register_operation('{op_type}')' "
         "or use an existing operation: {available}."
     )
 
@@ -32,26 +30,25 @@ class OperationRegistry(BaseRegistry):
             enable_logging: Whether to wrap operations with logging.
         """
         super().__init__(enable_logging=enable_logging)
-        
+
         for op_type in OperationType:
             self._registry_types[op_type.value] = {}
-            
 
     def register_operation(self, operation_type: Union[str, Iterable[str], OperationType, Iterable[OperationType]]):
         """Decorator for registering operations in the registry.
-        
+
         Args:
             operation_type: The type(s) under which to register the operation.
-            
+
         Returns:
             Decorator function that registers the decorated operation.
-            
+
         Raises:
             TypeError: If operation_type is not a string, OperationType, or iterable of these.
             ValueError: If operation_type is not a valid operation type.
         """
         return self.register_object(operation_type)
-        
+
     def add_operation(self, operation_type: str, func: Callable, name: Optional[str] = None) -> None:
         """Dynamically add an operation without a decorator.
 
@@ -64,7 +61,7 @@ class OperationRegistry(BaseRegistry):
             ValueError: If operation_type is invalid.
         """
         self.add_object(operation_type, func, name)
-        
+
     def get_operation(self, operation_type: str, name: str) -> Callable:
         """Retrieve an operation by type and name.
 
@@ -80,7 +77,7 @@ class OperationRegistry(BaseRegistry):
         """
         return self.get_object(operation_type, name)
 
-    def list_operations(self, operation_type: Optional[str] = None) -> Dict[str, List[str]]:
+    def list_operations(self, operation_type: Optional[str] = None) -> dict[str, list[str]]:
         """List all registered operations.
 
         Args:

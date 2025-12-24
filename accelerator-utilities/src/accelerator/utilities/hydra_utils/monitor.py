@@ -3,7 +3,8 @@ import multiprocessing
 import os
 import subprocess
 import time
-from typing import Callable, Mapping
+from collections.abc import Mapping
+from typing import Callable
 
 import numpy as np
 import psutil
@@ -94,9 +95,7 @@ class ResourceMonitorService:
         if pid is None:
             pid = os.getpid()
         if interval < 0.2:
-            raise RuntimeError(
-                f"Sampling interval ({interval:0.2f}s) cannot be lower than 0.2s"
-            )
+            raise RuntimeError(f"Sampling interval ({interval:0.2f}s) cannot be lower than 0.2s")
 
         fname = f"p{pid}_t{time.time()}_f{interval}"
         fname = f".{base_name}_{fname}" if base_name else f".{fname}"

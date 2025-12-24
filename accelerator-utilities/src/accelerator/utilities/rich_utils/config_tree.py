@@ -1,32 +1,32 @@
-from pathlib import Path
-from typing import Sequence
 import warnings
+from collections.abc import Sequence
+from pathlib import Path
+
 import rich
 import rich.syntax
 import rich.tree
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf, open_dict
-from accelerator.utilities.distributed_state.state import distributed_state
 from rich.prompt import Prompt
+
+from accelerator.utilities.distributed_state.state import distributed_state
 
 
 @distributed_state.on_main_process
 def print_config_tree(
     cfg: DictConfig,
     print_order: Sequence[str] = (
-        'pipeline',
-        'model',
-        'training_components',
-        'callbacks',
-        'datamodule',
-        'acceleration',
-        'paths',
+        "pipeline",
+        "model",
+        "training_components",
+        "callbacks",
+        "datamodule",
+        "acceleration",
+        "paths",
     ),
-    resolve: bool=False,
-    save_to_file: bool=False,
-    ignore: Sequence[str] = [
-        'hydra'
-    ]
+    resolve: bool = False,
+    save_to_file: bool = False,
+    ignore: Sequence[str] = ["hydra"],
 ) -> None:
     """
     Prints content of DictConfig using Rich library and its tree structure.
@@ -85,12 +85,8 @@ def enforce_tags(cfg: DictConfig, save_to_file: bool = False) -> None:
         if "id" in HydraConfig().cfg.hydra.job:
             raise ValueError("Specify tags before launching a multirun!")
 
-        print(
-            "No tags provided in config. Prompting user to input tags..."
-        )
-        tags = Prompt.ask(
-            "Enter a list of comma separated tags", default="dev"
-        )
+        print("No tags provided in config. Prompting user to input tags...")
+        tags = Prompt.ask("Enter a list of comma separated tags", default="dev")
         tags = [t.strip() for t in tags.split(",") if t != ""]
 
         with open_dict(cfg):
@@ -101,8 +97,6 @@ def enforce_tags(cfg: DictConfig, save_to_file: bool = False) -> None:
     if save_to_file:
         with open(Path(cfg.paths.experiment_dir, "tags.log"), "w") as file:
             rich.print(cfg.tags, file=file)
-
-
 
 
 def extras(cfg: DictConfig) -> None:
@@ -124,9 +118,7 @@ def extras(cfg: DictConfig) -> None:
 
     # disable python warnings
     if cfg.extras.get("ignore_warnings"):
-        print(
-            "Disabling python warnings! <cfg.extras.ignore_warnings=True>"
-        )
+        print("Disabling python warnings! <cfg.extras.ignore_warnings=True>")
         warnings.filterwarnings("ignore")
 
     # prompt user to input tags from command line if none are provided in the config
@@ -136,8 +128,5 @@ def extras(cfg: DictConfig) -> None:
 
     # pretty print config tree using Rich library
     if cfg.extras.get("print_config"):
-        print(
-            "Printing config tree with Rich! <cfg.extras.print_config=True>"
-        )
+        print("Printing config tree with Rich! <cfg.extras.print_config=True>")
         print_config_tree(cfg, resolve=True, save_to_file=True)
-

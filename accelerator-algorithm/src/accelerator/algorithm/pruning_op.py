@@ -1,15 +1,13 @@
 import accelerator
-
-from accelerator.algorithm.registry import registry, AccelerationType
 from accelerator.algorithm.pruning import (
-    pruner as pruners,
-    load_pruned,
     get_pruned_dict,
+    load_pruned,
+    pruner as pruners,
 )
+from accelerator.algorithm.registry import AccelerationType, registry
 from accelerator.utilities.logging import get_logger
 
 from .base import AccelerationOperationBase
-
 
 log = get_logger(__name__)
 

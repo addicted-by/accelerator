@@ -5,6 +5,7 @@ Model acceleration algorithms and optimization techniques for the accelerator fr
 ## Overview
 
 This package provides acceleration algorithms including:
+
 - Pruning techniques for model compression
 - Optimization strategies for model efficiency
 - Registry system for acceleration methods

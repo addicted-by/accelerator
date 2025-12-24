@@ -9,7 +9,7 @@ description = "Framework-agnostic utilities, no dependencies on other accelerato
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-    {name = "Compression & Acceleration Team"}
+    {name = "Compression & Acceleration Team"},
     {name = "Ryabykin Alexey r00926208", email=""}
 ]
 classifiers = [

@@ -1,21 +1,18 @@
 import abc
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import torch
 
 from accelerator.core.transform import LossTransformManager
-
-from accelerator.utilities.typings import BatchTensorType, ModelOutputType
 from accelerator.utilities.logging import get_logger
-
+from accelerator.utilities.typings import BatchTensorType, ModelOutputType
 
 if TYPE_CHECKING:
     from accelerator import Context
 
 from .debug import DebugConfig, DebugManager
-from .errors import (LossAPIException, LossCalculationError,
-                     LossConfigurationError)
+from .errors import LossAPIException, LossCalculationError, LossConfigurationError
 from .statistics import GradientLogger, LossStatistics
 
 logger = get_logger(__name__)
@@ -50,14 +47,10 @@ class LossWrapperBase(abc.ABC):
             LossConfigurationError: If value is invalid
         """
         if not isinstance(value, (int, float)):
-            raise LossConfigurationError(
-                f"Loss coefficient must be numeric, got {type(value)}"
-            )
+            raise LossConfigurationError(f"Loss coefficient must be numeric, got {type(value)}")
 
         if value < 0:
-            raise LossConfigurationError(
-                f"Loss coefficient must be non-negative, got {value}"
-            )
+            raise LossConfigurationError(f"Loss coefficient must be non-negative, got {value}")
 
         self._loss_coefficient = float(value)
 
@@ -67,9 +60,7 @@ class LossWrapperBase(abc.ABC):
         return self._loss_coefficient
 
     @abc.abstractmethod
-    def logger_step(
-        self, tb_logger: Optional[Any] = None, step: Optional[int] = None
-    ) -> Any:
+    def logger_step(self, tb_logger: Optional[Any] = None, step: Optional[int] = None) -> Any:
         """
         Performs logging after loss calculation.
 
@@ -127,14 +118,10 @@ class LossWrapper(LossWrapperBase, abc.ABC):
         super().__init__(debug_config)
 
         if loss_coefficient <= 0:
-            raise LossConfigurationError(
-                f"loss_coefficient must be positive, got {loss_coefficient}"
-            )
+            raise LossConfigurationError(f"loss_coefficient must be positive, got {loss_coefficient}")
 
         if (prediction_key is None) != (target_key is None):
-            raise LossConfigurationError(
-                "Both prediction_key and target_key must be provided together or both None"
-            )
+            raise LossConfigurationError("Both prediction_key and target_key must be provided together or both None")
 
         self._cfg = kwargs
         self._prediction_key = prediction_key
@@ -149,9 +136,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
 
         if transforms:
             try:
-                self._transform_pipeline = LossTransformManager._instantiate_transforms(
-                    transforms
-                )
+                self._transform_pipeline = LossTransformManager._instantiate_transforms(transforms)
             except Exception as e:
                 raise LossConfigurationError(
                     f"Failed to create transform pipeline for loss '{self._name}': {str(e)}"
@@ -210,17 +195,15 @@ class LossWrapper(LossWrapperBase, abc.ABC):
         """
         try:
             if transform_manager and self._transform_pipeline:
-                net_result, ground_truth, transforms_info = (
-                    transform_manager.apply_transforms(
-                        self._prediction_key,
-                        self._target_key,
-                        predictions,
-                        labels,
-                        self._transform_pipeline,
-                        inputs=inputs,
-                        context=context,
-                        **kwargs,
-                    )
+                net_result, ground_truth, transforms_info = transform_manager.apply_transforms(
+                    self._prediction_key,
+                    self._target_key,
+                    predictions,
+                    labels,
+                    self._transform_pipeline,
+                    inputs=inputs,
+                    context=context,
+                    **kwargs,
                 )
             else:
                 net_result, ground_truth = self._extract_tensors(predictions, labels)
@@ -238,9 +221,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
             )
 
             if not isinstance(loss, torch.Tensor):
-                raise LossCalculationError(
-                    f"calculate_batch_loss must return torch.Tensor, got {type(loss)}"
-                )
+                raise LossCalculationError(f"calculate_batch_loss must return torch.Tensor, got {type(loss)}")
 
             if isinstance(net_result, (list, tuple)):
                 batch_size = net_result[0].shape[0] if net_result[0].ndim > 0 else 1
@@ -248,22 +229,18 @@ class LossWrapper(LossWrapperBase, abc.ABC):
                 batch_size = net_result.shape[0] if net_result.ndim > 0 else 1
 
             self._statistics.update(loss, batch_size)
-            self._debug_manager.save_tensor(
-                loss, f"loss_{self._name}", self._statistics.num_samples
-            )
+            self._debug_manager.save_tensor(loss, f"loss_{self._name}", self._statistics.num_samples)
 
             return self.loss_coefficient * loss
 
         except (LossCalculationError, LossConfigurationError):
             raise
         except Exception as e:
-            raise LossCalculationError(
-                f"Unexpected error in loss calculation for {self._name}: {str(e)}"
-            ) from e
+            raise LossCalculationError(f"Unexpected error in loss calculation for {self._name}: {str(e)}") from e
 
     def _extract_tensors(
         self, predictions: ModelOutputType, labels: ModelOutputType
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Extract tensors from predictions and labels based on configuration."""
         if isinstance(predictions, dict):
             if self._prediction_key is None or self._target_key is None:
@@ -272,14 +249,10 @@ class LossWrapper(LossWrapperBase, abc.ABC):
                 )
 
             if self._prediction_key not in predictions:
-                raise LossCalculationError(
-                    f"prediction_key '{self._prediction_key}' not found in predictions"
-                )
+                raise LossCalculationError(f"prediction_key '{self._prediction_key}' not found in predictions")
 
             if self._target_key not in labels:
-                raise LossCalculationError(
-                    f"target_key '{self._target_key}' not found in labels"
-                )
+                raise LossCalculationError(f"target_key '{self._target_key}' not found in labels")
 
             return predictions[self._prediction_key], labels[self._target_key]
         else:
@@ -300,7 +273,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
         return self._name
 
     @property
-    def gradients_info(self) -> Dict[str, float]:
+    def gradients_info(self) -> dict[str, float]:
         """Get normalized gradient statistics."""
         return self._gradient_logger.get_statistics()
 
@@ -337,9 +310,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
         try:
             if tb_logger is not None:
                 if self.accumulated_loss is not None:
-                    tb_logger.add_scalar(
-                        f"avg_{self._name}", self.accumulated_loss, step
-                    )
+                    tb_logger.add_scalar(f"avg_{self._name}", self.accumulated_loss, step)
 
                 for name, value in self.gradients_info.items():
                     tb_logger.add_scalar(name, value, step)
@@ -353,9 +324,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
             )
 
         except Exception as e:
-            raise LossAPIException(
-                f"Logging failed for loss {self._name}: {str(e)}"
-            ) from e
+            raise LossAPIException(f"Logging failed for loss {self._name}: {str(e)}") from e
 
     def clear(self) -> None:
         """Resets all internal state variables."""
@@ -364,13 +333,15 @@ class LossWrapper(LossWrapperBase, abc.ABC):
 
     def __repr__(self) -> str:
         """String representation with clean formatting."""
-        description = dedent(f"""
+        description = dedent(
+            f"""
             Loss: {self._name}
             Prediction key: {self._prediction_key} || Target key: {self._target_key}
             Loss coefficient: {self._loss_coefficient}
             Samples processed: {self._statistics.num_samples}
             Transforms: {self.transform_count}
-        """).strip()
+        """
+        ).strip()
 
         if self._cfg:
             description += "\nConfiguration:\n"
@@ -418,9 +389,7 @@ class LossAdapter(LossWrapper):
         )
 
         if not isinstance(loss_module, torch.nn.Module):
-            raise LossConfigurationError(
-                f"loss_module must be a torch.nn.Module, got {type(loss_module)}"
-            )
+            raise LossConfigurationError(f"loss_module must be a torch.nn.Module, got {type(loss_module)}")
 
         self.loss_module = loss_module
 
