@@ -45,7 +45,7 @@ target-version = ["py39", "py310"]
 # -----------------------
 # Ruff (lint + imports)
 # -----------------------
-[tool.ruff]
+[tool.ruff-check]
 target-version = "py39"
 line-length = 120
 fix = true
@@ -65,6 +65,6 @@ ignore = [
     "B026", # Star-arg unpacking after a keyword argument is strongly discouraged
 ]
 
-[tool.ruff.isort]
+[tool.ruff-check.isort]
 combine-as-imports = true
 known-first-party = ["accelerator"]

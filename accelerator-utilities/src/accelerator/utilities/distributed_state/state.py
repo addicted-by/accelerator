@@ -45,7 +45,7 @@ class DistributedState:
 
     def __init__(self):
         if not getattr(self, "_initialized", False):
-            self._engine: Optional["DistributedBackend"] = None
+            self._engine: Optional[DistributedBackend] = None
             self._initialized = True
             self._cpu_execution = False
             self._device_set = None

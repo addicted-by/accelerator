@@ -1,3 +1,10 @@
+# .pre-commit-config.yaml
+# Install:
+#   pip install pre-commit
+#   pre-commit install
+# Optional (first time for detect-secrets baseline):
+#   detect-secrets scan > .secrets.baseline
+
 exclude: |
   (?x)(
     /tests/|
@@ -5,11 +12,24 @@ exclude: |
     /examples/|
     ^examples/|
     /legacy/|
-    ^legacy/
+    ^legacy/|
+    \.venv/|
+    ^\.venv/|
+    \.mypy_cache/|
+    ^\.mypy_cache/|
+    \.ruff_cache/|
+    ^\.ruff_cache/|
+    \.pytest_cache/|
+    ^\.pytest_cache/|
+    dist/|
+    ^dist/|
+    build/|
+    ^build/|
+    \.eggs/|
+    ^\.eggs/|
+    .*\.egg-info/|
+    ^.*\.egg-info/
   )
-
-default_language_version:
-  python: python3.10
 
 repos:
   # -------------------------
@@ -20,12 +40,25 @@ repos:
     hooks:
       - id: check-yaml
       - id: check-json
+      - id: check-toml
       - id: check-added-large-files
         args: ["--maxkb=1024"]
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-case-conflict
       - id: mixed-line-ending
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  # -------------------------
+  # Ruff (lint + autofix)
+  # -------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
+    hooks:
+      - id: ruff-check
+        args: ["--fix", "--exit-non-zero-on-fix"]
+        types_or: [python, pyi]
 
   # -------------------------
   # Black (formatting)
@@ -34,15 +67,7 @@ repos:
     rev: 23.9.1
     hooks:
       - id: black
-
-  # -------------------------
-  # Ruff (lint + isort replacement)
-  # -------------------------
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.7
-    hooks:
-      - id: ruff
-        args: ["--fix", "--exit-non-zero-on-fix"]
+        language_version: python3.10
 
   # -------------------------
   # Notebooks
@@ -53,8 +78,17 @@ repos:
       - id: nbqa-black
         additional_dependencies: [black==23.9.1]
       - id: nbqa-ruff
-        additional_dependencies: [ruff==0.1.7]
+        additional_dependencies: [ruff==0.14.10]
         args: ["--fix"]
+
+  # -------------------------
+  # Secrets
+  # -------------------------
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
 
   # -------------------------
   # Non-Python formatting
@@ -63,4 +97,4 @@ repos:
     rev: v3.0.3
     hooks:
       - id: prettier
-        types_or: [markdown, yaml, toml, json, dockerfile, shell]
+        types_or: [markdown, yaml, toml, json, shell]

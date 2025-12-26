@@ -108,7 +108,7 @@ class SmoothAverage(nn.Module, abc.ABC):
         return x
 
     # pylint: disable=missing-function-docstring
-    def forward(self, x: torch.Tensor) -> torch.Tensor:  # noqa: C0116 ignore[override]
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         core_out = self.core_forward(x)
 
         if self._mode == 0:
