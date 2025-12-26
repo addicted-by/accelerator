@@ -26,6 +26,7 @@ class DistillationManager:
         Args:
             teachers: Dictionary mapping teacher names to AcceleratedModel instances.
                      All models will be automatically frozen (gradients disabled).
+
         """
         self.teachers: dict[str, AcceleratedModel] = {}
 
@@ -57,6 +58,7 @@ class DistillationManager:
 
         Returns:
             Initialized DistillationManager instance
+
         """
         teachers = {}
 
@@ -90,6 +92,7 @@ class DistillationManager:
 
         Returns:
             AcceleratedModel instance or None if creation failed
+
         """
         model_cfg = teacher_cfg.get("model")
         if not model_cfg:
@@ -120,6 +123,7 @@ class DistillationManager:
         Args:
             model: Teacher model to load checkpoint into
             checkpoint_cfg: Checkpoint configuration containing path and loading settings
+
         """
         from accelerator.core.checkpoint import CheckpointManager
 
@@ -139,6 +143,7 @@ class DistillationManager:
 
         Args:
             model: The teacher model to freeze
+
         """
         model.eval()
 
@@ -158,6 +163,7 @@ class DistillationManager:
 
         Returns:
             The requested teacher model or None if not found
+
         """
         return self.teachers.get(name)
 
@@ -167,6 +173,7 @@ class DistillationManager:
 
         Returns:
             Dictionary of all teacher models
+
         """
         return self.teachers
 
@@ -178,6 +185,7 @@ class DistillationManager:
 
         Returns:
             True if the teacher exists, False otherwise
+
         """
         return name in self.teachers
 
@@ -186,6 +194,7 @@ class DistillationManager:
 
         Returns:
             List of teacher model names
+
         """
         return list(self.teachers.keys())
 
@@ -198,6 +207,7 @@ class DistillationManager:
 
         Returns:
             Dictionary mapping teacher names to their output dictionaries
+
         """
         results = {}
 
@@ -220,6 +230,7 @@ class DistillationManager:
 
         Returns:
             Dictionary mapping teacher names to their output dictionaries
+
         """
         return self.forward(*args, **kwargs)
 
@@ -228,6 +239,7 @@ class DistillationManager:
 
         Returns:
             Number of teacher models
+
         """
         return len(self.teachers)
 
@@ -239,6 +251,7 @@ class DistillationManager:
 
         Returns:
             True if the teacher exists, False otherwise
+
         """
         return name in self.teachers
 
@@ -247,6 +260,7 @@ class DistillationManager:
 
         Returns:
             String representation showing teacher models and their status
+
         """
         if not self.teachers:
             return "DistillationManager(no teachers)"

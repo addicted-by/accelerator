@@ -37,6 +37,7 @@ class AccelerationRegistry(BaseRegistry):
 
         Args:
             enable_logging: Whether to wrap acceleration operations with logging.
+
         """
         super().__init__(enable_logging=enable_logging)
 
@@ -56,6 +57,7 @@ class AccelerationRegistry(BaseRegistry):
 
         Raises:
             TypeError: If acceleration_type is not a string, AccelerationType, or iterable of these.
+
         """
         return self.register_object(acceleration_type)
 
@@ -66,6 +68,7 @@ class AccelerationRegistry(BaseRegistry):
             acceleration_type: The type of acceleration (e.g., 'quantization').
             func: The acceleration operation or class to register.
             name: Optional custom name; defaults to func.__name__.
+
         """
         self.add_object(acceleration_type, func, name)
 
@@ -81,6 +84,7 @@ class AccelerationRegistry(BaseRegistry):
 
         Raises:
             KeyError: If the acceleration operation is not registered.
+
         """
         return self.get_object(acceleration_type, name)
 
@@ -92,6 +96,7 @@ class AccelerationRegistry(BaseRegistry):
 
         Returns:
             Dictionary mapping acceleration types to lists of acceleration operation names.
+
         """
         return self.list_objects(acceleration_type)
 
@@ -104,6 +109,7 @@ class AccelerationRegistry(BaseRegistry):
 
         Returns:
             True if the acceleration operation exists, False otherwise.
+
         """
         return self.has_object(acceleration_type, name)
 

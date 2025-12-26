@@ -13,8 +13,7 @@ _module_cache = {}
 
 
 def __getattr__(name: str) -> Any:
-    """
-    Lazy loading implementation for operation submodules.
+    """Lazy loading implementation for operation submodules.
 
     This function is called when an attribute is not found in the module's namespace.
     It handles lazy loading of ckpt_transforms, load_ops, pre_load_ops, and post_load_ops
@@ -28,6 +27,7 @@ def __getattr__(name: str) -> Any:
 
     Raises:
         AttributeError: If the requested attribute is not available
+
     """
     if name in _module_cache:
         return _module_cache[name]

@@ -22,8 +22,7 @@ if TYPE_CHECKING:
     ]
 )
 class DistributedState:
-    """
-    Singleton class that provides distributed training utilities and state management.
+    """Singleton class that provides distributed training utilities and state management.
 
     This class acts as a global access point for distributed operations, providing
     decorators and context managers for distributed workflows
@@ -133,28 +132,28 @@ class DistributedState:
             torch.distributed.barrier()
 
     def on_main_process(self, func: Callable[..., Any]) -> Callable[..., Any]:
-        """
-        Decorator that only runs the decorated function on the main process.
+        """Decorator that only runs the decorated function on the main process.
 
         Args:
             func: The function to decorate
 
         Returns:
             The original function if on main process, else a no-op function
+
         """
         if self.is_main_process:
             return func
         return lambda *args, **kwargs: None
 
     def on_rank(self, rank: int):
-        """
-        Decorator that only runs the decorated function on the specified rank.
+        """Decorator that only runs the decorated function on the specified rank.
 
         Args:
             rank: The rank on which to run the function
 
         Returns:
             Decorator function
+
         """
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -165,14 +164,14 @@ class DistributedState:
         return decorator
 
     def on_last_process(self, func: Callable[..., Any]) -> Callable[..., Any]:
-        """
-        Decorator that only runs the decorated function on the last process.
+        """Decorator that only runs the decorated function on the last process.
 
         Args:
             func: The function to decorate
 
         Returns:
             The original function if on last process, else a no-op function
+
         """
         if self.rank == self.world_size - 1:
             return func
@@ -180,14 +179,14 @@ class DistributedState:
 
     @contextmanager
     def main_process_first(self):
-        """
-        Context manager where the main process goes first, others wait.
+        """Context manager where the main process goes first, others wait.
 
         Example:
             with distributed_state.main_process_first():
                 # Main process executes first
                 download_dataset()
             # All processes continue together
+
         """
         if not self.is_main_process:
             self.barrier()
@@ -199,11 +198,11 @@ class DistributedState:
 
     @contextmanager
     def rank_first(self, rank: int):
-        """
-        Context manager where the specified rank goes first, others wait.
+        """Context manager where the specified rank goes first, others wait.
 
         Args:
             rank: The rank that should go first
+
         """
         if self._engine:
             if self.rank != rank:
@@ -218,8 +217,7 @@ class DistributedState:
             yield
 
     def all_reduce(self, tensor, op: str = "mean"):
-        """
-        All-reduce operation on a tensor.
+        """All-reduce operation on a tensor.
 
         Args:
             tensor: Tensor to reduce
@@ -227,28 +225,28 @@ class DistributedState:
 
         Returns:
             Reduced tensor (unchanged if no engine available)
+
         """
         if self._engine:
             return self._engine.all_reduce(tensor, op)
         return tensor
 
     def gather(self, tensor):
-        """
-        Gather tensor from all processes.
+        """Gather tensor from all processes.
 
         Args:
             tensor: Tensor to gather
 
         Returns:
             Gathered tensors from all processes (single tensor list if no engine)
+
         """
         if self._engine:
             return self._engine.gather(tensor)
         return [tensor]
 
     def broadcast(self, obj: Any, src: int = 0) -> Any:
-        """
-        Broadcast object from source rank to all processes.
+        """Broadcast object from source rank to all processes.
 
         Args:
             obj: Object to broadcast
@@ -256,6 +254,7 @@ class DistributedState:
 
         Returns:
             Broadcasted object (unchanged if no engine available)
+
         """
         if self._engine:
             return self._engine.broadcast(obj, src)

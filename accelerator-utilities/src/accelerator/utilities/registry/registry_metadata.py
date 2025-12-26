@@ -15,6 +15,7 @@ class RegistrationMetadata:
         registry_type: The type of registry (e.g., 'loss', 'model')
         domain: The machine learning domain classification
         obj: The registered callable object
+
     """
 
     name: str
@@ -34,6 +35,7 @@ class RegistrationMetadata:
 
         Returns:
             RegistrationMetadata instance with current timestamp
+
         """
         return cls(
             name=name,
@@ -47,6 +49,7 @@ class RegistrationMetadata:
 
         Returns:
             Dictionary containing metadata (excluding the callable object)
+
         """
         return {
             "name": self.name,

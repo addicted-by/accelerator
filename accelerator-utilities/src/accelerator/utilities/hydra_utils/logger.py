@@ -7,8 +7,7 @@ from typing import Callable
 
 
 class PerfLogger:
-    """
-    Simple Performance logger to use as a context manager.
+    """Simple Performance logger to use as a context manager.
 
     Parameters
     ----------
@@ -23,6 +22,7 @@ class PerfLogger:
     -------
     >>> with PerfLogger(print) as pfl:
             time.sleep(1)
+
     """
 
     timers: dict[str, float] = {}

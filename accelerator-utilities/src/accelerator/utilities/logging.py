@@ -31,7 +31,7 @@ COLORS = {
 
 
 class ColoredFormatter(logging.Formatter):
-    """Custom formatter adding colors to levelname in console output"""
+    """Custom formatter adding colors to levelname in console output."""
 
     def format(self, record):
         levelname = record.levelname
@@ -42,7 +42,7 @@ class ColoredFormatter(logging.Formatter):
 
 
 class Logger:
-    """Singleton Logger class for the framework"""
+    """Singleton Logger class for the framework."""
 
     _instance = None
     _initialized = False
@@ -83,27 +83,24 @@ class Logger:
         Logger._initialized = True
 
     def _get_log_level(self) -> int:
-        """Get default log level"""
+        """Get default log level."""
         return DEFAULT_LOG_LEVEL
 
     def _configure_default_logger(self):
-        """Configure default logger with colored console and file handlers"""
+        """Configure default logger with colored console and file handlers."""
         base_logger = logging.getLogger(f"{DEFAULT_FRAMEWORK_NAME}")
 
-        # ---------- NEW: stop bubbling to the real root ----------
-        base_logger.propagate = False  # <-- ADD THIS LINE
+        base_logger.propagate = False
 
         self.root_logger = _RankZeroFilter(base_logger)
         self.log_file = Path(self.log_file) if self.log_file else None
         self.log_level = self._get_log_level()
         self.root_logger.setLevel(self.log_level)
 
-        # clear only **our** handlers; leave any pre-existing external ones alone
         for h in list(base_logger.handlers):
             if isinstance(h, (logging.StreamHandler, logging.FileHandler)):
                 base_logger.removeHandler(h)
 
-        # ---------- NEW: add console handler only if absent ----------
         if not any(isinstance(h, logging.StreamHandler) for h in base_logger.handlers):
             console_handler = logging.StreamHandler(sys.stdout)
             console_handler.setLevel(self.log_level)
@@ -117,7 +114,7 @@ class Logger:
         self.root_logger.debug("Framework logger initialized with default configuration")
 
     def _add_file_handler(self, log_file: Union[str, Path]):
-        """Add a file handler to the root logger"""
+        """Add a file handler to the root logger."""
         log_file = Path(log_file)
         try:
             log_dir = log_file.parent
@@ -146,7 +143,7 @@ class Logger:
             self.root_logger.warning(f"Could not create log file: {e}. Logging to console only.")
 
     def _update_log_file(self, log_file: Union[str, Path]):
-        """Update the log file configuration for all loggers"""
+        """Update the log file configuration for all loggers."""
         log_file = Path(log_file)
         current_log_file = Path(self.log_file) if self.log_file else None
 
@@ -171,8 +168,7 @@ class Logger:
         # self.root_logger.info(f"Updated log file to: {log_file}")
 
     def get_logger(self, name: str = None) -> logging.Logger:
-        """
-        Get a logger instance for the specified name.
+        """Get a logger instance for the specified name.
         If name is None, returns the root framework logger.
 
         Args:
@@ -180,6 +176,7 @@ class Logger:
 
         Returns:
             logging.Logger: Configured logger instance
+
         """
         if name is None:
             logger = self.root_logger
@@ -197,8 +194,7 @@ class Logger:
 
 
 def get_logger(name: str = None, log_file: Union[str, Path] = None) -> logging.Logger:
-    """
-    Get a configured logger for any module in the framework.
+    """Get a configured logger for any module in the framework.
 
     Args:
         name: Optional name for the logger (typically module/component name)
@@ -206,14 +202,14 @@ def get_logger(name: str = None, log_file: Union[str, Path] = None) -> logging.L
 
     Returns:
         logging.Logger: Configured logger instance
+
     """
     framework_logger = Logger(log_file)
     return framework_logger.get_logger(name)
 
 
 def set_log_file(log_file: Union[str, Path]) -> None:
-    """
-    Set or update the log file used by all loggers.
+    """Set or update the log file used by all loggers.
     This can be called at any time to change where logs are written.
 
     Args:
@@ -221,6 +217,7 @@ def set_log_file(log_file: Union[str, Path]) -> None:
 
     Returns:
         None
+
     """
     log_file = Path(log_file) if log_file else None
     logger_instance = Logger()
@@ -255,11 +252,11 @@ class _RankZeroFilter:
 
 
 def log_function_call(level: str = "DEBUG"):
-    """
-    Decorator to log function calls, arguments, and return values.
+    """Decorator to log function calls, arguments, and return values.
 
     Args:
         level: Logging level to use
+
     """
 
     def decorator(func):

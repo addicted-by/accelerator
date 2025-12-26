@@ -1,5 +1,4 @@
-"""
-Base distributed backend interface for the accelerator runtime engine.
+"""Base distributed backend interface for the accelerator runtime engine.
 
 This module defines the abstract base class for distributed training backends
 that can be used with the accelerator framework. The DistributedBackend class
@@ -26,6 +25,7 @@ Example:
     ...     def prepare_model(self, model):
     ...         # Wrap model for distributed training
     ...         return distributed_model
+
 """
 
 from abc import ABC, abstractmethod
@@ -41,8 +41,7 @@ T = TypeVar("T", bound="_DefaultConfig")
 
 
 class DistributedBackend(ABC):
-    """
-    Abstract base class for distributed training backends.
+    """Abstract base class for distributed training backends.
 
     This class defines the interface that all distributed training backends must
     implement to work with the accelerator framework. It provides a unified API
@@ -77,6 +76,7 @@ class DistributedBackend(ABC):
         ...
         >>> backend = MyBackend({"world_size": 4})
         >>> backend.setup()
+
     """
 
     def __init__(self, config: dict[str, Any], default_config: type[T] = _DefaultConfig):
@@ -85,8 +85,7 @@ class DistributedBackend(ABC):
     @property
     @abstractmethod
     def device(self) -> torch.DeviceObjType:
-        """
-        Get the device used by this distributed backend.
+        """Get the device used by this distributed backend.
 
         This property returns the torch device object that represents the
         hardware device (CPU, GPU, etc.) that this backend is configured
@@ -95,6 +94,7 @@ class DistributedBackend(ABC):
         Returns:
             torch.DeviceObjType: The torch device object representing the
                 hardware device used by this backend.
+
         """
         pass
 

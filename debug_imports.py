@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Debug imports to find the issue.
-"""
+"""Debug imports to find the issue."""
 
 import os
 import sys

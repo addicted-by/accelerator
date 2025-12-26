@@ -14,8 +14,7 @@ def resolve_checkpoint_path(
     run_cfg: DictConfig,
     prev_cm: Optional["StepConfigManager"],
 ) -> None:
-    """
-    If `run_cfg.load_from_previous` is True and a previous StepConfigManager
+    """If `run_cfg.load_from_previous` is True and a previous StepConfigManager
     is available, copy the checkpoint directory into
     `run_cfg.paths.checkpoint_path`.
 
@@ -34,7 +33,7 @@ def resolve_checkpoint_path(
 
 
 def make_step_cfg(full_cfg: DictConfig, step_name: str) -> DictConfig:
-    """ """
+    """PLACEHOLDER."""
     meta = full_cfg.pipeline.active_steps[step_name]
 
     # step_cfg = copy.deepcopy(full_cfg)
@@ -54,8 +53,7 @@ def make_step_cfg(full_cfg: DictConfig, step_name: str) -> DictConfig:
 
 
 class StepConfigManager:
-    """
-    Receives a fully composed DictConfig for a single step, creates
+    """Receives a fully composed DictConfig for a single step, creates
     the necessary directory structure, and writes a resolved copy of
     the configuration next to the step files.
     """
@@ -85,8 +83,7 @@ class StepConfigManager:
         return self._cfg.paths
 
     def _prepare_paths(self) -> None:
-        """
-        Creates the folder structure for one step and a global log view.
+        """Creates the folder structure for one step and a global log view.
 
         Real folders
         ------------

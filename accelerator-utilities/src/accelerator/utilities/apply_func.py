@@ -7,7 +7,7 @@ from typing import Any, Callable, Optional, Union
 
 
 def is_namedtuple(obj: object) -> bool:
-    """Check if object is namedtuple"""
+    """Check if object is namedtuple."""
     return isinstance(obj, tuple) and hasattr(obj, "_asdict") and hasattr(obj, "_fields")
 
 

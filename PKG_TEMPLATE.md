@@ -34,6 +34,8 @@ Short tagline or one-liner describing the package.
 .
 ├── .envs/                # Environment configs
 ├── src/                  # Project / package source code (importable)
+├── notebooks/            # Jupyter notebooks for playground
+├── example/              # Examples or tutorials for the usage
 ├── tests/                # Unit & integration tests
 ├── docs/                 # Documentation
 │   └── adr/              # Architecture Decision Records (optional)
@@ -87,4 +89,4 @@ Which pipelines run and why
 
 ## Ownership 👥
 
-Project code owners
+project code owners

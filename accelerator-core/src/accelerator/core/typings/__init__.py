@@ -1,6 +1,4 @@
-"""
-Core type definitions and base abstractions for the Accelerator framework.
-"""
+"""Core type definitions and base abstractions for the Accelerator framework."""
 
 from .base import (
     CONTEXT,

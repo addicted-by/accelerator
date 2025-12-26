@@ -13,9 +13,7 @@ METADATA_VERSION = "1.0"
 
 
 def _filter_latest_ops(ops: list[AccelerationOperationBase]) -> list[AccelerationOperationBase]:
-    """
-    Collapse a list of AccelerationOperation so that for each distinct only the last one remains.
-    """
+    """Collapse a list of AccelerationOperation so that for each distinct only the last one remains."""
     seen: list[str] = list()
     filtered: list[tuple[str, AccelerationOperationBase]] = []
     for op in reversed(ops):
@@ -41,6 +39,7 @@ class MetadataHandler:
 
         Returns:
             Dictionary containing model metadata
+
         """
         if not isinstance(model, AcceleratedModel):
             return {}
@@ -63,6 +62,7 @@ class MetadataHandler:
 
         Raises:
             RuntimeError: If configurations don't match
+
         """
         ignore_model = self.config.get("ignore_model_keys", [])
         ignore_accel = self.config.get("ignore_acceleration_keys", [])
@@ -91,14 +91,14 @@ class MetadataHandler:
             logger.warning("No acceleration metadata found in checkpoint")
 
     def _format_diff(self, diff: dict) -> str:
-        """
-        Format configuration differences for better readability.
+        """Format configuration differences for better readability.
 
         Args:
             diff: Dictionary of differences from _deep_diff
 
         Returns:
             Formatted string representation of differences
+
         """
         if not diff:
             return "No differences"
@@ -125,6 +125,7 @@ class MetadataHandler:
 
         Returns:
             Dictionary containing differences
+
         """
         diff = {}
         for key in set(d1.keys()) | set(d2.keys()):

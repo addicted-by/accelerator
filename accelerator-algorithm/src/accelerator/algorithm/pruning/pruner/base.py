@@ -39,6 +39,7 @@ class BasePruner:
             postprocess_output: Function to process model outputs before loss calculation.
             pruner_cfg: Configuration dictionary for the pruner.
             **kwargs: Additional configuration options.
+
         """
         self.experiment_path = Path(experiment_path) if experiment_path else Path(os.getcwd())
         self.log_file = log_file if log_file else sys.stdout
@@ -70,6 +71,7 @@ class BasePruner:
 
         Returns:
             The pruned model.
+
         """
         pass
 
@@ -92,6 +94,7 @@ class BasePruner:
 
         Returns:
             Average loss value.
+
         """
         if self.verbose:
             print(f"Loss calculation with grad: {req_grad}")
@@ -135,6 +138,7 @@ class BasePruner:
 
         Returns:
             Loss value (and optionally model outputs).
+
         """
         with torch.set_grad_enabled(req_grad):
             net_result = model(*inputs)
@@ -169,6 +173,7 @@ class BasePruner:
             dataloader: DataLoader for evaluation.
             stage: Stage identifier ('before' or 'after').
             req_grad: Whether to compute gradients.
+
         """
         with torch.no_grad():
             flops, total_params = count_ops_and_params(model=model, example_inputs=self.input_example)
@@ -202,6 +207,7 @@ class BasePruner:
 
         Returns:
             Pruned model.
+
         """
         model.train(False)
         fuse_batchnorm(model)
@@ -259,6 +265,7 @@ class BasePruner:
 
         Returns:
             Dictionary containing pruning statistics.
+
         """
         return self.stats
 
@@ -267,6 +274,7 @@ class BasePruner:
 
         Returns:
             YAML-formatted string of pruner attributes.
+
         """
         attrs = {k: str(v) for k, v in vars(self).items() if not callable(v) and not k.startswith("_")}
         return "\n".join(

@@ -1,5 +1,4 @@
-"""
-Accelerated model wrapper for PyTorch models.
+"""Accelerated model wrapper for PyTorch models.
 
 This module provides the AcceleratedModel class which wraps PyTorch models
 with additional acceleration capabilities, gamma correction, pixel shuffling,
@@ -45,8 +44,7 @@ log = get_logger(__name__)
 
 @dataclass
 class ModelDefaultConfig(_DefaultConfig):
-    """
-    Configuration structure for AcceleratedModel initialization.
+    """Configuration structure for AcceleratedModel initialization.
 
     This dataclass defines the default configuration parameters used to
     initialize and configure an AcceleratedModel instance. It extends
@@ -72,6 +70,7 @@ class ModelDefaultConfig(_DefaultConfig):
         ...     collate_fn=None,
         ...     separate_fn=None
         ... )
+
     """
 
     gamma: Optional[ConfigType] = field(default_factory=GammaDefaultConfig)
@@ -84,8 +83,7 @@ class ModelDefaultConfig(_DefaultConfig):
 @APIDesc.developer(dev_info="Ryabykin Alexey r00926208")
 @APIDesc.status(status_level="Beta")
 class AcceleratedModel(torch.nn.Module):
-    """
-    Advanced PyTorch model wrapper with acceleration and processing capabilities.
+    """Advanced PyTorch model wrapper with acceleration and processing capabilities.
 
     AcceleratedModel extends torch.nn.Module to provide a comprehensive wrapper
     around standard PyTorch models with additional features for computer vision
@@ -148,6 +146,7 @@ class AcceleratedModel(torch.nn.Module):
             model outputs
         regularization_term (Optional[torch.Tensor]): Accumulated regularization
             value, None if no regularization is active
+
     """
 
     _regularization_term: torch.Tensor = torch.tensor([0.0])
@@ -158,6 +157,7 @@ class AcceleratedModel(torch.nn.Module):
         Args:
             model: The core PyTorch model to wrap.
             cfg: Configuration containing model settings.
+
         """
         super().__init__()
 
@@ -177,13 +177,13 @@ class AcceleratedModel(torch.nn.Module):
         self._init_components()
 
     def _init_components(self):
-        """Initialize all required components for model:
+        """Initialize all required components for model.
 
         Components:
             - gamma: See info in `accelerator.runtime.model.gamma` package
-            - d2s:
-            - collate_fn:
-            - separate_fn:
+            - d2s: PLACEHOLDER.
+            - collate_fn: PLACEHOLDER.
+            - separate_fn: PLACEHOLDER.
         """
         self._init_gamma()
         self._init_pixel_shuffle()
@@ -234,6 +234,7 @@ class AcceleratedModel(torch.nn.Module):
 
         Raises:
             NotImplementedError: If the function cannot be imported or found.
+
         """
         try:
             package, name = collate_fn_name.rsplit(".", 1)
@@ -330,6 +331,7 @@ class AcceleratedModel(torch.nn.Module):
 
         Raises:
             KeyError: If an acceleration operation is not registered.
+
         """
         for accel_type, accel_state_dict in acceleration_metadata.items():
             accel_cfg = accel_state_dict["config"]
@@ -381,6 +383,7 @@ class AcceleratedModel(torch.nn.Module):
 
         Returns:
             List of strings containing parameter information.
+
         """
         total_params = sum(p.numel() for p in self.parameters())
         trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
@@ -398,6 +401,7 @@ class AcceleratedModel(torch.nn.Module):
 
         Returns:
             List of strings containing component configuration and status.
+
         """
         lines = ["  Configuration:"]
         lines.append(f"    Gamma: {'enabled' if self.gamma else 'disabled'}")
@@ -430,6 +434,7 @@ class AcceleratedModel(torch.nn.Module):
 
         Returns:
             List of strings containing acceleration operation information.
+
         """
         if self._acceleration_operations:
             lines = ["  Applied Accelerations:"]

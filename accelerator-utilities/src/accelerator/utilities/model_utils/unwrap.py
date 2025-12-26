@@ -2,8 +2,7 @@ import torch
 
 
 def unwrap_model(model):
-    """
-    Unwraps a model from `torch.nn.parallel.DistributedDataParallel`
+    """Unwraps a model from `torch.nn.parallel.DistributedDataParallel`
     or compiled model to access its underlying model.
     """
     true_model = model

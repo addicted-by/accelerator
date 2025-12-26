@@ -35,6 +35,7 @@ def create_progress_bar_callback(kind: str = "tqdm") -> BaseCallback:
 
     Raises:
         ValueError: If an unsupported progress bar type is provided.
+
     """
     kind = kind.lower()
     if kind == "rich":
@@ -54,6 +55,7 @@ def create_always_on_callbacks(progress_bar: Optional[str] = None) -> list[BaseC
 
     Returns:
         List of instantiated callback objects.
+
     """
     callbacks = [
         create_step_epoch_tracker_callback(),

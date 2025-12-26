@@ -28,6 +28,7 @@ class OperationRegistry(BaseRegistry):
 
         Args:
             enable_logging: Whether to wrap operations with logging.
+
         """
         super().__init__(enable_logging=enable_logging)
 
@@ -46,6 +47,7 @@ class OperationRegistry(BaseRegistry):
         Raises:
             TypeError: If operation_type is not a string, OperationType, or iterable of these.
             ValueError: If operation_type is not a valid operation type.
+
         """
         return self.register_object(operation_type)
 
@@ -59,6 +61,7 @@ class OperationRegistry(BaseRegistry):
 
         Raises:
             ValueError: If operation_type is invalid.
+
         """
         self.add_object(operation_type, func, name)
 
@@ -74,6 +77,7 @@ class OperationRegistry(BaseRegistry):
 
         Raises:
             KeyError: If the operation is not registered.
+
         """
         return self.get_object(operation_type, name)
 
@@ -85,6 +89,7 @@ class OperationRegistry(BaseRegistry):
 
         Returns:
             Dictionary mapping operation types to lists of operation names.
+
         """
         return self.list_objects(operation_type)
 
@@ -97,6 +102,7 @@ class OperationRegistry(BaseRegistry):
 
         Returns:
             True if the operation exists, False otherwise.
+
         """
         return self.has_object(operation_type, name)
 

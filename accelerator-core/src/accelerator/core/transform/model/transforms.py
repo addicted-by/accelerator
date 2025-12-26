@@ -26,6 +26,7 @@ def set_eval_mode(model: nn.Module) -> None:
     >>> model = MyModel()
     >>> set_eval_mode(model)
     >>> assert not model.training
+
     """
     model.eval()
 
@@ -45,6 +46,7 @@ def set_train_mode(model: nn.Module) -> None:
     >>> model = MyModel()
     >>> set_train_mode(model)
     >>> assert model.training
+
     """
     model.train()
 
@@ -69,6 +71,7 @@ def unfreeze_parameters(model: nn.Module) -> None:
     >>> # Unfreeze them
     >>> unfreeze_parameters(model)
     >>> assert all(p.requires_grad for p in model.parameters())
+
     """
     for param in model.parameters():
         param.requires_grad = True
@@ -113,6 +116,7 @@ def fuse_batch_norm(
     >>> model = MyModel()
     >>> model.eval()  # Must be in eval mode
     >>> fuse_batch_norm(model)
+
     """
     if fx_model is None:
         fx_model: torch.fx.GraphModule = torch.fx.symbolic_trace(model)
@@ -143,6 +147,7 @@ def _inplace_conv_bn_fusion(conv: nn.Conv2d, bn: nn.BatchNorm2d) -> None:
         Convolutional layer to fuse into.
     bn : nn.BatchNorm2d
         Batch normalization layer to fuse.
+
     """
     assert not (conv.training or bn.training), "Fusion only for eval!"
     conv.weight.data, bias = _fuse_conv_bn_weights(
@@ -193,6 +198,7 @@ def _fuse_conv_bn_weights(
     -------
     tuple
         Fused weights and bias tensors.
+
     """
     if conv_b is None:
         conv_b = torch.zeros_like(bn_rm)
@@ -220,6 +226,7 @@ def _get_parent_name(qualname: str) -> tuple:
     -------
     tuple
         Parent path and name (e.g., ('foo.bar', 'baz')).
+
     """
     *parent, name = qualname.rsplit(".", 1)
     return parent[0] if parent else "", name
@@ -239,6 +246,7 @@ def _get_parent_module(module: nn.Module, attr_path: str) -> nn.Module:
     -------
     nn.Module
         Parent module containing the attribute.
+
     """
     parent_name, _ = _get_parent_name(attr_path)
 
@@ -264,6 +272,7 @@ def _get_attr_by_name(module: nn.Module, name: str) -> nn.Module:
     -------
     nn.Module
         The nested module.
+
     """
     for s in name.split("."):
         module = getattr(module, s)

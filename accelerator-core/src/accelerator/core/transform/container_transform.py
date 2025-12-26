@@ -59,6 +59,7 @@ class ContainerCondition:
         ...         {'path': 'persistent.config.mode', 'operator': 'equal', 'value': 'finetune'}
         ...     ]
         ... })
+
     """
 
     OPERATORS = {
@@ -78,6 +79,7 @@ class ContainerCondition:
         Args:
             condition_config: Configuration dict specifying conditions to evaluate.
                             Can be a single condition or multiple conditions with logic.
+
         """
         self.condition_config = condition_config or {}
 
@@ -102,6 +104,7 @@ class ContainerCondition:
 
         Returns:
             True if condition is met, False otherwise.
+
         """
         if not self.condition_config:
             return True
@@ -121,6 +124,7 @@ class ContainerCondition:
 
         Returns:
             True if condition is met, False otherwise.
+
         """
         path = condition.get("path")
         operator = condition.get("operator")
@@ -161,6 +165,7 @@ class ContainerCondition:
 
         Returns:
             True if combined condition is met, False otherwise.
+
         """
         conditions = self.condition_config.get("conditions", [])
         logic = self.condition_config.get("logic", "AND").upper()
@@ -211,6 +216,7 @@ class ContainerPrinter:
         ...     'banner_char': '-',
         ...     'max_items': 5
         ... })
+
     """
 
     def __init__(self, label: str, print_config: Union[bool, dict[str, Any]]):
@@ -219,6 +225,7 @@ class ContainerPrinter:
         Args:
             label: Label to use in output (e.g., 'IN' or 'OUT').
             print_config: Boolean or dict with printing configuration.
+
         """
         self.label = label
 
@@ -242,6 +249,7 @@ class ContainerPrinter:
 
         Args:
             context: The Context instance to print information from.
+
         """
         output_lines = []
 
@@ -288,6 +296,7 @@ class ContainerPrinter:
 
         Returns:
             Formatted string representation of the value.
+
         """
         # indent = " " * (self.indent * indent_level)
 
@@ -385,6 +394,7 @@ class ContainerUpdateTransform:
         ...     trans_opt={'type': 'CrossEntropyLoss'},
         ...     condition={'path': 'persistent.config.use_loss', 'operator': 'equal', 'value': True}
         ... )
+
     """
 
     def __init__(
@@ -437,6 +447,7 @@ class ContainerUpdateTransform:
         Raises:
             ValueError: If trans_opt is provided but missing 'type' key.
             ValueError: If trans_inputs format is invalid.
+
         """
         # Store output paths
         self.items = items
@@ -515,6 +526,7 @@ class ContainerUpdateTransform:
 
         Returns:
             ContainerPrinter instance.
+
         """
         return ContainerPrinter(label, print_config)
 
@@ -538,6 +550,7 @@ class ContainerUpdateTransform:
 
         Raises:
             RuntimeError: If transform execution fails.
+
         """
         # Step 1: Print input values if enabled
         if self.print_in:

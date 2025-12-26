@@ -15,20 +15,20 @@ class BaseCallback(abc.ABC, _HashableConfigMixin):
 
     @property
     def priority(self) -> int:
-        """Execution order (lower numbers first)"""
+        """Execution order (lower numbers first)."""
         return 100
 
     @property
     def critical(self) -> bool:
-        """Whether to stop training if this callback fails"""
+        """Whether to stop training if this callback fails."""
         return True
 
     def on_acceleration_begin(self, context: "Context"):
-        """Called at the beginning of acceleration: some components could be set here"""
+        """Called at the beginning of acceleration: some components could be set here."""
         pass
 
     def on_acceleration_end(self, context: "Context"):
-        """Called at the end of acceleration: some components could be reset here"""
+        """Called at the end of acceleration: some components could be reset here."""
         pass
 
     # Training lifecycle hooks

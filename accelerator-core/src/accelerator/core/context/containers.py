@@ -38,6 +38,7 @@ class BaseLifecycleContainer(ABC):
 
         Raises:
             PathResolutionError: If the path cannot be resolved
+
         """
         parts = path.split(".", 1)
         sub_container = parts[0]
@@ -71,6 +72,7 @@ class BaseLifecycleContainer(ABC):
 
         Raises:
             PathResolutionError: If the path cannot be resolved
+
         """
         parts = path.split(".", 1)
         sub_container = parts[0]
@@ -104,6 +106,7 @@ class BaseLifecycleContainer(ABC):
         Raises:
             KeyError: If a key in the path is not found
             TypeError: If trying to navigate through a non-dict
+
         """
         keys = path.split(".")
         current = data
@@ -138,6 +141,7 @@ class BaseLifecycleContainer(ABC):
 
         Raises:
             TypeError: If trying to create nested path through non-dict
+
         """
         keys = path.split(".")
         current = data
@@ -168,6 +172,7 @@ class BaseLifecycleContainer(ABC):
 
         Args:
             d: Dictionary to clean up
+
         """
         keys_to_remove = []
         for key, value in list(d.items()):

@@ -26,7 +26,7 @@ logger = get_logger(__name__)
 
 
 class Context(BaseContainer):
-    """Class used only as a container for all required components"""
+    """Class used only as a container for all required components."""
 
     def __init__(self, config: Optional[DictConfig] = None):
         self.config = config or DictConfig({})
@@ -68,6 +68,7 @@ class Context(BaseContainer):
             >>> context.get_item('per_batch.input.rgb')
             >>> context.get_item('per_step.loss.total')
             >>> context.get_item('persistent.model.state')
+
         """
         parts = path.split(".", 1)
         if len(parts) < 2:
@@ -94,6 +95,7 @@ class Context(BaseContainer):
             >>> context.set_item('per_batch.input.rgb', tensor)
             >>> context.set_item('per_step.loss.total', 0.5, use_weakref=False)
             >>> context.set_item('persistent.additional.pca_mat', matrix)
+
         """
         parts = path.split(".", 1)
         if len(parts) < 2:
@@ -114,6 +116,7 @@ class Context(BaseContainer):
 
         Raises:
             ValueError: If scope is not recognized
+
         """
         if scope not in self._CONTAINERS:
             raise ValueError(f"Unknown lifecycle scope: {scope}. " f"Available: {list(self._CONTAINERS.keys())}")

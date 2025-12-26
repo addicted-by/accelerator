@@ -9,8 +9,7 @@ from ..base import BaseTransform
 @APIDesc.developer(dev_info="Ryabykin Alexey r00926208")
 @APIDesc.status(status_level="beta")
 class BaseLossTransform(BaseTransform, abc.ABC):
-    """
-    Abstract base class for transformations applied to predictions and ground truths.
+    """Abstract base class for transformations applied to predictions and ground truths.
 
     Subclasses MUST implement EITHER _apply_joint OR _apply_single.
     The class will dynamically determine the mode of operation based on which of these
@@ -22,20 +21,22 @@ class BaseLossTransform(BaseTransform, abc.ABC):
                     or specified in the config.
         _mode (str): Internal flag set to 'joint' or 'single' based on detected
                      implementation.
+
     """
 
     def __init__(self, **kwargs):
-        """
-        Initialize the transformation and determine its mode of operation.
+        """Initialize the transformation and determine its mode of operation.
 
         Args:
             config (Optional[Dict[str, Any]], optional): Configuration parameters.
                 Supports 'name' (str) to override the default name.
                 Defaults to None, resulting in an empty config.
+            kwargs: PLACEHOLDER
 
         Raises:
             TypeError: If the subclass implements both _apply_joint and _apply_single,
                        or if it implements neither.
+
         """
         super().__init__(config=kwargs)
 
@@ -57,8 +58,7 @@ class BaseLossTransform(BaseTransform, abc.ABC):
             raise TypeError(f"Transform '{self.name}' must implement either '_apply_joint' or '_apply_single'.")
 
     def _apply_joint(self, prediction: Any, ground_truth: Any, **kwargs) -> tuple[Any, Any, dict[str, Any]]:
-        """
-        Apply transformation considering both inputs together.
+        """Apply transformation considering both inputs together.
         MUST be implemented by subclasses if this is the intended mode of operation.
 
         Args:
@@ -71,12 +71,12 @@ class BaseLossTransform(BaseTransform, abc.ABC):
             - Transformed prediction
             - Transformed ground truth
             - Dictionary with metadata about the joint transformation.
+
         """
         raise NotImplementedError("This method should be overridden by subclasses choosing joint application.")
 
     def _apply_single(self, tensor: Any, **kwargs) -> tuple[Any, dict[str, Any]]:
-        """
-        Apply transformation to a single tensor independently.
+        """Apply transformation to a single tensor independently.
         MUST be implemented by subclasses if this is the intended mode of operation.
 
         Args:
@@ -87,13 +87,13 @@ class BaseLossTransform(BaseTransform, abc.ABC):
             Tuple containing:
             - Transformed tensor
             - Dictionary with metadata about the single tensor transformation.
+
         """
         raise NotImplementedError("This method should be overridden by subclasses choosing separate application.")
 
     @APIDesc.status(status_level="Internal Use Only")
     def apply(self, prediction: Any, ground_truth: Any, **kwargs) -> tuple[Any, Any, dict[str, Any]]:
-        """
-        Applies the transformation based on the dynamically detected mode.
+        """Applies the transformation based on the dynamically detected mode.
 
         This method acts as a dispatcher, calling either _apply_joint or
         _apply_single based on the detected implementation. It also handles metadata
@@ -115,6 +115,7 @@ class BaseLossTransform(BaseTransform, abc.ABC):
             RuntimeError: If the mode was not correctly determined (should be caught by __init__).
             Exception: Propagates exceptions raised during the execution of
                        the underlying transformation methods.
+
         """
         meta = {"transform_name": self.name, "apply_mode": self._mode}
 

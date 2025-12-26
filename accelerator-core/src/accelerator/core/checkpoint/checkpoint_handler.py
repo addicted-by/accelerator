@@ -33,6 +33,7 @@ class CheckpointHandler:
         Args:
             checkpoint_data: Dictionary containing checkpoint data
             save_path: Path where to save the checkpoint
+
         """
         try:
             torch.save(checkpoint_data, save_path)
@@ -51,10 +52,11 @@ class CheckpointHandler:
 
         Returns:
             Dictionary containing checkpoint data
+
         """
         try:
             weights_only = self.config.get("weights_only", True)
-            return torch.load(path, map_location=device, weights_only=weights_only)
+            return torch.load(path, map_location=device, weights_only=weights_only)  # nosec B614
         except Exception as e:
             error_msg = f"Failed to load checkpoint {path}: {str(e)}"
             logger.error(error_msg)
@@ -66,6 +68,7 @@ class CheckpointHandler:
         Args:
             save_path: Path where checkpoint was saved
             metrics: Dictionary of metrics for the checkpoint
+
         """
         metrics["timestamp"] = datetime.now().timestamp()
         self.checkpoint_history[str(save_path)] = metrics
@@ -79,6 +82,7 @@ class CheckpointHandler:
             metrics: Current metrics
             current_path: Path to current checkpoint
             save_dir: Directory to save checkpoints
+
         """
         monitor = self.config.get("monitor")
 

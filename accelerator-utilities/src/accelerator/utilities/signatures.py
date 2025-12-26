@@ -10,6 +10,7 @@ def get_documentation(obj: Any) -> str:
 
     Returns:
         Cleaned and truncated documentation string
+
     """
     try:
         doc = inspect.getdoc(obj)
@@ -45,6 +46,7 @@ def get_method_info(cls: type) -> list[str]:
 
     Returns:
         List of formatted method information strings
+
     """
     methods = []
     try:
@@ -88,6 +90,7 @@ def get_function_signature(func: Callable) -> str:
 
     Returns:
         Formatted signature string
+
     """
     try:
         sig = inspect.signature(func)
@@ -118,6 +121,7 @@ def get_class_signature(cls: type) -> str:
 
     Returns:
         Formatted constructor signature string
+
     """
     try:
         init_sig = inspect.signature(cls.__init__)
@@ -149,6 +153,7 @@ def format_class_info(name: str, cls: type) -> str:
 
     Returns:
         Formatted class information string
+
     """
     info_parts = [f"{name} (class)"]
 
@@ -176,6 +181,7 @@ def format_function_info(name: str, func: Callable) -> str:
 
     Returns:
         Formatted function information string
+
     """
     info_parts = [f"{name} (function)"]
 
@@ -197,6 +203,7 @@ def get_object_info(name: str, obj: Callable) -> str:
 
     Returns:
         Formatted string with object information
+
     """
     try:
         if inspect.isclass(obj):

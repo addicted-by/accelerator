@@ -1,7 +1,6 @@
-"""
-Custom tags:
+"""Custom tags:
 - "mlflow.run_id": Custom run identifier
-- "mlflow.artifact_location": Custom artifact storage location
+- "mlflow.artifact_location": Custom artifact storage location.
 """
 import pathlib
 import re
@@ -69,9 +68,7 @@ def _validate_custom_artifact_location(artifact_location):
 
 
 def patched_create_run(self, experiment_id, user_id, start_time, tags, run_name):
-    """
-    Patched version of SqlAlchemyStore.create_run that supports custom run_id and artifact_location.
-    """
+    """Patched version of SqlAlchemyStore.create_run that supports custom run_id and artifact_location."""
     with self.ManagedSessionMaker() as session:
         experiment = self.get_experiment(experiment_id)
         self._check_experiment_is_active(experiment)
@@ -136,9 +133,7 @@ def patched_create_run(self, experiment_id, user_id, start_time, tags, run_name)
 
 
 def apply_patch():
-    """
-    Apply the patch to SqlAlchemyStore.create_run method.
-    """
+    """Apply the patch to SqlAlchemyStore.create_run method."""
     from mlflow.store.tracking.sqlalchemy_store import SqlAlchemyStore
 
     SqlAlchemyStore._original_create_run = SqlAlchemyStore.create_run
@@ -152,9 +147,7 @@ def apply_patch():
 
 
 def remove_patch():
-    """
-    Remove the patch and restore original create_run method.
-    """
+    """Remove the patch and restore original create_run method."""
     from mlflow.store.tracking.sqlalchemy_store import SqlAlchemyStore
 
     if hasattr(SqlAlchemyStore, "_original_create_run"):

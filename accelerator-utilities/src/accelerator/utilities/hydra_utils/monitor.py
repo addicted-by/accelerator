@@ -59,8 +59,7 @@ class ProcessTimer(multiprocessing.Process):
 
 
 class ResourceMonitorService:
-    """
-    A Service that monitor a PID with a certain frequency to a file.
+    """A Service that monitor a PID with a certain frequency to a file.
 
     A threading or a process backend is available. The process backend is recommended
     for single core application that do not release the GIL. The threading backend is
@@ -79,6 +78,7 @@ class ResourceMonitorService:
         Base name for the monitoring trace file.
     gpu_monit: bool
         If True, also monitor gpu usage and memory, default False.
+
     """
 
     def __init__(

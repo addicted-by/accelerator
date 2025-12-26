@@ -14,9 +14,7 @@ log = get_logger(__name__)
 
 
 def get_distributed_args(cfg: DictConfig) -> tuple[int, int]:
-    """
-    PLACEHOLDER. NEED TO BE IMPROVED FOR FURTHER!
-    """
+    """PLACEHOLDER. NEED TO BE IMPROVED FOR FURTHER."""
     nnodes = int(getattr(cfg, "nnodes", 1))
     nproc = int(getattr(cfg, "nproc_per_node", 8))
     return nnodes, nproc

@@ -39,8 +39,7 @@ class InputValidator:
         labels: Union[torch.Tensor, dict[str, torch.Tensor]],
         config: ValidationConfig = None,
     ) -> None:
-        """
-        Validate input predictions and labels.
+        """Validate input predictions and labels.
 
         Args:
             predictions: Model predictions to validate
@@ -49,6 +48,7 @@ class InputValidator:
 
         Raises:
             ValidationError: If inputs are invalid
+
         """
         config = config or ValidationConfig()
 

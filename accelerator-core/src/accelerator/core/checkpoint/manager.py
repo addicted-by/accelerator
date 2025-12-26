@@ -89,6 +89,7 @@ class CheckpointManager:
 
         Args:
             cfg: Configuration object with 'paths', 'checkpoint', and 'acceleration' sections.
+
         """
         self.setup_checkpoint_config(cfg)
 
@@ -111,8 +112,7 @@ class CheckpointManager:
         epoch: int = 0,
         **kwargs,
     ) -> str:
-        """
-        Save a model checkpoint with acceleration metadata and metrics.
+        """Save a model checkpoint with acceleration metadata and metrics.
 
         This method:
         1. Determines if the model is accelerated or raw
@@ -123,6 +123,7 @@ class CheckpointManager:
 
         Returns:
             Path to the saved checkpoint file
+
         """
         model = unwrap_model(model_)
         try:
@@ -214,8 +215,9 @@ class CheckpointManager:
         cfg_override: Optional[dict[str, Any]] = None,
     ) -> dict[str, Any]:
         """Static method to load checkpoints.
+
         TODO: realize cfg.model_cfg_override
-        TODO: realize cfg.acceleration_cfg_override
+        TODO: realize cfg.acceleration_cfg_override.
         """
         cm = CheckpointManager()
         checkpoint_path = cm._resolve_path(path)
@@ -382,6 +384,7 @@ class CheckpointManager:
 
         Raises:
             ValueError: If any operation is not registered.
+
         """
         if ops_list is None:
             return

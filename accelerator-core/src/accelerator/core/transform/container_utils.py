@@ -38,6 +38,7 @@ class ContainerGetItem:
         ... )
         >>> args, kwargs = getter(context)
         >>> # args = [rgb_tensor], kwargs = {'pca_mat': pca_matrix}
+
     """
 
     def __init__(self, args: Optional[list[str]] = None, kwargs: Optional[dict[str, str]] = None):
@@ -51,6 +52,7 @@ class ContainerGetItem:
 
         Note:
             Both args and kwargs can be empty for passthrough transforms.
+
         """
         self.args_paths = args or []
         self.kwargs_paths = kwargs or {}
@@ -74,6 +76,7 @@ class ContainerGetItem:
             >>> getter = ContainerGetItem(args=['per_batch.input.rgb'])
             >>> args, kwargs = getter(context)
             >>> rgb_tensor = args[0]
+
         """
         args = []
         kwargs = {}
@@ -117,6 +120,7 @@ class ContainerSetItem:
         >>> # Set multiple values
         >>> setter = ContainerSetItem(['per_step.prediction.output', 'per_step.loss.total'])
         >>> setter(context, [output_tensor, 0.5])
+
     """
 
     def __init__(self, items: Union[str, list[str]]):
@@ -129,6 +133,7 @@ class ContainerSetItem:
         Examples:
             >>> setter = ContainerSetItem('per_batch.prediction.output')
             >>> setter = ContainerSetItem(['per_step.loss.ce', 'per_step.loss.reg'])
+
         """
         self.items = [items] if isinstance(items, str) else items
 
@@ -158,6 +163,7 @@ class ContainerSetItem:
 
             >>> setter = ContainerSetItem(['per_step.loss.ce', 'per_step.loss.reg'])
             >>> setter(context, [0.3, 0.2])
+
         """
         # Normalize values to list
         if not isinstance(values, (list, tuple)):

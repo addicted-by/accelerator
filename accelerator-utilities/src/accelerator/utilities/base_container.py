@@ -7,8 +7,7 @@ logger = get_logger(__name__)
 
 
 class BaseContainer(ABC):
-    """
-    Foundational container class providing systematic representation architecture
+    """Foundational container class providing systematic representation architecture
     and extensibility framework for specialized container implementations.
     """
 
@@ -39,8 +38,7 @@ class BaseContainer(ABC):
 
 
 class ComponentContainer(BaseContainer):
-    """
-    Specialized container for component aggregation with systematic
+    """Specialized container for component aggregation with systematic
     active/inactive component enumeration and status analysis.
     """
 
@@ -85,8 +83,7 @@ class ComponentContainer(BaseContainer):
 
 
 class StateContainer(BaseContainer):
-    """
-    Specialized container for state management with temporal progression
+    """Specialized container for state management with temporal progression
     tracking and metrics presentation capabilities.
     """
 

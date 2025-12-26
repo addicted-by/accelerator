@@ -158,8 +158,7 @@ class LossFactory:
 
 
 class LossCombiner(LossWrapperBase):
-    """
-    Combines multiple loss functions with centralized input validation and shared transform caching.
+    """Combines multiple loss functions with centralized input validation and shared transform caching.
 
     This class orchestrates multiple loss functions, validates inputs once for all losses,
     provides shared transform caching, and aggregates loss calculation.
@@ -171,6 +170,7 @@ class LossCombiner(LossWrapperBase):
         _statistics: Loss statistics tracker
         _formatter: Report formatter
         transform_manager: Shared transform manager for caching across all losses
+
     """
 
     def __init__(
@@ -181,13 +181,15 @@ class LossCombiner(LossWrapperBase):
         *args,
         **kwargs,
     ):
-        """
-        Initialize LossCombiner with a list of loss instances.
+        """Initialize LossCombiner with a list of loss instances.
 
         Args:
             losses: List of instantiated LossWrapper instances
             device: Device for tensor operations
             validation_config: Configuration for input validation
+            args: PLACEHOLDER
+            kwargs: PLACEHOLDER
+
         """
         super().__init__(**kwargs)
 
@@ -229,19 +231,21 @@ class LossCombiner(LossWrapperBase):
         *args,
         **kwargs,
     ) -> "LossCombiner":
-        """
-        Create LossCombiner from configuration.
+        """Create LossCombiner from configuration.
 
         Args:
             config: Loss configuration dictionary with 'active_losses' and 'loss_configs'
             device: Device for tensor operations
             validation_config: Configuration for input validation
+            *args: PLACEHOLDER
+            **kwargs: PLACEHOLDER
 
         Returns:
             LossCombiner instance
 
         Raises:
             LossConfigurationError: If configuration is invalid
+
         """
         factory = LossFactory()
         transform_manager = LossTransformManager()
@@ -298,8 +302,7 @@ class LossCombiner(LossWrapperBase):
             raise ValidationError(f"Unexpected validation error: {str(e)}") from e
 
     def add_get_loss(self, predictions: ModelOutputType, labels: ModelOutputType, *args, **kwargs) -> torch.Tensor:
-        """
-        Calculate combined loss from all active losses with shared transform caching.
+        """Calculate combined loss from all active losses with shared transform caching.
 
         Args:
             predictions: Model predictions
@@ -313,6 +316,7 @@ class LossCombiner(LossWrapperBase):
         Raises:
             ValidationError: If input validation fails
             LossCalculationError: If loss calculation fails
+
         """
         try:
             self.validate_inputs(predictions, labels)
@@ -357,11 +361,11 @@ class LossCombiner(LossWrapperBase):
             self.transform_manager.clear_cache()
 
     def add_loss(self, loss: LossWrapper) -> None:
-        """
-        Add a new loss to the combiner.
+        """Add a new loss to the combiner.
 
         Args:
             loss: LossWrapper instance to add
+
         """
         if not isinstance(loss, LossWrapper):
             raise LossConfigurationError("Loss must be a LossWrapper instance")
@@ -374,14 +378,14 @@ class LossCombiner(LossWrapperBase):
         self._formatter.update_widths(loss.name, pred_key)
 
     def remove_loss(self, loss_name: str) -> bool:
-        """
-        Remove a loss by name.
+        """Remove a loss by name.
 
         Args:
             loss_name: Name of the loss to remove
 
         Returns:
             True if loss was found and removed, False otherwise
+
         """
         for i, loss in enumerate(self._active_losses):
             if loss.name == loss_name:
@@ -390,14 +394,14 @@ class LossCombiner(LossWrapperBase):
         return False
 
     def get_loss(self, loss_name: str) -> Optional[LossWrapper]:
-        """
-        Get a loss by name.
+        """Get a loss by name.
 
         Args:
             loss_name: Name of the loss to retrieve
 
         Returns:
             LossWrapper instance or None if not found
+
         """
         for loss in self._active_losses:
             if loss.name == loss_name:
@@ -446,8 +450,7 @@ class LossCombiner(LossWrapperBase):
         }
 
     def logger_step(self, tb_logger=None, step=None) -> str:
-        """
-        Generate loss report and log to tensorboard if provided.
+        """Generate loss report and log to tensorboard if provided.
 
         Args:
             tb_logger: Optional tensorboard logger
@@ -458,6 +461,7 @@ class LossCombiner(LossWrapperBase):
 
         Raises:
             LossAPIException: If logging fails
+
         """
         report = self._formatter.generate_report(
             self._active_losses,

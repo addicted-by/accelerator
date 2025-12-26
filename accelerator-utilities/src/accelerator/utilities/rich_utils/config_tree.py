@@ -28,8 +28,7 @@ def print_config_tree(
     save_to_file: bool = False,
     ignore: Sequence[str] = ["hydra"],
 ) -> None:
-    """
-    Prints content of DictConfig using Rich library and its tree structure.
+    """Prints content of DictConfig using Rich library and its tree structure.
 
     Args:
         cfg (DictConfig): Configuration composed by Hydra.
@@ -39,6 +38,8 @@ def print_config_tree(
             DictConfig.
         save_to_file (bool, optional): Whether to export config to the hydra
             output folder.
+        ignore (Sequence[str]): Which nodes and the corresponding sub-graphs to ignore.
+
     """
     style = "dim"
     tree = rich.tree.Tree("CONFIG", style=style, guide_style=style)
@@ -80,7 +81,8 @@ def print_config_tree(
 @distributed_state.on_main_process
 def enforce_tags(cfg: DictConfig, save_to_file: bool = False) -> None:
     """Prompts user to input tags from command line if no tags are provided in
-    config."""
+    config.
+    """
     if not cfg.get("tags"):
         if "id" in HydraConfig().cfg.hydra.job:
             raise ValueError("Specify tags before launching a multirun!")
@@ -109,8 +111,8 @@ def extras(cfg: DictConfig) -> None:
 
     Args:
         cfg (DictConfig): Main config.
-    """
 
+    """
     # return if no `extras` config
     if not cfg.get("extras"):
         print("Extras config not found! <cfg.extras=null>")

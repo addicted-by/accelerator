@@ -42,6 +42,7 @@ class ReferenceManager:
             - Primitives (int, float, str, bool, None): Never use weak refs
             - Built-in collections (list, dict, tuple, set): Never use weak refs
             - Other objects: Use weak refs by default
+
         """
         # Import torch only when needed to avoid hard dependency
         try:
@@ -85,6 +86,7 @@ class ReferenceManager:
         Note:
             If weak reference creation fails (e.g., for objects that don't
             support weak refs), falls back to strong reference automatically.
+
         """
         if use_weakref is None:
             use_weakref = ReferenceManager.should_use_weakref(value)
@@ -115,6 +117,7 @@ class ReferenceManager:
         Raises:
             DeadReferenceError: If the weak reference target has been
                               garbage collected
+
         """
         if is_weakref:
             value = ref()

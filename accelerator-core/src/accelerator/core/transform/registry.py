@@ -19,8 +19,7 @@ class TransformScopeType(Enum):
 @APIDesc.developer(dev_info="Ryabykin Alexey r00926208")
 @APIDesc.status(status_level="beta")
 class TensorTransformsRegistry(BaseRegistry):
-    """
-    Registry for transform classes and cached instances.
+    """Registry for transform classes and cached instances.
 
     This registry provides a centralized way to register, retrieve, and manage
     tensor transformation operations. It ensures that transform instances with
@@ -38,6 +37,7 @@ class TensorTransformsRegistry(BaseRegistry):
 
         Args:
             enable_logging: Whether to wrap transform operations with logging.
+
         """
         super().__init__(enable_logging=enable_logging)
 
@@ -49,8 +49,7 @@ class TensorTransformsRegistry(BaseRegistry):
     def register_transform(
         self, transform_type: Union[str, Iterable[str], TransformScopeType, Iterable[TransformScopeType]]
     ):
-        """
-        Decorator for registering transform classes in the registry.
+        """Decorator for registering transform classes in the registry.
 
         Args:
             transform_type: The type(s) under which to register the transform.
@@ -60,25 +59,25 @@ class TensorTransformsRegistry(BaseRegistry):
 
         Raises:
             TypeError: If transform_type is not a string, TransformType, or iterable of these.
+
         """
         return self.register_object(transform_type)
 
     def add_transform(
         self, transform_type: str, transform_cls: type[BaseTransform], name: Optional[str] = None
     ) -> None:
-        """
-        Dynamically add a transform class without a decorator.
+        """Dynamically add a transform class without a decorator.
 
         Args:
             transform_type: The type of transform (e.g., 'normalization').
             transform_cls: The transform class to register.
             name: Optional custom name; defaults to transform_cls.__name__.
+
         """
         self.add_object(transform_type, transform_cls, name)
 
     def get_transform(self, name: str, transform_type: Optional[str] = None) -> type[BaseTransform]:
-        """
-        Retrieve a transform class by name and optionally type.
+        """Retrieve a transform class by name and optionally type.
 
         Args:
             name: The name of the transform class.
@@ -89,6 +88,7 @@ class TensorTransformsRegistry(BaseRegistry):
 
         Raises:
             KeyError: If the transform is not registered.
+
         """
         if transform_type:
             return self.get_object(transform_type, name)
@@ -102,20 +102,19 @@ class TensorTransformsRegistry(BaseRegistry):
         raise KeyError(f"Transform '{name}' not found in registry. Available transforms: {formatted_available}")
 
     def list_transforms(self, transform_type: Optional[str] = None) -> dict[str, list[str]]:
-        """
-        List all registered transform classes.
+        """List all registered transform classes.
 
         Args:
             transform_type: Optional specific type to list; if None, list all.
 
         Returns:
             Dictionary mapping transform types to lists of transform class names.
+
         """
         return self.list_objects(transform_type)
 
     def has_transform(self, name: str, transform_type: Optional[str] = None) -> bool:
-        """
-        Check if a transform class is registered.
+        """Check if a transform class is registered.
 
         Args:
             name: The name of the transform class.
@@ -123,6 +122,7 @@ class TensorTransformsRegistry(BaseRegistry):
 
         Returns:
             True if the transform exists, False otherwise.
+
         """
         if transform_type:
             return self.has_object(transform_type, name)
@@ -135,8 +135,7 @@ class TensorTransformsRegistry(BaseRegistry):
     def get_or_create_instance(
         self, name: str, config: Optional[dict[str, Any]] = None, transform_type: Optional[str] = None
     ) -> BaseTransform:
-        """
-        Get a cached transform instance or create a new one.
+        """Get a cached transform instance or create a new one.
 
         Args:
             name: Name of the transform
@@ -145,6 +144,7 @@ class TensorTransformsRegistry(BaseRegistry):
 
         Returns:
             A transform instance, either from cache or newly created
+
         """
         config = config or {}
 
@@ -159,8 +159,7 @@ class TensorTransformsRegistry(BaseRegistry):
         return temp_instance
 
     def instantiate_transform_pipeline(self, transforms_config: list) -> list[BaseTransform]:
-        """
-        Create a pipeline of transforms from configuration, reusing cached instances.
+        """Create a pipeline of transforms from configuration, reusing cached instances.
 
         Args:
             transforms_config: List of transform configurations
@@ -170,6 +169,7 @@ class TensorTransformsRegistry(BaseRegistry):
 
         Raises:
             ValueError: If an invalid transform entry is provided
+
         """
         transforms = []
         for entry in transforms_config:

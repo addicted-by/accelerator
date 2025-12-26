@@ -15,24 +15,51 @@ def _compose_with_existing_hydra(
     version_base: Optional[str] = None,
     return_hydra_config: bool = False,
 ) -> DictConfig:
-    """
-    Compose a DictConfig with `overrides` whether or not Hydra is already
-    initialised.
+    """Compose a Hydra ``DictConfig`` while transparently handling whether Hydra is
+    already initialized.
+
+    This helper allows programmatic configuration composition both inside and
+    outside a ``@hydra.main`` context. If Hydra is already initialized, the
+    currently active job configuration name and CLI overrides are reused and
+    extended. If Hydra is not initialized, a temporary Hydra context is created
+    using the provided configuration directory.
 
     Parameters
     ----------
     overrides : list[str]
-        Dot-list overrides to apply, e.g. ["model=resnet50", "lr=0.01"].
-    conf_root : Path | None
-        Path to your conf/ directory **if Hydra is not already running**.
-        Ignored when running inside @hydra.main.
-    base_cfg  : str
-        Name of the root yaml to use when Hydra is *not* initialised AND the
-        original config name cannot be recovered.
+        List of dotlist-style overrides to apply, for example
+        ``["model=resnet50", "optimizer.lr=0.01"]``.
+    conf_root : Path | None, optional
+        Path to the root ``conf/`` directory. This parameter is required only
+        when Hydra is not already initialized and is ignored otherwise.
+    base_cfg : str, default="main"
+        Name of the base configuration file (without ``.yaml``) to compose when
+        Hydra is not initialized or when the original job configuration name
+        cannot be recovered.
+    version_base : str | None, optional
+        Hydra version base passed to ``initialize_config_dir``. Use this to
+        control compatibility with a specific Hydra version.
+    return_hydra_config : bool, default=False
+        If ``True``, include the Hydra runtime configuration under the
+        ``hydra`` key in the returned ``DictConfig``.
 
     Returns
     -------
     DictConfig
+        The composed Hydra configuration with all specified overrides applied.
+
+    Raises
+    ------
+    ValueError
+        If Hydra is not initialized and ``conf_root`` is not provided.
+
+    Notes
+    -----
+    - When executed inside a ``@hydra.main`` context, this function preserves
+    existing CLI overrides and appends the provided ``overrides``.
+    - When executed outside of Hydra, a temporary initialization context is
+    created and torn down automatically.
+
     """
     if hydra.core.hydra_config.HydraConfig.initialized():
         cli_overrides = list(hydra.core.hydra_config.HydraConfig.get().overrides.task)
@@ -56,14 +83,14 @@ def _compose_with_existing_hydra(
 
 
 def find_get_objects(cfg):
-    """
-    Recursively processes a configuration to replace dictionaries containing '_object_' with their corresponding objects.
+    """Recursively processes a configuration to replace dictionaries containing '_object_' with their corresponding objects.
 
     Args:
         cfg: The configuration object (dict, list, or other type).
 
     Returns:
         The processed configuration, with '_object_' dictionaries replaced by objects.
+
     """
     if isinstance(cfg, (dict, DictConfig)):
         if "_object_" in cfg:
@@ -78,8 +105,7 @@ def find_get_objects(cfg):
 
 
 def instantiate_wrapper(cfg, *args, **kwargs):
-    """
-    Processes the configuration and instantiates it using Hydra's instantiate utility.
+    """Processes the configuration and instantiates it using Hydra's instantiate utility.
 
     Args:
         cfg: The configuration object to process and instantiate.
@@ -88,6 +114,7 @@ def instantiate_wrapper(cfg, *args, **kwargs):
 
     Returns:
         The instantiated object or processed configuration, or None if cfg is None.
+
     """
     if cfg is None:
         return None
@@ -100,8 +127,7 @@ def instantiate_wrapper(cfg, *args, **kwargs):
 
 
 def instantiate(cfg, *args, **kwargs):
-    """
-    A convenience wrapper for instantiating a configuration.
+    """A convenience wrapper for instantiating a configuration.
 
     Args:
         cfg: The configuration object to instantiate.
@@ -110,13 +136,13 @@ def instantiate(cfg, *args, **kwargs):
 
     Returns:
         The instantiated object or processed configuration.
+
     """
     return instantiate_wrapper(cfg, *args, **kwargs)
 
 
 def load_sub_configs(cfg, *args, **kwargs):
-    """
-    Recursively processes a configuration object, loading sub-configurations specified by '_load_' keys
+    """Recursively processes a configuration object, loading sub-configurations specified by '_load_' keys
     and applying overrides specified by '_override_' keys.
 
     Args:
@@ -126,6 +152,7 @@ def load_sub_configs(cfg, *args, **kwargs):
 
     Returns:
         The processed configuration object.
+
     """
     original_struct = OmegaConf.is_struct(cfg)
 

@@ -27,6 +27,7 @@ class MergingPruner(BasePruner):
                 - use_scales: Whether to use scaling factors
                 - single_parametrization: Whether to share parametrization
                 - pretrain_importances: Whether to pretrain importance scores
+
         """
         super().__init__(**kwargs)
 
@@ -59,6 +60,7 @@ class MergingPruner(BasePruner):
 
         Returns:
             Pruned model with merged features
+
         """
         # Initialize if not already done
         if not hasattr(self, "input_example"):

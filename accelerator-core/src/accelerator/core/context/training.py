@@ -115,7 +115,7 @@ class TrainingState(StateContainer):
 
 
 class TrainingManager(BaseContainer):
-    """Class used for Managing Training State"""
+    """Class used for Managing Training State."""
 
     def __init__(self):
         self.components = TrainingComponents()

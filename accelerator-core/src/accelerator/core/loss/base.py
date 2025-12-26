@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 
 
 class LossWrapperBase(abc.ABC):
-    """ """
+    """PLACEHOLDER."""
 
     def __init__(self, debug_config: Optional[DebugConfig] = None):
         self._loss_coefficient: float = 1.0
@@ -33,18 +33,18 @@ class LossWrapperBase(abc.ABC):
         *args: Any,
         **kwargs: Any,
     ) -> torch.Tensor:
-        """ """
+        """PLACEHOLDER."""
         ...
 
     def set_loss_coefficient(self, value: float) -> None:
-        """
-        Sets the loss coefficient value.
+        """Sets the loss coefficient value.
 
         Args:
             value: New coefficient value
 
         Raises:
             LossConfigurationError: If value is invalid
+
         """
         if not isinstance(value, (int, float)):
             raise LossConfigurationError(f"Loss coefficient must be numeric, got {type(value)}")
@@ -61,8 +61,7 @@ class LossWrapperBase(abc.ABC):
 
     @abc.abstractmethod
     def logger_step(self, tb_logger: Optional[Any] = None, step: Optional[int] = None) -> Any:
-        """
-        Performs logging after loss calculation.
+        """Performs logging after loss calculation.
 
         Args:
             tb_logger: Optional tensorboard logger instance
@@ -73,13 +72,13 @@ class LossWrapperBase(abc.ABC):
 
         Raises:
             LossAPIException: If logging fails
+
         """
         ...
 
     @abc.abstractmethod
     def clear(self) -> None:
-        """
-        Clears the current state of the wrapper.
+        """Clears the current state of the wrapper.
 
         This method should be called at the start of each new epoch to
         reset any accumulated state.
@@ -88,8 +87,7 @@ class LossWrapperBase(abc.ABC):
 
 
 class LossWrapper(LossWrapperBase, abc.ABC):
-    """
-    Abstract base class for implementing specific loss functions with transform support.
+    """Abstract base class for implementing specific loss functions with transform support.
 
     This class provides a framework for implementing loss functions with support for
     batch-wise loss calculation, transform pipelines, and state management.
@@ -103,6 +101,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
         _statistics: Loss statistics tracker
         _gradient_logger: Gradient statistics logger
         _transform_pipeline: Transform pipeline for this loss
+
     """
 
     def __init__(
@@ -150,8 +149,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
         *args: Any,
         **kwargs: Any,
     ) -> torch.Tensor:
-        """
-        Calculates the loss for a single batch.
+        """Calculates the loss for a single batch.
 
         Args:
             net_result: Model predictions for the batch
@@ -164,6 +162,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
 
         Raises:
             LossCalculationError: If loss calculation fails
+
         """
         ...
 
@@ -177,12 +176,14 @@ class LossWrapper(LossWrapperBase, abc.ABC):
         *args: Any,
         **kwargs: Any,
     ) -> torch.Tensor:
-        """
-        Processes inputs, applies transforms, and calculates the loss.
+        """Processes inputs, applies transforms, and calculates the loss.
 
         Args:
             predictions: Model predictions
             labels: Ground truth labels
+            transform_manager: TransformManager instance
+            inputs: Additional args
+            context: Context instance
             *args: Additional positional arguments
             **kwargs: Additional keyword arguments
 
@@ -192,6 +193,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
         Raises:
             LossCalculationError: If loss calculation fails
             LossConfigurationError: If configuration is invalid
+
         """
         try:
             if transform_manager and self._transform_pipeline:
@@ -259,11 +261,11 @@ class LossWrapper(LossWrapperBase, abc.ABC):
             return predictions, labels
 
     def log_gradients(self, value: torch.Tensor) -> None:
-        """
-        Logs gradient statistics for the given tensor.
+        """Logs gradient statistics for the given tensor.
 
         Args:
             value: Tensor containing gradients to log
+
         """
         batch_size = value.shape[0] if value.ndim > 0 else 1
         self._gradient_logger.log_gradients(value, batch_size)
@@ -298,14 +300,14 @@ class LossWrapper(LossWrapperBase, abc.ABC):
         return len(self._transform_pipeline)
 
     def logger_step(self, tb_logger=None, step=None) -> tuple:
-        """
-        Perform logging step with error handling.
+        """Perform logging step with error handling.
 
         Returns:
             Tuple of (name, accumulated_loss, coefficient, prediction_key, target_key)
 
         Raises:
             LossAPIException: If logging fails
+
         """
         try:
             if tb_logger is not None:
@@ -357,8 +359,7 @@ class LossWrapper(LossWrapperBase, abc.ABC):
 
 
 class LossAdapter(LossWrapper):
-    """
-    Adapter to make standard PyTorch loss modules compatible with LossWrapper interface.
+    """Adapter to make standard PyTorch loss modules compatible with LossWrapper interface.
 
     This implementation properly integrates with the parent class and maintains
     all functionality while providing a clean interface to PyTorch losses.
@@ -400,8 +401,7 @@ class LossAdapter(LossWrapper):
         *args: Any,
         **kwargs: Any,
     ) -> torch.Tensor:
-        """
-        Calculate loss using the wrapped PyTorch loss module.
+        """Calculate loss using the wrapped PyTorch loss module.
 
         Args:
             net_result: Model predictions for the batch
@@ -414,6 +414,7 @@ class LossAdapter(LossWrapper):
 
         Raises:
             LossCalculationError: If the underlying loss module fails
+
         """
         try:
             return self.loss_module(net_result, ground_truth, *args, **kwargs)

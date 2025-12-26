@@ -2,6 +2,9 @@
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+# -----------------------
+# Project metadata
+# -----------------------
 [project]
 name = "accelerator-utilities"
 version = "0.1.0"
@@ -22,11 +25,12 @@ dev = [
     "pytest",
     "black",
     "ruff",
+    "mypy",
     "pre-commit",
 ]
 
 # -----------------------
-# Packaging
+# Packaging (PEP 561)
 # -----------------------
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -35,36 +39,83 @@ include = ["accelerator*"]
 [tool.setuptools.package-dir]
 "" = "src"
 
+[tool.setuptools.package-data]
+accelerator = ["py.typed"]
+
 # -----------------------
-# Formatting
+# Black
 # -----------------------
 [tool.black]
 line-length = 120
 target-version = ["py39", "py310"]
 
 # -----------------------
-# Ruff (lint + imports)
+# Ruff (PEP 8 + PEP 257)
 # -----------------------
-[tool.ruff-check]
+[tool.ruff]
 target-version = "py39"
 line-length = 120
 fix = true
 
 select = [
+    # Core
     "E",   # pycodestyle
     "F",   # pyflakes
-    "I",   # isort replacement
+    "I",   # isort
     "UP",  # pyupgrade
     "B",   # bugbear
+
+    # PEP 257
+    "D",   # pydocstyle
 ]
 
 ignore = [
     "E203",  # Black compatibility
-    "E501",  # Line length handled by Black
-    "UP007", # Use X | Y for type annotations
-    "B026", # Star-arg unpacking after a keyword argument is strongly discouraged
+    "E501",  # Handled by Black
+
+    # pyupgrade
+    "UP007", # X | Y not required yet
+    "UP045", # X | Y not required yet
+
+    # bugbear
+    "B026",
+
+    # Docstrings (pragmatic)
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public method
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public class
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+    "D106",  # Missing docstring in public function
+    "D107",  # Missing docstring in `__init__`
+    "D205",  # 1 blank line required between summary line and description
+    "D401",  # First line of docstring should be in imperative mood
 ]
 
-[tool.ruff-check.isort]
+[tool.ruff.isort]
 combine-as-imports = true
 known-first-party = ["accelerator"]
+
+# -----------------------
+# mypy (PEP 561)
+# -----------------------
+[tool.mypy]
+python_version = "3.9"
+strict = true
+pretty = true
+show_error_codes = true
+
+namespace_packages = true
+explicit_package_bases = true
+
+mypy_path = "src"
+
+exclude = [
+    "tests/",
+    "examples/",
+]
+
+# Relaxations commonly needed for infra / ML code
+disallow_any_generics = false
+warn_return_any = true

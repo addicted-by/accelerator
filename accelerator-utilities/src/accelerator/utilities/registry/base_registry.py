@@ -23,6 +23,7 @@ def log_fn_call(func: callable) -> callable:
 
     Returns:
         Wrapped function that logs when called.
+
     """
 
     @functools.wraps(func)
@@ -54,6 +55,7 @@ class BaseRegistry:
 
         Args:
             enable_logging: Whether to wrap registered objects with logging.
+
         """
         self._enable_logging = enable_logging
         self._lock = Lock()
@@ -79,6 +81,7 @@ class BaseRegistry:
         Raises:
             TypeError: If registry_type is not a string, Enum, or iterable of these.
             ValueError: If registry_type is not a valid registry type.
+
         """
 
         def decorator(cls_or_func: Callable) -> Callable:
@@ -128,6 +131,7 @@ class BaseRegistry:
 
         Raises:
             ValueError: If registry_type is invalid.
+
         """
         name = name or func.__name__
         with self._lock:
@@ -162,6 +166,7 @@ class BaseRegistry:
 
         Raises:
             KeyError: If the object is not registered.
+
         """
         if registry_type not in self._registry_types:
             raise ValueError(f"Invalid registry type '{registry_type}'")
@@ -182,6 +187,7 @@ class BaseRegistry:
 
         Returns:
             Dictionary mapping registry types to lists of object names.
+
         """
         if registry_type:
             if registry_type not in self._registry_types:
@@ -200,6 +206,7 @@ class BaseRegistry:
 
         Returns:
             True if the object exists, False otherwise.
+
         """
         # Check for object existence in metadata structure
         return registry_type in self._registry_types and name in self._registry_types[registry_type]
@@ -216,6 +223,7 @@ class BaseRegistry:
 
         Raises:
             KeyError: If the object is not registered.
+
         """
         with self._lock:
             if registry_type not in self._registry_types:
@@ -235,6 +243,7 @@ class BaseRegistry:
 
         Returns:
             Dictionary mapping registry types to lists of object names matching the domain(s).
+
         """
         # Normalize domain to list
         domains = [domain] if isinstance(domain, Domain) else domain
@@ -264,6 +273,7 @@ class BaseRegistry:
 
         Returns:
             Nested dictionary structure: {registry_type: {domain: count}}
+
         """
         with self._lock:
             summary: dict[str, dict[str, int]] = {}
@@ -287,6 +297,7 @@ class BaseRegistry:
 
         Returns:
             Dictionary mapping registry types to lists of metadata dictionaries.
+
         """
         with self._lock:
             result: dict[str, list[dict]] = {}

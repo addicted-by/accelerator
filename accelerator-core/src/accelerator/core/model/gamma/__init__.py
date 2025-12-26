@@ -475,9 +475,7 @@ class Gamma(torch.nn.Module):
 
 
 class ImprovedGammaIdentForward(nn.Module):
-    """
-    Plug
-    """
+    """PLACEHOLDER."""
 
     def __init__(self):
         super().__init__()
@@ -491,9 +489,7 @@ class ImprovedGammaIdentForward(nn.Module):
 
 
 class ImprovedGammaIdentInverse(nn.Module):
-    """
-    Plug
-    """
+    """PLACEHOLDER."""
 
     def __init__(self):
         super().__init__()
@@ -503,8 +499,7 @@ class ImprovedGammaIdentInverse(nn.Module):
 
 
 class ImprovedGamma(nn.Module):
-    """
-    Module that performs transform with functional dependency.
+    """Module that performs transform with functional dependency.
     Similar to polynomial gamma idea but more flexible.
     """
 
@@ -518,32 +513,36 @@ class ImprovedGamma(nn.Module):
         monotonous=False,
         trainable_endpoints=False,
     ):
-        """
-        Resolution is the number of learnable nodes uniformly distributed in [0, 1].
-        Initializes with linspace, so initially output = input ;)
+        """Initialize a learnable 1D transformation defined on the interval [0, 1].
 
-        Parameters:
+        The transformation is parameterized by a fixed number of learnable nodes
+        uniformly distributed over [0, 1]. Parameters are initialized using a
+        linear spacing, resulting in an identity transform at initialization
+        (i.e., output equals input).
 
-        - resolution: int - number of points used for transformation
-
-        - num_channels: int - number of channels of input data. If none, than
-        the only one transformation will be applied for all channels
-
-        - mode: 'bilinear', 'bicubic' - mode used in grid sample to interpolate
-
-        - skip_channels: list - list of channels to which gamma is not applied
-
-        - clamp_grid_sample: bool - if True than the output of grid sample is clamped
-        to [0, 1] thus making transform from [0, 1] to [0, 1] implicitly
-
-        - monotonous: bool - if True than abs is applied to deltas, making
-        transform function monotone, if false than only 0 -> 0 and 1->1 restrictions
-        are applied
-
-        - trainable_endpoints: bool - if True than start points are trainable params,
-        and cumsum is not normalized (thus there is no more 0->0 and 1->1 restriction).
-        False will give old behaviour (0->0 and 1->1).
-        EXTREMELY EXPERIMENTAL!!! CAUTION!!! GRAD EXPLOSION !!!
+        Parameters
+        ----------
+        resolution : int
+            Number of learnable nodes used to parameterize the transformation.
+        num_channels : int or None, optional
+            Number of input channels. If ``None``, a single shared transformation
+            is applied to all channels.
+        mode : {"bilinear", "bicubic"}, optional
+            Interpolation mode used by ``grid_sample``.
+        skip_channels : Sequence[int], optional
+            Indices of channels for which the transformation is not applied.
+        clamp_grid_sample : bool, optional
+            If ``True``, the output of ``grid_sample`` is clamped to the range
+            [0, 1], enforcing an implicit [0, 1] → [0, 1] mapping.
+        monotonous : bool, optional
+            If ``True``, absolute values are applied to parameter deltas, enforcing
+            a monotonic transformation. If ``False``, only endpoint constraints
+            (0 → 0 and 1 → 1) are enforced.
+        trainable_endpoints : bool, optional
+            If ``True``, endpoint values become trainable parameters and the
+            cumulative sum is not normalized, removing the 0 → 0 and 1 → 1
+            constraints. This mode is experimental and may lead to gradient
+            explosion.
 
         """
         super().__init__()
@@ -570,10 +569,7 @@ class ImprovedGamma(nn.Module):
                 self.start_points = torch.nn.Parameter(torch.zeros(1), requires_grad=True)
 
     def forward(self, input):
-        """
-        input - tensor [N, C, W, H]
-        """
-
+        """Input - tensor [N, C, W, H]."""
         device = input.device
         output = torch.zeros(input.shape, device=device)
         values = self.get_values()
@@ -636,8 +632,7 @@ class ImprovedGamma(nn.Module):
 
 
 class ImprovedGammaJDD(nn.Module):
-    """
-    Module that performs transform with functional dependency.
+    """Module that performs transform with functional dependency.
     Similar to polynomial gamma idea but more flexible.
     """
 
@@ -654,39 +649,43 @@ class ImprovedGammaJDD(nn.Module):
         monotonous=False,
         trainable_endpoints=False,
     ):
-        """
-        Resolution is the number of learnable nodes uniformly distributed in [0, 1].
-        Initializes with linspace, so initially output = input ;)
+        """Initialize a learnable 1D transformation defined on the interval [0, 1].
 
-        Parameters:
+        The transformation is parameterized by a fixed number of learnable nodes
+        uniformly distributed over [0, 1]. Parameters are initialized using a
+        linear spacing, resulting in an identity transform at initialization
+        (i.e., output equals input).
 
-        - resolution: int - number of points used for transformation
-
-        - num_frames_channels: int - number of channels of input frames. If none, than
-        the only one transformation will be applied for all frames channels
-
-        - num_meta_channels: int - number of channels of input frames. If none, than
-        the only one transformation will be applied for all meta channels
-
-        - mode: 'bilinear', 'bicubic' - mode used in grid sample to interpolate
-
-        - skip_frames_channels: list - list of frames channels to which gamma is not applied
-
-        - skip_meta_channels: list - list of meta channels to which gamma is not applied
-
-        - apply_to_meta: bool - apply gamma transformation to meta or no
-
-        - clamp_grid_sample: bool - if True than the output of grid sample is clamped
-        to [0, 1] thus making transform from [0, 1] to [0, 1] implicitly
-
-        - monotonous: bool - if True than abs is applied to deltas, making
-        transform function monotone, if false than only 0 -> 0 and 1->1 restrictions
-        are applied
-
-        - trainable_endpoints: bool - if True than start points are trainable params,
-        and cumsum is not normalized (thus there is no more 0->0 and 1->1 restriction).
-        False will give old behaviour (0->0 and 1->1).
-        EXTREMELY EXPERIMENTAL!!! CAUTION!!! GRAD EXPLOSION !!!
+        Parameters
+        ----------
+        resolution : int
+            Number of learnable nodes used to parameterize the transformation.
+        num_frames_channels : int or None, optional
+            Number of frame input channels. If ``None``, a single shared
+            transformation is applied to all frame channels.
+        num_meta_channels : int or None, optional
+            Number of meta input channels. If ``None``, a single shared
+            transformation is applied to all meta channels.
+        mode : {"bilinear", "bicubic"}, optional
+            Interpolation mode used by ``grid_sample``.
+        skip_frames_channels : Sequence[int], optional
+            Indices of frame channels for which the transformation is not applied.
+        skip_meta_channels : Sequence[int], optional
+            Indices of meta channels for which the transformation is not applied.
+        apply_to_meta : bool, optional
+            Whether to apply the transformation to meta channels.
+        clamp_grid_sample : bool, optional
+            If ``True``, the output of ``grid_sample`` is clamped to the range
+            [0, 1], enforcing an implicit [0, 1] → [0, 1] mapping.
+        monotonous : bool, optional
+            If ``True``, absolute values are applied to parameter deltas, enforcing
+            a monotonic transformation. If ``False``, only endpoint constraints
+            (0 → 0 and 1 → 1) are enforced.
+        trainable_endpoints : bool, optional
+            If ``True``, the endpoint values become trainable parameters and the
+            cumulative sum is not normalized, removing the 0 → 0 and 1 → 1
+            constraints. This mode is experimental and may lead to gradient
+            explosion.
 
         """
         super().__init__()
@@ -715,9 +714,7 @@ class ImprovedGammaJDD(nn.Module):
             )
 
     def forward(self, *inputs):
-        """
-        input - tensor [N, C, W, H]
-        """
+        """Input - tensor [N, C, W, H]."""
         if len(inputs) == 1:  # degamma case: frame out
             if self.apply_to_meta:
                 log.warning("!!! Apply to meta was selected, but input has only one argument !!!")

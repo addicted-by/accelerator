@@ -14,7 +14,7 @@ log = get_logger(__name__)
 
 @registry.register_acceleration(AccelerationType.PRUNING)
 class QaPUTPruning(AccelerationOperationBase):
-    """"""
+    """PLACEHOLDER."""
 
     def apply(self, context: "accelerator.Context"):
         model = context.model

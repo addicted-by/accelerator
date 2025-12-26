@@ -77,6 +77,7 @@ class LossRegistry(BaseRegistry):
 
         Args:
             enable_logging: Whether to wrap loss functions with logging.
+
         """
         super().__init__(enable_logging=enable_logging)
 
@@ -91,12 +92,14 @@ class LossRegistry(BaseRegistry):
 
         Args:
             loss_type: The type(s) under which to register the loss function.
+            name: name of the losses (Optional)
 
         Returns:
             Decorator function that registers the decorated loss function.
 
         Raises:
             TypeError: If loss_type is not a string, LossType, or iterable of these.
+
         """
         base_decorator = self.register_object(loss_type, name=name)
 
@@ -113,6 +116,7 @@ class LossRegistry(BaseRegistry):
             loss_type: The type of loss (e.g., 'classification').
             func: The loss function or class to register.
             name: Optional custom name; defaults to func.__name__.
+
         """
         self.add_object(loss_type, _adapt(func, name=name), name)
 
@@ -128,6 +132,7 @@ class LossRegistry(BaseRegistry):
 
         Raises:
             KeyError: If the loss function is not registered.
+
         """
         return self.get_object(loss_type, name)
 
@@ -139,6 +144,7 @@ class LossRegistry(BaseRegistry):
 
         Returns:
             Dictionary mapping loss types to lists of loss function names.
+
         """
         return self.list_objects(loss_type)
 
@@ -151,6 +157,7 @@ class LossRegistry(BaseRegistry):
 
         Returns:
             True if the loss function exists, False otherwise.
+
         """
         return self.has_object(loss_type, name)
 

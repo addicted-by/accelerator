@@ -32,8 +32,7 @@ class BasePruner:
         pruner_cfg: dict = None,
         **kwargs,
     ):
-        """
-        Initializes the BasePruner with the given configuration.
+        """Initializes the BasePruner with the given configuration.
 
         ### Args:
             experiment_path (Optional[PathType]): Path to the directory where pruning results
@@ -133,8 +132,7 @@ class BasePruner:
     def __get_sample_input(
         self, dataloader: torch.utils.data.DataLoader, device: torch.device
     ) -> tuple[torch.Tensor, ...]:
-        """
-        Retrieves a sample input from the dataloader
+        """Retrieves a sample input from the dataloader
         and transfers it to the specified device.
 
         ### Args:
@@ -176,28 +174,33 @@ class BasePruner:
         dataloader: torch.utils.data.DataLoader,
         **kwargs: Any,
     ) -> ModuleType:
+        """Execute pruning on the provided model using the given dataloader.
+
+        The method supports verbosity and optionally saving a detailed pruning report.
+        Additional keyword arguments allow further fine-tuning or custom batch collation.
+
+        Parameters
+        ----------
+        model : ModuleType
+            The model to be pruned.
+        dataloader : torch.utils.data.DataLoader
+            Dataloader used for assessing the model during pruning.
+        verbose : bool, optional
+            If True, prints detailed information about the pruning process.
+        to_save_report : bool, optional
+            If True, saves a detailed report of the pruning process.
+        **kwargs : dict, optional
+            Additional keyword arguments. Can include:
+            - `dataset` (torch.utils.data.Dataset): Dataset for further fine-tuning.
+            - `custom_collate_fn` (Callable): Function to collate a batch in the format:
+            ``inputs`` (Tuple), ``gts`` (Tuple), ``additional`` (Any).
+
+        Returns
+        -------
+        ModuleType
+            The pruned model.
+
         """
-        Executes pruning on the provided model
-        using the given dataloader with options
-        for verbosity and saveing a report
-
-        ### Args:
-            `model` (ModuleType): The model to be pruned.
-            `dataloader` (torch.utils.data.DataLoader): The dataloader to use for assessing the model.
-            `verbose` (bool): If True, prints detailed information about the pruning process.
-            `to_save_report` (bool): If True, saves a detailed report of the pruning process.
-
-
-        ### Keyword Args (Any):
-            `dataset` (torch.utils.data.Dataset): dataset for further finetuning.
-                Since the logic with partial training is realized.
-            `custom_collate_fn` (Callable): function how to collate the batch
-                in format: `inputs` (Tuple), `gts` (Tuple), `additional` (Any).
-
-        ### Returns:
-            ModuleType: The pruned model.
-        """
-
         # loss calculation before, parameters, flops, logging
         model.train(False)
         fuse_batchnorm(model)
@@ -250,15 +253,12 @@ class BasePruner:
 
     @property
     def get_last_stats(self):
-        """
-        Returns the most recent training statistics
-        """
+        """Returns the most recent training statistics."""
         return self.stats
 
     def __repr__(self):
-        """
-        Generates a YAML-based string representation
-        of the object for debugging and logging
+        """Generates a YAML-based string representation
+        of the object for debugging and logging.
         """
         attrs = {k: str(v) for k, v in vars(self).items() if not callable(v) and not k.startswith("_")}
         desc = "\n".join(

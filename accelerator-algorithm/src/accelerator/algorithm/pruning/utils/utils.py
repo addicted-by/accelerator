@@ -13,9 +13,10 @@ from torch.nn.utils import parametrize
 
 
 def deprecated(func):
-    """This is a decorator which can be used to mark functions
+    """Decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
-    when the function is used."""
+    when the function is used.
+    """
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
@@ -33,7 +34,6 @@ def deprecated(func):
 
 def reapply_parametrizations(model, parametrized_modules, unsafe=True):
     """Function to reapply parameterizations to a model."""
-
     for name, params in parametrized_modules.items():
         module = dict(model.named_modules())[name]
 
@@ -45,7 +45,8 @@ def reapply_parametrizations(model, parametrized_modules, unsafe=True):
 
 def save_report(pruning_record, experiment_path, ratio):
     """Saves a pruning report as CSV files, both in raw and
-    human-readable formats, in a specified experiment path folder."""
+    human-readable formats, in a specified experiment path folder.
+    """
     if experiment_path:
         experiment_path = pathlib.Path(experiment_path)
         pruning_reports_path = experiment_path / "pruning_records"
@@ -64,7 +65,6 @@ def save_report(pruning_record, experiment_path, ratio):
 
 def remove_parametrizations(model):
     """Function to remove parameterizations from a model."""
-
     parametrized_modules = {}
 
     for name, module in model.named_modules():
@@ -81,7 +81,7 @@ def remove_parametrizations(model):
 
 
 def get_attr_by_name(module, name):
-    """ """
+    """PLACEHOLDER."""
     for s in name.split("."):
         module = getattr(module, s)
 
@@ -89,22 +89,30 @@ def get_attr_by_name(module, name):
 
 
 def get_parent_name(qualname: str) -> tuple[str, str]:
-    """
-    Splits a ``qualname`` into parent path and last atom.
-    For example, `foo.bar.baz` -> (`foo.bar`, `baz`)
-    """
+    """Splits a ``qualname`` into parent path and last atom. For example, `foo.bar.baz` -> (`foo.bar`, `baz`)."""
     *parent, name = qualname.rsplit(".", 1)
     return parent[0] if parent else "", name
 
 
 def get_parent_module(module, attr_path):
-    """
-    Returns parent module of module.attr_path.
+    """Return the parent module of a given submodule specified by attribute path.
+
+    This function retrieves the module that contains the submodule identified
+    by `attr_path`. If `attr_path` refers to a top-level attribute, the
+    parent is the module itself.
 
     Parameters
     ----------
-    module: torch.nn.Module.
-    attr_path: str.
+    module : torch.nn.Module
+        The root module from which to retrieve the parent.
+    attr_path : str
+        Dot-separated path to the submodule, e.g., 'layer1.conv1'.
+
+    Returns
+    -------
+    torch.nn.Module
+        The parent module of the specified attribute path.
+
     """
     parent_name, _ = get_parent_name(attr_path)
 
@@ -117,7 +125,7 @@ def get_parent_module(module, attr_path):
 
 
 def remove_all_hooks(model: torch.nn.Module) -> None:
-    """ """
+    """PLACEHOLDER."""
     for _, child in model._modules.items():
         if child is not None:
             if hasattr(child, "_forward_hooks"):
@@ -126,14 +134,26 @@ def remove_all_hooks(model: torch.nn.Module) -> None:
 
 
 def fuse_batchnorm(model, fx_model=None, convs=None):
-    """
-    Fuse conv and bn only if conv is in convs argument.
+    """Fuse convolution and batch normalization layers selectively.
+
+    Only fuses a convolution layer if it is included in the `convs` argument.
 
     Parameters
     ----------
-    model: torch.nn.Module.
-    fx_model: torch.fx.GraphModule.
-    convs: List[torch.nn.ConvNd].
+    model : torch.nn.Module
+        The model containing layers to fuse.
+    fx_model : torch.fx.GraphModule, optional
+        FX-traced version of the model. If provided, fusions are applied
+        on the FX graph.
+    convs : list[torch.nn.ConvNd] or None, optional
+        List of convolution layers to fuse with their following batch
+        normalization layers. If ``None``, no selective filtering is applied.
+
+    Returns
+    -------
+    None
+        The function modifies `model` (and/or `fx_model`) in-place.
+
     """
     if fx_model is None:
         fx_model: torch.fx.GraphModule = torch.fx.symbolic_trace(model)
@@ -156,7 +176,7 @@ def fuse_batchnorm(model, fx_model=None, convs=None):
 
 
 def _inplace_conv_bn_fusion(conv, bn):
-    """ """
+    """PLACEHOLDER."""
     assert not (conv.training or bn.training), "Fusion only for eval!"
     conv.weight.data, bias = _fuse_conv_bn_weights(
         conv.weight,
@@ -175,7 +195,7 @@ def _inplace_conv_bn_fusion(conv, bn):
 
 
 def _fuse_conv_bn_weights(conv_w, conv_b, bn_rm, bn_rv, bn_eps, bn_w, bn_b):
-    """ """
+    """PLACEHOLDER."""
     if conv_b is None:
         conv_b = torch.zeros_like(bn_rm)
     if bn_w is None:
@@ -193,7 +213,8 @@ def _fuse_conv_bn_weights(conv_w, conv_b, bn_rm, bn_rv, bn_eps, bn_w, bn_b):
 def to_device(x: Union[torch.Tensor, Iterable], device: torch.device) -> Union[torch.Tensor, Iterable]:
     """Recursively moves tensors in data structures (list, tuples, single tensors)
     to a specified device, making it handly for device-agnostic execution
-    of model operations."""
+    of model operations.
+    """
 
     def _to_device(x, device):
         if isinstance(x, (list, tuple)):
@@ -220,8 +241,7 @@ def run_model(model, inputs, req_grad=False, device=None):
 
 
 def get_model(model):
-    """
-    Unwraps a model from `torch.nn.parallel.DistributedDataParallel`
+    """Unwraps a model from `torch.nn.parallel.DistributedDataParallel`
     or compiled model to access its underlying model.
     """
     true_model = model

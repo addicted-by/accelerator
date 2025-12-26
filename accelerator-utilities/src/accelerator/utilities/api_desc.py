@@ -26,8 +26,7 @@ def _append_to_docstring(obj: F, section_title: str, lines: list[str]) -> None:
 
 
 class APIDesc:
-    """
-    Namespace for decorators that add descriptive metadata to API components (functions, classes).
+    """Namespace for decorators that add descriptive metadata to API components (functions, classes).
     Metadata is typically appended to the object's docstring.
     """
 
@@ -48,13 +47,13 @@ class APIDesc:
 
     @staticmethod
     def status(status_level: str, details: Optional[str] = None, since: Optional[str] = None):
-        """
-        Decorator factory to add API status information (e.g., stable, experimental, internal).
+        """Decorator factory to add API status information (e.g., stable, experimental, internal).
 
         Args:
             status_level: The status (e.g., 'Stable', 'Experimental', 'Alpha', 'Beta', 'Internal Use Only').
             details: Optional additional details about the status.
             since: Optional version or date when this status became effective.
+
         """
         if not isinstance(status_level, str):
             raise TypeError("status_level must be a string.")
@@ -73,12 +72,12 @@ class APIDesc:
 
     @staticmethod
     def since(version: str, description: Optional[str] = None):
-        """
-        Decorator factory to specify the version when the API was introduced.
+        """Decorator factory to specify the version when the API was introduced.
 
         Args:
             version: The version string (e.g., 'v1.0.0', 'Release 2024-Q1').
             description: Optional description of what was introduced.
+
         """
         if not isinstance(version, str):
             raise TypeError("version must be a string.")
@@ -100,14 +99,14 @@ class APIDesc:
         removal_in: Optional[str] = None,
         message: str = "This API is deprecated and may be removed in a future version.",
     ):
-        """
-        Decorator factory to mark an API as deprecated. Also issues a DeprecationWarning.
+        """Decorator factory to mark an API as deprecated. Also issues a DeprecationWarning.
 
         Args:
             since: Version or date when this API was deprecated.
             replacement: Suggestion for a replacement API (e.g., 'use new_function() instead').
             removal_in: Planned version or date for removal (e.g., 'v3.0.0', '2026-01-01').
             message: Custom deprecation message.
+
         """
         if not isinstance(since, str):
             raise TypeError("since must be a string.")
@@ -149,12 +148,12 @@ class APIDesc:
 
     @staticmethod
     def see_also(references: Union[str, list[str], tuple[str, ...]]):
-        """
-        Decorator factory to add links or references to related documentation, tickets, or APIs.
+        """Decorator factory to add links or references to related documentation, tickets, or APIs.
 
         Args:
             references: A string or list/tuple of strings representing URLs, ticket IDs,
                         or related function/class names.
+
         """
         if isinstance(references, str):
             refs = [references]
@@ -171,11 +170,11 @@ class APIDesc:
 
     @staticmethod
     def warning(message: str):
-        """
-        Decorator factory to add a usage warning or important note.
+        """Decorator factory to add a usage warning or important note.
 
         Args:
             message: The warning message text.
+
         """
         if not isinstance(message, str):
             raise TypeError("message must be a string.")

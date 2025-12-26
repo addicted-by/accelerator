@@ -39,31 +39,54 @@ class Importance(abc.ABC):
 
 
 class GroupNormImportance(Importance):
-    """A general implementation of magnitude importance. By default, it calculates the group L2-norm for each channel/dim.
-    It supports several variants like:
-        - Standard L1-norm of the first layer in a group: MagnitudeImportance(p=1, normalizer=None, group_reduction="first")
-        - Group L1-Norm: MagnitudeImportance(p=1, normalizer=None, group_reduction="mean")
-        - BN Scaling Factor: MagnitudeImportance(p=1, normalizer=None, group_reduction="mean", target_types=[nn.modules.batchnorm._BatchNorm])
+    """General implementation of magnitude-based importance.
 
-    Args:
-        * p (int): the norm degree. Default: 2
-        * group_reduction (str): the reduction method for group importance. Default: "mean"
-        * normalizer (str): the normalization method for group importance. Default: "mean"
-        * target_types (list): the target types for importance calculation. Default: [nn.modules.conv._ConvNd, nn.Linear, nn.modules.batchnorm._BatchNorm]
+    By default, calculates the group L2-norm for each channel or dimension.
+    Supports several variants:
 
-    Example:
+    - Standard L1-norm of the first layer in a group:
+      MagnitudeImportance(p=1, normalizer=None, group_reduction="first")
+    - Group L1-norm:
+      MagnitudeImportance(p=1, normalizer=None, group_reduction="mean")
+    - BatchNorm scaling factor:
+      MagnitudeImportance(
+          p=1,
+          normalizer=None,
+          group_reduction="mean",
+          target_types=[nn.modules.batchnorm._BatchNorm]
+      )
 
-        It accepts a group as inputs, and return a 1-D tensor with the same length as the number of channels.
-        All groups must be pruned simultaneously and thus their importance should be accumulated across channel groups.
+    Parameters
+    ----------
+    p : int, optional
+        Norm degree. Default is 2.
+    group_reduction : str, optional
+        Reduction method for group importance. Default is "mean".
+    normalizer : str, optional
+        Normalization method for group importance. Default is "mean".
+    target_types : list, optional
+        Target layer types for importance calculation. Default is
+        [nn.modules.conv._ConvNd, nn.Linear, nn.modules.batchnorm._BatchNorm].
 
-        ```python
-            DG = tp.DependencyGraph().build_dependency(model, example_inputs=torch.randn(1,3,224,224))
-            group = DG.get_pruning_group( model.conv1, tp.prune_conv_out_channels, idxs=[2, 6, 9] )
-            scorer = GroupNormImportance()
-            imp_score = scorer(group)
-            #imp_score is a 1-D tensor with length 3 for channels [2, 6, 9]
-            min_score = imp_score.min()
-        ```
+    Example
+    -------
+    This class accepts a group as input and returns a 1-D tensor with the
+    same length as the number of channels. All groups must be pruned
+    simultaneously, so their importance should be accumulated across channel groups.
+
+    Example usage:
+
+        DG = tp.DependencyGraph().build_dependency(
+            model, example_inputs=torch.randn(1, 3, 224, 224)
+        )
+        group = DG.get_pruning_group(
+            model.conv1, tp.prune_conv_out_channels, idxs=[2, 6, 9]
+        )
+        scorer = GroupNormImportance()
+        imp_score = scorer(group)
+        # imp_score is a 1-D tensor with length 3 for channels [2, 6, 9]
+        min_score = imp_score.min()
+
     """
 
     def __init__(
@@ -81,9 +104,7 @@ class GroupNormImportance(Importance):
         self.bias = bias
 
     def _lamp(self, scores):  # Layer-adaptive Sparsity for the Magnitude-based Pruning
-        """
-        Normalizing scheme for LAMP.
-        """
+        """Normalizing scheme for LAMP."""
         # sort scores in an ascending order
         sorted_scores, sorted_idx = scores.view(-1).sort(descending=False)
         # compute cumulative sum
@@ -202,11 +223,10 @@ class GroupNormImportance(Importance):
 
 
 class BNScaleImportance(GroupNormImportance):
-    """Learning Efficient Convolutional Networks through Network Slimming,
-    https://arxiv.org/abs/1708.06519
+    """Learning Efficient Convolutional Networks through Network Slimming.
+    https://arxiv.org/abs/1708.06519.
 
     Example:
-
         It accepts a group as inputs, and return a 1-D tensor with the same length as the number of channels.
         All groups must be pruned simultaneously and thus their importance should be accumulated across channel groups.
 
@@ -232,11 +252,10 @@ class BNScaleImportance(GroupNormImportance):
 
 
 class LAMPImportance(GroupNormImportance):
-    """Layer-adaptive Sparsity for the Magnitude-based Pruning,
-    https://arxiv.org/abs/2010.07611
+    """Layer-adaptive Sparsity for the Magnitude-based Pruning.
+    https://arxiv.org/abs/2010.07611.
 
     Example:
-
             It accepts a group as inputs, and return a 1-D tensor with the same length as the number of channels.
             All groups must be pruned simultaneously and thus their importance should be accumulated across channel groups.
 
@@ -248,6 +267,7 @@ class LAMPImportance(GroupNormImportance):
                 #imp_score is a 1-D tensor with length 3 for channels [2, 6, 9]
                 min_score = imp_score.min()
             ```
+
     """
 
     def __init__(self, p=2, group_reduction="mean", normalizer="lamp", bias=False):
@@ -256,8 +276,8 @@ class LAMPImportance(GroupNormImportance):
 
 
 class FPGMImportance(GroupNormImportance):
-    """Filter Pruning via Geometric Median for Deep Convolutional Neural Networks Acceleration,
-    http://openaccess.thecvf.com/content_CVPR_2019/papers/He_Filter_Pruning_via_Geometric_Median_for_Deep_Convolutional_Neural_Networks_CVPR_2019_paper.pdf
+    """Filter Pruning via Geometric Median for Deep Convolutional Neural Networks Acceleration.
+    http://openaccess.thecvf.com/content_CVPR_2019/papers/He_Filter_Pruning_via_Geometric_Median_for_Deep_Convolutional_Neural_Networks_CVPR_2019_paper.pdf.
     """
 
     def __init__(self, p=2, group_reduction="mean", normalizer="mean", bias=False):
@@ -296,9 +316,9 @@ class FPGMImportance(GroupNormImportance):
 
 
 class RandomImportance(Importance):
-    """Random importance estimator
-    Example:
+    """Random importance estimator.
 
+    Example:
             It accepts a group as inputs, and return a 1-D tensor with the same length as the number of channels.
             All groups must be pruned simultaneously and thus their importance should be accumulated across channel groups.
 
@@ -309,7 +329,8 @@ class RandomImportance(Importance):
                 imp_score = scorer(group)
                 #imp_score is a 1-D tensor with length 3 for channels [2, 6, 9]
                 min_score = imp_score.min()
-            ```
+            ```.
+
     """
 
     @torch.no_grad()
@@ -319,10 +340,9 @@ class RandomImportance(Importance):
 
 class GroupTaylorImportance(GroupNormImportance):
     """Grouped first-order taylor expansion of the loss function.
-    https://openaccess.thecvf.com/content_CVPR_2019/papers/Molchanov_Importance_Estimation_for_Neural_Network_Pruning_CVPR_2019_paper.pdf
+    https://openaccess.thecvf.com/content_CVPR_2019/papers/Molchanov_Importance_Estimation_for_Neural_Network_Pruning_CVPR_2019_paper.pdf.
 
     Example:
-
         It accepts a group as inputs, and return a 1-D tensor with the same length as the number of channels.
         All groups must be pruned simultaneously and thus their importance should be accumulated across channel groups.
 
@@ -336,7 +356,8 @@ class GroupTaylorImportance(GroupNormImportance):
             imp_score = scorer(group)
             #imp_score is a 1-D tensor with length 3 for channels [2, 6, 9]
             min_score = imp_score.min()
-        ```
+        ```.
+
     """
 
     def __init__(
@@ -555,11 +576,10 @@ class GroupTaylorImportance(GroupNormImportance):
 
 
 class GroupHessianImportance(GroupNormImportance):
-    """Grouped Optimal Brain Damage:
-    https://proceedings.neurips.cc/paper/1989/hash/6c9882bbac1c7093bd25041881277658-Abstract.html
+    """Grouped Optimal Brain Damage.
+    https://proceedings.neurips.cc/paper/1989/hash/6c9882bbac1c7093bd25041881277658-Abstract.html.
 
     Example:
-
          It accepts a group as inputs, and return a 1-D tensor with the same length as the number of channels.
          All groups must be pruned simultaneously and thus their importance should be accumulated across channel groups.
 
@@ -577,7 +597,8 @@ class GroupHessianImportance(GroupNormImportance):
              imp_score = scorer(group)
              #imp_score is a 1-D tensor with length 3 for channels [2, 6, 9]
              min_score = imp_score.min()
-         ```
+         ```.
+
     """
 
     def __init__(

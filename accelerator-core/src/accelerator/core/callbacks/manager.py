@@ -21,6 +21,7 @@ class CallbackManager:
 
         Args:
             callbacks: List of BaseCallback instances
+
         """
         self.callbacks = sorted(callbacks, key=lambda x: x.priority)
 
@@ -33,6 +34,7 @@ class CallbackManager:
 
         Returns:
             CallbackManager instance
+
         """
         callback_instances = CallbackManager._instantiate_callbacks(callbacks_cfg)
         return CallbackManager(callback_instances)
@@ -46,6 +48,7 @@ class CallbackManager:
 
         Returns:
             List of instantiated callback objects
+
         """
         callbacks = []
         for callback_name in callbacks_cfg.active_callbacks:
@@ -74,6 +77,7 @@ class CallbackManager:
         Args:
             event_name: Name of the event (without 'on_' prefix)
             context: Context object to pass to callbacks
+
         """
         self._safe_execute(f"on_{event_name}", context)
 
@@ -82,6 +86,7 @@ class CallbackManager:
 
         Args:
             callback: BaseCallback instance to add
+
         """
         if not isinstance(callback, BaseCallback):
             raise ValueError("callback must be a BaseCallback instance")
@@ -97,6 +102,7 @@ class CallbackManager:
 
         Returns:
             True if callback was found and removed, False otherwise
+
         """
         for i, cb in enumerate(self.callbacks):
             if isinstance(cb, callback_class):

@@ -2,8 +2,7 @@ import torch
 
 
 class RelatedGroup(torch.nn.Module):
-    """
-    Class for grouping tensors and parameters.
+    """Class for grouping tensors and parameters.
     Group is a collection of pairs of tensor and it's dimension.
     Two parameter tensors are considered to be in the same group
     if they should have the same integration grid.
@@ -14,6 +13,7 @@ class RelatedGroup(torch.nn.Module):
     ----------
     size: int.
         Each tensor in the group should have the same size along certain dimension.
+
     """
 
     def __init__(self, size):
@@ -54,27 +54,38 @@ class RelatedGroup(torch.nn.Module):
             tensor["value"].related_groups[tensor["dim"]] = self
 
     def append_param(self, name, value, dim, layer, operation=None):
-        """
-        Adds parameter tensor to the group.
+        """Add a parameter tensor to the internal parameter group.
 
         Parameters
         ----------
-        name: str.
-        value: torch.Tensor.
-        dim: int.
-        operation: str.
+        name : str
+            Name of the parameter.
+        value : torch.Tensor
+            The parameter tensor to append.
+        dim : int
+            The dimension along which the operation is applied.
+        layer : Any
+            The layer associated with the parameter.
+        operation : str or None, optional
+            Optional operation to apply when appending the parameter. If ``None``,
+            no operation is performed.
+
         """
         self.params.append({"value": value, "name": name, "dim": dim, "operation": operation, "layer": layer})
 
     def append_tensor(self, value, dim, operation=None):
-        """
-        Adds tensor to the group.
+        """Add a tensor to the internal tensor group.
 
         Parameters
         ----------
-        value: torch.Tensor.
-        dim: int.
-        operation: str.
+        value : torch.Tensor
+            The tensor to append.
+        dim : int
+            The dimension along which the operation is applied.
+        operation : str or None, optional
+            Optional operation to apply when appending the tensor. If ``None``,
+            no operation is performed.
+
         """
         self.tensors.append({"value": value, "dim": dim, "operation": operation})
 

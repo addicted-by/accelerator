@@ -15,8 +15,7 @@ class GradientLogger:
         self._num_samples = 0
 
     def log_gradients(self, value: torch.Tensor, batch_size: int) -> None:
-        """
-        Logs gradient statistics for the given tensor.
+        """Logs gradient statistics for the given tensor.
 
         Args:
             value: Tensor containing gradients to log
@@ -24,6 +23,7 @@ class GradientLogger:
 
         Raises:
             LossCalculationError: If gradient logging fails
+
         """
         try:
             if not isinstance(value, torch.Tensor):
@@ -60,12 +60,12 @@ class LossStatistics:
         self._last_loss = None
 
     def update(self, loss: torch.Tensor, batch_size: int) -> None:
-        """
-        Update statistics with new loss value.
+        """Update statistics with new loss value.
 
         Args:
             loss: Loss tensor for current batch
             batch_size: Size of the current batch
+
         """
         self._num_samples += batch_size
         loss_detached = loss.detach().cpu() * batch_size

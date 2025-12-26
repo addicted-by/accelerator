@@ -30,7 +30,8 @@ class _TransferableDataType:
 )
 def move_data_to_device(batch: Any, device: _DEVICE) -> Any:
     """Transfers a collection of data to the given device. Any object that defines a method ``to(device)`` will be
-    moved and all other objects in the collection will be left untouched."""
+    moved and all other objects in the collection will be left untouched.
+    """
     if isinstance(device, str):
         device = torch.device(device)
 

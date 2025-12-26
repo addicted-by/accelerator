@@ -182,7 +182,7 @@ class TimeTrackingCallback(BaseCallback):
             logger.info(f"Slowest epoch: {str(timedelta(seconds=int(slowest_epoch)))}")
 
     def get_current_stats(self) -> dict:
-        """Get current timing statistics"""
+        """Get current timing statistics."""
         if not self.epoch_times:
             return {}
 

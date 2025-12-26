@@ -5,6 +5,7 @@ import glob
 import json
 import os
 import pathlib
+import subprocess
 import time
 from pathlib import Path
 from typing import Any, Callable
@@ -90,6 +91,7 @@ class RuntimePerformance(AnyRunCallback):
         _target_: hydra_callbacks.RuntimePerformance
         enabled: true
     ```
+
     """
 
     def __init__(self, enabled: bool = True):
@@ -107,8 +109,7 @@ class RuntimePerformance(AnyRunCallback):
 
 
 class GitInfo(AnyRunCallback):
-    """
-    Check git infos and log them.
+    """Check git infos and log them.
 
     Parameters
     ----------
@@ -123,6 +124,7 @@ class GitInfo(AnyRunCallback):
         _target_: hydra_callbacks.GitInfo
         clean: true
     ```
+
     """
 
     def __init__(self, clean: bool = False):
@@ -171,6 +173,7 @@ class MultiRunGatherer(Callback):
         result_file: results.json
         aggregator: hydra_callbacks.MultiRunGatherer._default_aggregator
     ```
+
     """
 
     def __init__(
@@ -228,6 +231,7 @@ class LatestRunLink(Callback):
         run_base_dir: outputs
         multirun_base_dir: multirun
     ```
+
     """
 
     def __init__(self, run_base_dir: str = "outputs", multirun_base_dir: str = "multirun"):
@@ -291,6 +295,7 @@ class ResourceMonitor(AnyRunCallback):
         monitoring_file: resource_monitoring.csv
         gpu_monit: true
     ```
+
     """
 
     _monitor: dict[tuple[str, str], Any]
@@ -402,6 +407,7 @@ class RegisterRun(Callback):
         run_base_dir: outputs
         multirun_base_dir: multiruns
     ```
+
     """
 
     def __init__(
@@ -474,6 +480,7 @@ class SetEnvironment(AnyRunCallback):
           VAR1: "value1"
           VAR2: "value2"
     ```
+
     """
 
     def __init__(self, enabled: bool = True, env: dict[str, str] | None = None):
@@ -510,6 +517,7 @@ class ExecShellCommand(AnyRunCallback):
         run_command: echo "run done"
         multirun_command: echo "multirun done"
     ```
+
     """
 
     def __init__(self, run_command: str = "", multirun_command: str = ""):
@@ -518,11 +526,11 @@ class ExecShellCommand(AnyRunCallback):
 
     def on_run_end(self, config: DictConfig, **kwargs: None) -> None:
         """Execute after a single run."""
-        os.system(self.run_command)
+        subprocess.run(self.run_command, check=True, shell=True)  # nosec B602
 
     def on_multirun_end(self, config: DictConfig, **kwargs: None) -> None:
         """Execute after a multi run."""
-        os.system(self.multirun_command)
+        subprocess.run(self.multirun_command, check=True, shell=True)  # nosec B602
 
 
 class SetLogFile(Callback):
@@ -534,8 +542,7 @@ mlflow_client = None
 
 
 def ensure_experiment(name: str, artifact_root: str) -> str:
-    """
-    Create the experiment if needed, giving it the requested artifact_root.
+    """Create the experiment if needed, giving it the requested artifact_root.
     Returns the experiment_id (string).
     """
     global mlflow_client
@@ -549,7 +556,7 @@ def ensure_experiment(name: str, artifact_root: str) -> str:
 
 
 class SetupMLFLOW(Callback):
-    """ """
+    """PLACEHOLDER."""
 
     def __init__(self, enabled: bool = True):
         self.enabled = enabled

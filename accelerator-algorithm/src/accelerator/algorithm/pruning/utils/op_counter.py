@@ -1,11 +1,10 @@
-"""
-This opcounter is adapted from https://github.com/sovrasov/flops-counter.pytorch
+"""Opcounter is adapted from https://github.com/sovrasov/flops-counter.pytorch.
 
 Copyright (C) 2021 Sovrasov V. - All Rights Reserved
  * You may use, distribute and modify this code under the
  * terms of the MIT license.
  * You should have received a copy of the MIT license with
- * this file. If not visit https://opensource.org/licenses/MIT
+ * this file. If not visit https://opensource.org/licenses/MIT.
 """
 
 import copy
@@ -153,10 +152,9 @@ def rnn_flops(flops, rnn_module, w_ih, w_hh, input_size):
 
 
 def rnn_flops_counter_hook(rnn_module, input, output):
-    """
-    Takes into account batch goes at first position, contrary
+    """Takes into account batch goes at first position, contrary
     to pytorch common rule (but actually it doesn't matter).
-    If sigmoid and tanh are hard, only a comparison FLOPS should be accurate
+    If sigmoid and tanh are hard, only a comparison FLOPS should be accurate.
     """
     flops = 0
     # input is a tuple containing a sequence to process and (optionally) hidden state
@@ -338,12 +336,10 @@ def add_flops_counting_methods(net_main_module):
 
 
 def compute_average_flops_cost(self):
-    """
-    A method that will be available after add_flops_counting_methods() is called
+    """A method that will be available after add_flops_counting_methods() is called
     on a desired net object.
     Returns current mean flops consumption per image.
     """
-
     for m in self.modules():
         m.accumulate_flops = accumulate_flops.__get__(m)
 
@@ -363,8 +359,7 @@ def compute_average_flops_cost(self):
 
 
 def start_flops_count(self, **kwargs):
-    """
-    A method that will be available after add_flops_counting_methods() is called
+    """A method that will be available after add_flops_counting_methods() is called
     on a desired net object.
     Activates the computation of mean flops consumption per image.
     Call it before you run the network.
@@ -403,8 +398,7 @@ def start_flops_count(self, **kwargs):
 
 
 def stop_flops_count(self):
-    """
-    A method that will be available after add_flops_counting_methods() is called
+    """A method that will be available after add_flops_counting_methods() is called
     on a desired net object.
     Stops computing the mean flops consumption per image.
     Call whenever you want to pause the computation.
@@ -415,8 +409,7 @@ def stop_flops_count(self):
 
 
 def reset_flops_count(self):
-    """
-    A method that will be available after add_flops_counting_methods() is called
+    """A method that will be available after add_flops_counting_methods() is called
     on a desired net object.
     Resets statistics computed so far.
     """
